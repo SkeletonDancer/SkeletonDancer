@@ -1,0 +1,23 @@
+{
+    "name": "rollerworks/skeleton-dancer",
+    "description": "Project skeleton bootstrap",
+    "type": "application",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Sebastiaan Stok",
+            "email": "s.stok@rollerscapes.net"
+        }
+    ],
+    "require": {
+        "php": ">=5.5",
+        "twig/twig": "^1.22",
+        "symfony/console": "^2.7",
+        "symfony/filesystem": "^2.7"
+    },
+    "autoload": {
+        "psr-4": {
+            "Rollerworks\\Tools\\SkeletonDancer\\": "src/"
+        }
+    }
+}
