@@ -10,7 +10,9 @@
         }
     ],
     "require": {
-        "php": ">=5.5"
+        "php": ">=5.5"{% if true == symfonyTest %},
+{% endif %}
+{% if true == symfonyTest %}        "symfony/phpunit-bridge": "^2.7"{% endif %}
 
     },
     "autoload": {

@@ -2,27 +2,9 @@
 
 namespace Rollerworks\Tools\SkeletonDancer\Generator;
 
-use Symfony\Component\Filesystem\Filesystem;
-
-final class ComposerGenerator
+final class ComposerGenerator extends AbstractGenerator
 {
-    /**
-     * @var \Twig_Environment
-     */
-    private $twig;
-
-    /**
-     * @var Filesystem
-     */
-    private $filesystem;
-
-    public function __construct(\Twig_Environment $twig, Filesystem $filesystem)
-    {
-        $this->twig = $twig;
-        $this->filesystem = $filesystem;
-    }
-
-    public function generate($namespace, $type, $license, $author, $phpMin, $workingDir)
+    public function generate($namespace, $type, $license, $author, $phpMin, $symfonyTest, $workingDir)
     {
         $packageName = $this->generateComposerName($namespace);
 
@@ -36,6 +18,7 @@ final class ComposerGenerator
                     'license' => $license,
                     'author' => $this->extractAuthor($author),
                     'phpMin' => $phpMin,
+                    'symfonyTest' => $symfonyTest,
                     'namespace' => $namespace,
                 ]
             )
@@ -46,18 +29,7 @@ final class ComposerGenerator
     {
         return [
             'name' => substr($author, 0, strpos($author, '<')),
-            'email' => substr($author, strpos($author, '<') + 1, strrpos($author, '>')),
+            'email' => substr($author, strpos($author, '<') + 1, -1),
         ];
-    }
-
-    private function generateComposerName($namespace)
-    {
-        if (!preg_match('/^(?P<vendor>\w+)\\\\(Bundle|Tools|Components?)?\\\\(?P<product>\w+)/', $namespace, $parts)) {
-            if ('Bundle' === substr($parts['product'], -6)) {
-                $parts['product'] = substr($parts['product'], 0, -6);
-            }
-
-            return strtolower($parts['vendor'].'/'.$parts['product']);
-        }
     }
 }

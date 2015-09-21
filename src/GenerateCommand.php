@@ -97,24 +97,24 @@ final class GenerateCommand extends Command
         $input->setOption('namespace', $style->askQuestion(new Question('Namespace', $input->getOption('namespace'))));
         $input->setOption('author', $style->askQuestion(new Question('Author', $input->getOption('author'))));
         $input->setOption('php-min', $style->askQuestion(new Question('Php-min', $input->getOption('php-min'))));
-        $input->setOption('doc-format', $style->askQuestion(new ChoiceQuestion('Documentation format', ['rst', 'markdown', 'none'], array_search($input->getOption('doc-format'), ['rst', 'markdown', 'none']))));
+        //$input->setOption('doc-format', $style->askQuestion(new ChoiceQuestion('Documentation format', ['rst', 'markdown', 'none'], array_search($input->getOption('doc-format'), ['rst', 'markdown', 'none'], true))));
 
-        if (!$input->getOption('enable-phpunit') && $style->askQuestion(new ConfirmationQuestion('Enable PHPUnit?'))) {
-            $input->setOption('enable-phpunit', true);
-        }
-
-        if (!$input->getOption('enable-phpspec') && $style->askQuestion(new ConfirmationQuestion('Enable PHPSpec'))) {
-            $input->setOption('enable-phpspec', true);
-        }
-
+//        if (!$input->getOption('enable-phpunit') && $style->askQuestion(new ConfirmationQuestion('Enable PHPUnit?'))) {
+//            $input->setOption('enable-phpunit', true);
+//        }
+//
+//        if (!$input->getOption('enable-phpspec') && $style->askQuestion(new ConfirmationQuestion('Enable PHPSpec'))) {
+//            $input->setOption('enable-phpspec', true);
+//        }
+//
         if (!$input->getOption('enable-sf-test-bridge') && $style->askQuestion(new ConfirmationQuestion('Enable Symfony PHPUnit bridge'))) {
             $input->setOption('enable-sf-test-bridge', true);
         }
 
         // XXX Only for extension type
-        if (!$input->getOption('external-issues') && $style->askQuestion(new ConfirmationQuestion('external-issues'))) {
-            $input->setOption('external-issues', true);
-        }
+//        if (!$input->getOption('external-issues') && $style->askQuestion(new ConfirmationQuestion('external-issues'))) {
+//            $input->setOption('external-issues', true);
+//        }
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
@@ -126,7 +126,17 @@ final class GenerateCommand extends Command
                 'debug' => true,
                 'cache' => new \Twig_Cache_Filesystem(__DIR__.'/../temp'),
                 'autoescape' => 'filename',
+                'strict_variables' => true
             ]
+        );
+
+        $twig->addFunction(
+            new \Twig_SimpleFunction(
+                'doc_header',
+                function ($value, $format) {
+                    return $value."\n".str_repeat($format, strlen($value));
+                }
+            )
         );
 
         $workingDir = getcwd();
@@ -137,8 +147,16 @@ final class GenerateCommand extends Command
         (new Generator\ComposerGenerator($twig, $filesystem))->generate(
             $input->getOption('namespace'),
             $input->getOption('type'),
-            'MIT', //$input->getOption('license')
+            'MIT',
             $input->getOption('author'),
+            $input->getOption('php-min'),
+            $input->getOption('enable-sf-test-bridge'),
+            $workingDir
+        );
+
+        (new Generator\ReadMeGenerator($twig, $filesystem))->generate(
+            $input->getOption('name'),
+            $input->getOption('namespace'),
             $input->getOption('php-min'),
             $workingDir
         );
