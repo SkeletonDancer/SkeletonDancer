@@ -124,7 +124,10 @@ final class GenerateCommand extends Command
             $input->setOption('enable-behat', true);
         }
 
-        if (!$input->getOption('enable-sf-test-bridge') && $style->askQuestion(new ConfirmationQuestion('Enable Symfony PHPUnit bridge'))) {
+        if ($input->getOption('enable-phpunit') &&
+            !$input->getOption('enable-sf-test-bridge') &&
+            $style->askQuestion(new ConfirmationQuestion('Enable Symfony PHPUnit bridge'))
+        ) {
             $input->setOption('enable-sf-test-bridge', true);
         }
     }
@@ -151,6 +154,16 @@ final class GenerateCommand extends Command
             )
         );
 
+        $twig->addFilter(
+            new \Twig_SimpleFilter(
+                'normalizeNamespace',
+                function ($value) {
+                    return str_replace('\\\\', '\\', $value);
+                },
+                ['is_safe' => ['html', 'yml']]
+            )
+        );
+
         $workingDir = getcwd();
 
         $style = new SymfonyStyle($input, $output);
@@ -163,6 +176,9 @@ final class GenerateCommand extends Command
             $input->getOption('author'),
             $input->getOption('php-min'),
             $input->getOption('enable-sf-test-bridge'),
+            $input->getOption('enable-phpunit'),
+            $input->getOption('enable-phpspec'),
+            $input->getOption('enable-behat'),
             $workingDir
         );
 
@@ -170,6 +186,13 @@ final class GenerateCommand extends Command
             $input->getOption('name'),
             $input->getOption('namespace'),
             $input->getOption('php-min'),
+            $workingDir
+        );
+
+        (new Generator\LicenseGenerator($twig, $filesystem))->generate(
+            $input->getOption('name'),
+            $input->getOption('author'),
+            'MIT',
             $workingDir
         );
 
@@ -192,6 +215,15 @@ final class GenerateCommand extends Command
             $input->getOption('enable-phpspec'),
             $input->getOption('enable-behat'),
             $input->getOption('doc-format'),
+            $workingDir
+        );
+
+        (new Generator\TestingConfigGenerator($twig, $filesystem))->generate(
+            $input->getOption('name'),
+            $input->getOption('namespace'),
+            $input->getOption('enable-phpunit'),
+            $input->getOption('enable-phpspec'),
+            $input->getOption('enable-behat'),
             $workingDir
         );
 

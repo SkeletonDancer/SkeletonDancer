@@ -4,7 +4,17 @@ namespace Rollerworks\Tools\SkeletonDancer\Generator;
 
 final class ComposerGenerator extends AbstractGenerator
 {
-    public function generate($namespace, $type, $license, $author, $phpMin, $symfonyTest, $workingDir)
+    public function generate($namespace,
+        $type,
+        $license,
+        $author,
+        $phpMin,
+        $symfonyTest,
+        $enablePhpUnit,
+        $enablePhpSpec,
+        $enableBehat,
+        $workingDir
+    )
     {
         $packageName = $this->generateComposerName($namespace);
 
@@ -18,18 +28,14 @@ final class ComposerGenerator extends AbstractGenerator
                     'license' => $license,
                     'author' => $this->extractAuthor($author),
                     'phpMin' => $phpMin,
-                    'symfonyTest' => $symfonyTest,
                     'namespace' => $namespace,
+
+                    'symfonyTest' => $enablePhpUnit && $symfonyTest,
+                    'enablePhpUnit' => $enablePhpUnit,
+                    'enablePhpSpec' => $enablePhpSpec,
+                    'enableBehat' => $enableBehat,
                 ]
             )
         );
-    }
-
-    private function extractAuthor($author)
-    {
-        return [
-            'name' => substr($author, 0, strpos($author, '<')),
-            'email' => substr($author, strpos($author, '<') + 1, -1),
-        ];
     }
 }

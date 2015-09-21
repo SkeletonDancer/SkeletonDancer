@@ -12,7 +12,7 @@ final class SphinxConfigGenerator extends AbstractGenerator
                 'sphinx.py.twig',
                 [
                     'name' => $name,
-                    'shortName' => preg_replace('#[^\w\d_-]|\s#', '', ucfirst($name)),
+                    'shortName' => $this->shortProductName($name),
                 ]
             )
         );

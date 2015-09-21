@@ -34,4 +34,17 @@ abstract class AbstractGenerator
             return strtolower($parts['vendor'].'/'.$parts['product']);
         }
     }
+
+    protected function extractAuthor($author)
+    {
+        return [
+            'name' => substr($author, 0, strpos($author, '<')),
+            'email' => substr($author, strpos($author, '<') + 1, -1),
+        ];
+    }
+
+    protected function shortProductName($name)
+    {
+        return preg_replace('#[^\w\d_-]|\s#', '', ucfirst($name));
+    }
 }

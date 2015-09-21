@@ -10,10 +10,28 @@
         }
     ],
     "require": {
-        "php": ">=5.5"{% if true == symfonyTest %},
+        "php": ">=5.5"
+    },
+{% if enablePhpSpec or enableBehat %}
+    "require-dev": {
+{% if enablePhpSpec %}
+        "phpspec/phpspec": "^2.2.1"{% if symfonyTest or enableBehat %},{% endif %}
 {% endif %}
-{% if true == symfonyTest %}        "symfony/phpunit-bridge": "^2.7"{% endif %}
 
+{% if symfonyTest %}
+        "symfony/phpunit-bridge": "^2.7"{% if enableBehat %},{% endif %}
+{% endif %}
+
+{% if enableBehat %}
+        "behat/behat": "~3.0",
+        "behat/symfony2-extension": "~2.0",
+        "behat/mink-extension": "~2.0",
+        "behat/mink-browserkit-driver": "~1.2",
+        "behat/mink-selenium2-driver": "~1.2",
+        "behat/mink": "^1.6",
+        "lakion/mink-debug-extension": "^1.0.1"
+{% endif %}
+{% endif %}
     },
     "autoload": {
         "psr-4": {
