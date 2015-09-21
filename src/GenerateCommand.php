@@ -90,6 +90,20 @@ final class GenerateCommand extends Command
     {
         $style = new SymfonyStyle($input, $output);
         $style->title('SkeletonDancer - PHP Project bootstrapping');
+
+        $style = new SymfonyStyle($input, $output);
+        $iterator = new \FilesystemIterator(getcwd());
+
+        if ($iterator->valid()) {
+            $style->warning(['The working directory is not empty!', 'If you continue you may loose existing files.']);
+
+            if (!$style->confirm('Do you want to continue?', false)) {
+                $style->error('Aborted.');
+
+                return 1;
+            }
+        }
+
         $style->block('Before we start I need to something about your project, please fill in all the questions.');
 
         $input->setOption('type', $style->askQuestion(new ChoiceQuestion('Type', self::$types, $input->getOption('type'))));
@@ -178,6 +192,14 @@ final class GenerateCommand extends Command
             $input->getOption('enable-phpspec'),
             $input->getOption('enable-behat'),
             $input->getOption('doc-format'),
+            $workingDir
+        );
+
+        (new Generator\TravisConfigGenerator($twig, $filesystem))->generate(
+            $input->getOption('php-min'),
+            $input->getOption('enable-phpunit'),
+            $input->getOption('enable-phpspec'),
+            $input->getOption('enable-behat'),
             $workingDir
         );
 

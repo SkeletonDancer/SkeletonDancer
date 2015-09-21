@@ -1,0 +1,47 @@
+language: php
+
+php:
+{% if '5.4' == phpMin %}
+    - 5.4
+    - 5.5
+    - 5.6
+{% elseif '5.5' == phpMin %}
+    - 5.5
+    - 5.6
+{% elseif '5.6' == phpMin %}
+    - 5.6
+{% endif %}
+    - 7.0
+    - hhvm
+
+matrix:
+    include:
+        - php: {{ phpMin }}
+          env: DEPENDENCIES='low'
+        - php: 5.6
+          env: DEPENDENCIES='dev'
+    allow_failures:
+        - php: 7.0
+        - env: DEPENDENCIES='dev'
+    fast_finish: true
+
+sudo: false
+
+cache:
+    directories:
+        - $HOME/.composer/cache/files
+
+install:
+    - export SYMFONY_DEPRECATIONS_HELPER=weak
+    - export COMPOSER_ROOT_VERSION=dev-master
+    - if [ "$DEPENDENCIES" == "dev" ]; then perl -pi -e 's/^}$/,"minimum-stability":"dev"}/' composer.json; fi;
+    - if [ "$DEPENDENCIES" != "low" ]; then travis_retry composer update; fi;
+    - if [ "$DEPENDENCIES" == "low" ]; then travis_retry composer update --prefer-lowest; fi;
+
+script:
+{% if enablePhpUnit %}
+    - phpunit --configuration phpunit.xml.dist --verbose
+{% endif %}
+{% if enablePhpSpec %}
+    - vendor/bin/phpspec run -v -f pretty spec
+{% endif %}
