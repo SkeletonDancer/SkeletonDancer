@@ -161,6 +161,20 @@ final class GenerateCommand extends Command
             $workingDir
         );
 
+        (new Generator\GushConfigGenerator($twig, $filesystem))->generate(
+            $input->getOption('name'),
+            $input->getOption('author'),
+            'MIT',
+            $workingDir
+        );
+
+        (new Generator\PhpCsGenerator($twig, $filesystem))->generate(
+            $input->getOption('name'),
+            $input->getOption('author'),
+            'MIT',
+            $workingDir
+        );
+
         $style->success('Done, enjoy!');
     }
 }
