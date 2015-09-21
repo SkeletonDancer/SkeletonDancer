@@ -1,0 +1,22 @@
+/composer.lock
+/*.phar
+/.php_cs.cache
+
+{% if phpSpecEnabled or phpUnitEnabled or behatEnabled %}
+# test config
+{% endif %}
+{% if phpUnitEnabled %}
+/phpunit.xml
+{% endif %}
+{% if phpSpecEnabled %}
+/phpspec.yml
+{% endif %}
+{% if behatEnabled %}
+/behat.yml
+{% endif %}
+
+# dirs
+/vendor/
+{% if docFormat == 'rst' %}
+/doc/_build
+{% endif %}

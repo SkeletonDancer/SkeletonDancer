@@ -74,12 +74,12 @@ final class GenerateCommand extends Command
                 InputOption::VALUE_NONE
             )
             ->addOption(
-                'enable-sf-test-bridge',
+                'enable-behat',
                 null,
                 InputOption::VALUE_NONE
             )
             ->addOption(
-                'external-issues',
+                'enable-sf-test-bridge',
                 null,
                 InputOption::VALUE_NONE
             )
@@ -97,24 +97,22 @@ final class GenerateCommand extends Command
         $input->setOption('namespace', $style->askQuestion(new Question('Namespace', $input->getOption('namespace'))));
         $input->setOption('author', $style->askQuestion(new Question('Author', $input->getOption('author'))));
         $input->setOption('php-min', $style->askQuestion(new Question('Php-min', $input->getOption('php-min'))));
-        //$input->setOption('doc-format', $style->askQuestion(new ChoiceQuestion('Documentation format', ['rst', 'markdown', 'none'], array_search($input->getOption('doc-format'), ['rst', 'markdown', 'none'], true))));
+        $input->setOption('doc-format', $style->askQuestion(new ChoiceQuestion('Documentation format', ['rst', 'markdown', 'none'], array_search($input->getOption('doc-format'), ['rst', 'markdown', 'none'], true))));
 
-//        if (!$input->getOption('enable-phpunit') && $style->askQuestion(new ConfirmationQuestion('Enable PHPUnit?'))) {
-//            $input->setOption('enable-phpunit', true);
-//        }
-//
-//        if (!$input->getOption('enable-phpspec') && $style->askQuestion(new ConfirmationQuestion('Enable PHPSpec'))) {
-//            $input->setOption('enable-phpspec', true);
-//        }
-//
+        if (!$input->getOption('enable-phpunit') && $style->askQuestion(new ConfirmationQuestion('Enable PHPUnit?'))) {
+            $input->setOption('enable-phpunit', true);
+        }
+
+        if (!$input->getOption('enable-phpspec') && $style->askQuestion(new ConfirmationQuestion('Enable PHPSpec'))) {
+            $input->setOption('enable-phpspec', true);
+        }
+        if (!$input->getOption('enable-behat') && $style->askQuestion(new ConfirmationQuestion('Enable Behat'))) {
+            $input->setOption('enable-behat', true);
+        }
+
         if (!$input->getOption('enable-sf-test-bridge') && $style->askQuestion(new ConfirmationQuestion('Enable Symfony PHPUnit bridge'))) {
             $input->setOption('enable-sf-test-bridge', true);
         }
-
-        // XXX Only for extension type
-//        if (!$input->getOption('external-issues') && $style->askQuestion(new ConfirmationQuestion('external-issues'))) {
-//            $input->setOption('external-issues', true);
-//        }
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
@@ -174,6 +172,21 @@ final class GenerateCommand extends Command
             'MIT',
             $workingDir
         );
+
+        (new Generator\GitConfigGenerator($twig, $filesystem))->generate(
+            $input->getOption('enable-phpunit'),
+            $input->getOption('enable-phpspec'),
+            $input->getOption('enable-behat'),
+            $input->getOption('doc-format'),
+            $workingDir
+        );
+
+        if ('rst' === $input->getOption('doc-format')) {
+            (new Generator\SphinxConfigGenerator($twig, $filesystem))->generate(
+                $input->getOption('name'),
+                $workingDir
+            );
+        }
 
         $style->success('Done, enjoy!');
     }

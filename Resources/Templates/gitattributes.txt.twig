@@ -1,0 +1,39 @@
+* text=auto
+
+# Always use LF
+core.autocrlf=lf
+
+# files
+.gitignore export-ignore
+.gitattributes export-ignore
+.gitmodules export-ignore
+.travis.yml export-ignore
+.gush.yml export-ignore
+.php_cs export-ignore
+
+{% if phpSpecEnabled or phpUnitEnabled or behatEnabled %}
+# test config
+{% endif %}
+{% if phpSpecEnabled %}
+phpspec.yml.dist
+{% endif %}
+{% if phpUnitEnabled %}
+phpunit.xml.dist export-ignore
+{% endif %}
+{% if behatEnabled %}
+behat.yml.dist export-ignore
+{% endif %}
+
+# dirs
+{% if phpUnitEnabled %}
+/tests export-ignore
+{% endif %}
+{% if phpSpecEnabled %}
+/spec export-ignore
+{% endif %}
+{% if docFormat != 'none' %}
+/doc export-ignore
+{% endif %}
+{% if behatEnabled %}
+/features
+{% endif %}
