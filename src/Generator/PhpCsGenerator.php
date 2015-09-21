@@ -7,7 +7,7 @@ final class PhpCsGenerator extends AbstractGenerator
     public function generate($name, $author, $license, $workingDir)
     {
         $this->filesystem->dumpFile(
-            $workingDir.'/.php_cs.php',
+            $workingDir.'/.php_cs',
             $this->twig->render(
                 'php_cs.php.twig',
                 [

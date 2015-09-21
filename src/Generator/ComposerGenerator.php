@@ -14,7 +14,7 @@ final class ComposerGenerator extends AbstractGenerator
                 'composer.json.twig',
                 [
                     'name' => $packageName,
-                    'type' => $type,
+                    'type' => 'extension' === $type ? 'library' : $type,
                     'license' => $license,
                     'author' => $this->extractAuthor($author),
                     'phpMin' => $phpMin,
