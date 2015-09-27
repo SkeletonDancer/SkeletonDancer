@@ -25,5 +25,5 @@ install:
 script:
     - mkdir project-temp
     - cd project-temp
-    - ../src/skel-dancer.php generate --no-interaction --type="symfony-integration-bundle" --name="RollerworksSkeletonDancerBundle" --namespace="Rollerworks\\Bundle\\SkeletonDancerBundle" --enable-sf-test-bridge --doc-format=rst --enable-phpunit --enable-phpspec --enable-behat --bundle-name="RollerworksSkeletonDancerBundle" --bundle-config-format=yml
+    - php ../src/skel-dancer.php generate --no-interaction --type="symfony-integration-bundle" --name="RollerworksSkeletonDancerBundle" --namespace="Rollerworks\\Bundle\\SkeletonDancerBundle" --enable-sf-test-bridge --doc-format=rst --enable-phpunit --enable-phpspec --enable-behat --bundle-name="RollerworksSkeletonDancerBundle" --bundle-config-format=yml
     #- phpunit --configuration phpunit.xml.dist --verbose
