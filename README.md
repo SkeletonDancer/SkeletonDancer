@@ -64,6 +64,11 @@ after this your project is created.
 and may not suite your needs. Feel free to change them,
 or suggest improvements (by open an issue).
 
+Screenshot
+----------
+
+![skeleton-dancer-shell](https://cloud.githubusercontent.com/assets/904790/10122427/eb25069c-6519-11e5-8d7a-a3517228fe8a.png)
+
 Versioning
 ----------
 
