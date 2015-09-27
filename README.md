@@ -27,7 +27,7 @@ Installation
 Assuming you know how to use Git and Composer.
 
 **Note:** Windows users are encouraged to use the Git shell,
-all these examples assume you are using Unix-based Shell.
+all these examples assume you are using a Unix-based Shell.
 
 ```bash
 $ git clone https://github.com/rollerworks/SkeletonDancer.git
@@ -53,7 +53,7 @@ somewhere on your computer (like the /home folder).
 
 ```bash
 $ mkdir my-project
-$ de my-project
+$ cd my-project
 $ dancer create
 ```
 
