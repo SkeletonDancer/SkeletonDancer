@@ -1,0 +1,29 @@
+
+language: php
+
+php:
+    - 5.5
+    #- 5.6
+    #- 7.0
+    #- hhvm
+
+matrix:
+#    allow_failures:
+#        - php: 7.0
+    fast_finish: true
+
+sudo: false
+
+cache:
+    directories:
+        - $HOME/.composer/cache/files
+
+install:
+    - export SYMFONY_DEPRECATIONS_HELPER=strict
+    - travis_retry composer install
+
+script:
+    - mkdir project-temp
+    - cd project-temp
+    - ../src/skel-dancer.php generate --no-interaction --type="symfony-integration-bundle" --name="RollerworksSkeletonDancerBundle" --namespace="Rollerworks\\Bundle\\SkeletonDancerBundle" --enable-sf-test-bridge --doc-format=rst --enable-phpunit --enable-phpspec --enable-behat --bundle-name="RollerworksSkeletonDancerBundle" --bundle-config-format=yml
+    #- phpunit --configuration phpunit.xml.dist --verbose
