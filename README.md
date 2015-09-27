@@ -19,9 +19,6 @@ Requirements
 
 You need at least PHP 5.5 and Composer.
 
-*This project is currently only tested on Windows
-and may fail on Linux or Mac (sorry).*
-
 Installation
 ------------
 
