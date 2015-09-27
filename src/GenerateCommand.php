@@ -24,7 +24,7 @@ use Symfony\Component\Filesystem\Filesystem;
 
 final class GenerateCommand extends Command
 {
-    private static $types = ['library', 'extension', 'symfony-bundle', 'project'];
+    private static $types = ['library', 'extension', 'symfony-integration-bundle', 'symfony-package-bundle', 'project'];
 
     protected function configure()
     {
@@ -92,6 +92,17 @@ final class GenerateCommand extends Command
                 null,
                 InputOption::VALUE_NONE
             )
+
+            ->addOption(
+                'bundle-name',
+                null,
+                InputOption::VALUE_REQUIRED
+            )
+            ->addOption(
+                'bundle-config-format',
+                null,
+                InputOption::VALUE_REQUIRED
+            )
         ;
     }
 
@@ -109,7 +120,7 @@ final class GenerateCommand extends Command
             if (!$style->confirm('Do you want to continue?', false)) {
                 $style->error('Aborted.');
 
-                return 1;
+                return;
             }
         }
 
@@ -133,6 +144,13 @@ final class GenerateCommand extends Command
             $input->setOption('enable-behat', true);
         }
 
+        if ($this->isSfBundle($input->getOption('type'))) {
+            $style->block('Please provide the additional information for the symfony bundle.');
+
+            $input->setOption('bundle-name', $style->askQuestion(new Question('Bundle name', strtr($input->getOption('namespace'), ['\\Bundle\\' => '', '\\' => '']).'Bundle')));
+            $input->setOption('bundle-config-format', $style->askQuestion(new ChoiceQuestion('Configuration format', ['yml', 'xml'], 0)));
+        }
+
         if ($input->getOption('enable-phpunit') &&
             !$input->getOption('enable-sf-test-bridge') &&
             $style->askQuestion(new ConfirmationQuestion('Enable Symfony PHPUnit bridge'))
@@ -143,6 +161,10 @@ final class GenerateCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        if (null === $input->getOption('name')) {
+            return 1;
+        }
+
         $filesystem = new Filesystem();
         $twig = new \Twig_Environment(
             new \Twig_Loader_Filesystem(__DIR__.'/../Resources/Templates'),
@@ -251,6 +273,26 @@ final class GenerateCommand extends Command
             );
         }
 
+        if ($this->isSfBundle($input->getOption('type'))) {
+            (new Generator\SfBundleGenerator($twig, $filesystem))->generate(
+                $input->getOption('name'),
+                $input->getOption('namespace'),
+                $input->getOption('bundle-name'),
+                $input->getOption('bundle-config-format'),
+                $workingDir
+            );
+        }
+
         $style->success('Done, enjoy!');
+    }
+
+    /**
+     * @param string $type
+     *
+     * @return bool
+     */
+    private function isSfBundle($type)
+    {
+        return 'symfony-' === substr($type, 0, 8);
     }
 }

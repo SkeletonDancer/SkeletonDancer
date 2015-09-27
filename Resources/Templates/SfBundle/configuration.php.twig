@@ -1,0 +1,36 @@
+<?php
+
+namespace {{ namespace|normalizeNamespace }}\DependencyInjection;
+
+{% block use_statements %}
+use Symfony\Component\Config\Definition\Builder\TreeBuilder;
+use Symfony\Component\Config\Definition\ConfigurationInterface;
+{% endblock use_statements %}
+
+{% block class_definition %}
+class Configuration implements ConfigurationInterface
+{% endblock class_definition %}
+{
+{% block class_body %}
+    /**
+     * @var string
+     */
+    private $configName;
+
+    public function __construct($configName)
+    {
+        $this->configName = $configName;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getConfigTreeBuilder()
+    {
+        $treeBuilder = new TreeBuilder();
+        $rootNode = $treeBuilder->root($this->configName);
+
+        return $treeBuilder;
+    }
+{% endblock class_body %}
+}
