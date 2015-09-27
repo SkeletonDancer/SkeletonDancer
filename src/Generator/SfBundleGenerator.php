@@ -37,7 +37,7 @@ final class SfBundleGenerator extends AbstractGenerator
         $this->filesystem->dumpFile(
             $workingDir.'/src/DependencyInjection/'.$extensionName.'Extension.php',
             $this->twig->render(
-                'SfBundle/Extension.php.twig',
+                'SfBundle/extension.php.twig',
                 [
                     'name' => $name,
                     'namespace' => $namespace,
