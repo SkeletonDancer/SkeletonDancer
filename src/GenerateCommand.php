@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of the SkeletonDancer package.
+ *
+ * (c) Sebastiaan Stok <s.stok@rollerscapes.net>
+ *
+ * This source file is subject to the MIT license that is bundled
+ * with this source code in the file LICENSE.
+ */
+
 namespace Rollerworks\Tools\SkeletonDancer;
 
 use Rollerworks\Tools\SkeletonDancer\Generator;
@@ -104,7 +113,7 @@ final class GenerateCommand extends Command
             }
         }
 
-        $style->block('Before we start I need to something about your project, please fill in all the questions.');
+        $style->block('Before we start I need to know something about your project, please fill in all the questions.');
 
         $input->setOption('type', $style->askQuestion(new ChoiceQuestion('Type', self::$types, $input->getOption('type'))));
         $input->setOption('name', $style->askQuestion(new Question('Name', $input->getOption('name'))));
