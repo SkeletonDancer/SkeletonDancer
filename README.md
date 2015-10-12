@@ -6,7 +6,7 @@ SkeletonDancer
 A really simple (not completed) PHP project scaffolding tool.
 
 *I got tired of having to copy-past and mess-up my configuration for every project,
-so I created something really simple cli tool using the Symfony Console and Twig.*
+so I created a really simple cli tool using the Symfony Console and Twig.*
 
 Whats with the name?
 --------------------
