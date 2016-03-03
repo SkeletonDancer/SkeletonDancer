@@ -24,94 +24,34 @@ use Symfony\Component\Filesystem\Filesystem;
 
 final class GenerateCommand extends Command
 {
-    private static $types = ['library', 'extension', 'symfony-integration-bundle', 'symfony-package-bundle', 'project'];
+    private static $types = [
+        'library',
+        'extension',
+        'symfony-integration-bundle',
+        'symfony-package-bundle',
+        'project',
+    ];
 
     protected function configure()
     {
         $this
             ->setName('generate')
+            ->setAliases(['dance', 'new'])
             ->setDescription('Generates an empty project in the current directory')
-            ->addOption(
-                'type',
-                null,
-                InputOption::VALUE_REQUIRED,
-                'Type of the project ('.implode(', ', self::$types).')'
-            )
-            ->addOption(
-                'name',
-                null,
-                InputOption::VALUE_REQUIRED,
-                'Title of the project, eg: Rollerworks Search Pomm Extension'
-            )
-            ->addOption(
-                'namespace',
-                null,
-                InputOption::VALUE_REQUIRED,
-                'PHP Namespace of the project'
-            )
-            ->addOption(
-                'author',
-                null,
-                InputOption::VALUE_REQUIRED,
-                'Author of the project (used for composer and license)',
-                'Sebastiaan Stok <s.stok@rollerscapes.net>' // Problem? :-)
-            )
-            ->addOption(
-                'php-min',
-                null,
-                InputOption::VALUE_REQUIRED,
-                'Minimum required PHP version',
-                '5.5'
-            )
-
-            // Special options
-            ->addOption(
-                'doc-format',
-                null,
-                InputOption::VALUE_REQUIRED,
-                'Documentation format (rst, markdown, none)',
-                'markdown'
-            )
-            ->addOption(
-                'enable-phpunit',
-                null,
-                InputOption::VALUE_NONE
-            )
-            ->addOption(
-                'enable-phpspec',
-                null,
-                InputOption::VALUE_NONE
-            )
-            ->addOption(
-                'enable-behat',
-                null,
-                InputOption::VALUE_NONE
-            )
-            ->addOption(
-                'enable-sf-test-bridge',
-                null,
-                InputOption::VALUE_NONE
-            )
-
-            ->addOption(
-                'bundle-name',
-                null,
-                InputOption::VALUE_REQUIRED
-            )
-            ->addOption(
-                'bundle-config-format',
-                null,
-                InputOption::VALUE_REQUIRED
-            )
         ;
     }
 
-    protected function interact(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output)
     {
         $style = new SymfonyStyle($input, $output);
         $style->title('SkeletonDancer - PHP Project bootstrapping');
 
-        $style = new SymfonyStyle($input, $output);
+        if (!$input->isInteractive()) {
+            $style->error('This command can only be run in interactive mode.');
+
+            return 1;
+        }
+
         $iterator = new \FilesystemIterator(getcwd());
 
         if ($iterator->valid()) {
@@ -120,49 +60,70 @@ final class GenerateCommand extends Command
             if (!$style->confirm('Do you want to continue?', false)) {
                 $style->error('Aborted.');
 
-                return;
+                return 1;
             }
         }
 
+        // Todo:
+        // * Detect if Bundle suffix is already present for the Bundle-name; ParkManagerRouteAutoWiringBundleBundle
+        // * Auto enable Symfony testing bridge for bundles.
+
         $style->block('Before we start I need to know something about your project, please fill in all the questions.');
 
-        $input->setOption('type', $style->askQuestion(new ChoiceQuestion('Type', self::$types, $input->getOption('type'))));
-        $input->setOption('name', $style->askQuestion(new Question('Name', $input->getOption('name'))));
-        $input->setOption('namespace', $style->askQuestion(new Question('Namespace', $input->getOption('namespace'))));
-        $input->setOption('author', $style->askQuestion(new Question('Author', $input->getOption('author'))));
-        $input->setOption('php-min', $style->askQuestion(new Question('Php-min', $input->getOption('php-min'))));
-        $input->setOption('doc-format', $style->askQuestion(new ChoiceQuestion('Documentation format', ['rst', 'markdown', 'none'], array_search($input->getOption('doc-format'), ['rst', 'markdown', 'none'], true))));
+        $information = [];
+        $information['type'] = $style->choice('Type', self::$types);
+        $information['name'] = $style->ask('Name');
 
-        if (!$input->getOption('enable-phpunit') && $style->askQuestion(new ConfirmationQuestion('Enable PHPUnit?'))) {
-            $input->setOption('enable-phpunit', true);
+        if (preg_match('/^(?P<vendor>[a-z0-9_.-]+)\s+(?P<name>[a-z0-9_.-]+)$/i', $information['name'], $regs)) {
+            $packageName = strtolower($this->humanize($regs[1]).'/'.$this->humanize($regs[2]));
+        } else {
+            $packageName = '';
         }
 
-        if (!$input->getOption('enable-phpspec') && $style->askQuestion(new ConfirmationQuestion('Enable PHPSpec'))) {
-            $input->setOption('enable-phpspec', true);
-        }
-        if (!$input->getOption('enable-behat') && $style->askQuestion(new ConfirmationQuestion('Enable Behat'))) {
-            $input->setOption('enable-behat', true);
-        }
+        $information['package-name'] = $style->ask(
+            'Package name (<vendor>/<name>)',
+            $packageName,
+            function ($name) {
+                if (!preg_match('{^[a-z0-9_.-]+/[a-z0-9_.-]+$}', $name)) {
+                    throw new \InvalidArgumentException(
+                        'The package name '.
+                        $name.
+                        ' is invalid, it should be lowercase and have a vendor name, a forward slash, and a package name, matching: [a-z0-9_.-]+/[a-z0-9_.-]+'
+                    );
+                }
 
-        if ($this->isSfBundle($input->getOption('type'))) {
+                return $name;
+            }
+        );
+
+        $information['namespace'] = $style->ask('PHP Namespace');
+        $information['author'] = $style->ask('Author of the project', 'Sebastiaan Stok <s.stok@rollerscapes.net>');
+        $information['php-min'] = $style->ask('Php-min', '7.0');
+        $information['doc-format'] = $style->choice('Documentation format', ['rst', 'markdown', 'none']);
+
+        // Testing frameworks
+        $information['enable-phpunit'] = $style->confirm('Enable PHPUnit?');
+        $information['enable-phpspec'] = $style->confirm('Enable PHPSpec?', false);
+        $information['enable-behat'] = $style->confirm('Enable Behat?', false);
+
+        if ($this->isSfBundle($information['type'])) {
             $style->block('Please provide the additional information for the symfony bundle.');
 
-            $input->setOption('bundle-name', $style->askQuestion(new Question('Bundle name', strtr($input->getOption('namespace'), ['\\Bundle\\' => '', '\\' => '']).'Bundle')));
-            $input->setOption('bundle-config-format', $style->askQuestion(new ChoiceQuestion('Configuration format', ['yml', 'xml'], 0)));
+            $bundleName = strtr($information['namespace'], ['\\Bundle\\' => '', '\\' => '']);
+            $bundleName .= substr($bundleName, -6) === 'Bundle' ? '' : 'Bundle';
+
+            $information['bundle-name'] = $style->ask('Bundle name', $bundleName);
+            $information['bundle-config-format'] = $style->choice('Configuration format', ['yml', 'xml'], 'xml');
         }
 
-        if ($input->getOption('enable-phpunit') &&
-            !$input->getOption('enable-sf-test-bridge') &&
-            $style->askQuestion(new ConfirmationQuestion('Enable Symfony PHPUnit bridge'))
-        ) {
-            $input->setOption('enable-sf-test-bridge', true);
-        }
-    }
-
-    protected function execute(InputInterface $input, OutputInterface $output)
-    {
-        if (null === $input->getOption('name')) {
-            return 1;
+        if ($information['enable-phpunit']) {
+            if ($this->isSfBundle($information['type'])) {
+                $information['enable-sf-test-bridge'] = true;
+            } elseif ($style->askQuestion(new ConfirmationQuestion('Enable Symfony PHPUnit bridge'))) {
+                $information['enable-sf-test-bridge'] = true;
+            }
+        } else {
+            $information['enable-sf-test-bridge'] = false;
         }
 
         $filesystem = new Filesystem();
@@ -171,7 +132,6 @@ final class GenerateCommand extends Command
             [
                 'debug' => true,
                 'cache' => new \Twig_Cache_Filesystem(__DIR__.'/../temp'),
-                'autoescape' => 'filename',
                 'strict_variables' => true
             ]
         );
@@ -195,90 +155,99 @@ final class GenerateCommand extends Command
             )
         );
 
+        $twig->addFilter(
+            new \Twig_SimpleFilter(
+                'escape_namespace',
+                'addslashes',
+                ['is_safe' => ['html', 'yml']]
+            )
+        );
+
         $workingDir = getcwd();
 
         $style = new SymfonyStyle($input, $output);
         $style->text('Start dancing, this may take a while...');
 
         (new Generator\ComposerGenerator($twig, $filesystem))->generate(
-            $input->getOption('namespace'),
-            $input->getOption('type'),
+            $information['package-name'],
+            $information['namespace'],
+            $information['type'],
             'MIT',
-            $input->getOption('author'),
-            $input->getOption('php-min'),
-            $input->getOption('enable-sf-test-bridge'),
-            $input->getOption('enable-phpunit'),
-            $input->getOption('enable-phpspec'),
-            $input->getOption('enable-behat'),
+            $information['author'],
+            $information['php-min'],
+            $information['enable-sf-test-bridge'],
+            $information['enable-phpunit'],
+            $information['enable-phpspec'],
+            $information['enable-behat'],
             $workingDir
         );
 
         (new Generator\ReadMeGenerator($twig, $filesystem))->generate(
-            $input->getOption('name'),
-            $input->getOption('namespace'),
-            $input->getOption('php-min'),
+            $information['name'],
+            $information['package-name'],
+            $information['php-min'],
             $workingDir
         );
 
         (new Generator\LicenseGenerator($twig, $filesystem))->generate(
-            $input->getOption('name'),
-            $input->getOption('author'),
+            $information['name'],
+            $information['author'],
             'MIT',
             $workingDir
         );
 
         (new Generator\GushConfigGenerator($twig, $filesystem))->generate(
-            $input->getOption('name'),
-            $input->getOption('author'),
+            $information['name'],
+            $information['author'],
             'MIT',
             $workingDir
         );
 
         (new Generator\PhpCsGenerator($twig, $filesystem))->generate(
-            $input->getOption('name'),
-            $input->getOption('author'),
+            $information['name'],
+            $information['author'],
             'MIT',
             $workingDir
         );
 
         (new Generator\GitConfigGenerator($twig, $filesystem))->generate(
-            $input->getOption('enable-phpunit'),
-            $input->getOption('enable-phpspec'),
-            $input->getOption('enable-behat'),
-            $input->getOption('doc-format'),
+            $information['enable-phpunit'],
+            $information['enable-phpspec'],
+            $information['enable-behat'],
+            $information['doc-format'],
             $workingDir
         );
 
         (new Generator\TestingConfigGenerator($twig, $filesystem))->generate(
-            $input->getOption('name'),
-            $input->getOption('namespace'),
-            $input->getOption('enable-phpunit'),
-            $input->getOption('enable-phpspec'),
-            $input->getOption('enable-behat'),
+            $information['name'],
+            $information['namespace'],
+            $information['enable-phpunit'],
+            $information['enable-phpspec'],
+            $information['enable-behat'],
             $workingDir
         );
 
         (new Generator\TravisConfigGenerator($twig, $filesystem))->generate(
-            $input->getOption('php-min'),
-            $input->getOption('enable-phpunit'),
-            $input->getOption('enable-phpspec'),
-            $input->getOption('enable-behat'),
+            $information['php-min'],
+            $information['enable-phpunit'],
+            $information['enable-phpspec'],
+            $information['enable-behat'],
             $workingDir
         );
 
-        if ('rst' === $input->getOption('doc-format')) {
+        if ('rst' === $information['doc-format']) {
             (new Generator\SphinxConfigGenerator($twig, $filesystem))->generate(
-                $input->getOption('name'),
+                $information['name'],
                 $workingDir
             );
         }
 
-        if ($this->isSfBundle($input->getOption('type'))) {
+        if ($this->isSfBundle($information['type'])) {
             (new Generator\SfBundleGenerator($twig, $filesystem))->generate(
-                $input->getOption('name'),
-                $input->getOption('namespace'),
-                $input->getOption('bundle-name'),
-                $input->getOption('bundle-config-format'),
+                $information['name'],
+                $information['namespace'],
+                $information['bundle-name'],
+                $information['bundle-config-format'],
                 $workingDir
             );
         }
@@ -293,6 +262,16 @@ final class GenerateCommand extends Command
      */
     private function isSfBundle($type)
     {
-        return 'symfony-' === substr($type, 0, 8);
+        return 0 === strpos($type, 'symfony-');
+    }
+
+    /**
+     * @param string $text
+     *
+     * @return string
+     */
+    private function humanize($text)
+    {
+        return trim(ucfirst(trim(strtolower(preg_replace(['/((?<![-._])[A-Z])/', '/[\s]+/'], ['-$1', '-'], $text)))), '-');
     }
 }

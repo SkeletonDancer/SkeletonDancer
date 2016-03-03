@@ -13,10 +13,8 @@ namespace Rollerworks\Tools\SkeletonDancer\Generator;
 
 final class ReadMeGenerator extends AbstractGenerator
 {
-    public function generate($name, $namespace, $phpMin, $workingDir)
+    public function generate($name, $packageName, $phpMin, $workingDir)
     {
-        $packageName = $this->generateComposerName($namespace);
-
         $this->filesystem->dumpFile(
             $workingDir.'/README.md',
             $this->twig->render(
