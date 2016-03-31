@@ -38,6 +38,7 @@ final class GenerateCommand extends Command
             ->setName('generate')
             ->setAliases(['dance', 'new'])
             ->setDescription('Generates an empty project in the current directory')
+            ->addOption('no-git', null, InputOption::VALUE_NONE, 'Do not generate the .git configuration')
         ;
     }
 
@@ -196,13 +197,6 @@ final class GenerateCommand extends Command
             $workingDir
         );
 
-        (new Generator\GushConfigGenerator($twig, $filesystem))->generate(
-            $information['name'],
-            $information['author'],
-            'MIT',
-            $workingDir
-        );
-
         (new Generator\PhpCsGenerator($twig, $filesystem))->generate(
             $information['name'],
             $information['author'],
@@ -210,13 +204,22 @@ final class GenerateCommand extends Command
             $workingDir
         );
 
-        (new Generator\GitConfigGenerator($twig, $filesystem))->generate(
-            $information['enable-phpunit'],
-            $information['enable-phpspec'],
-            $information['enable-behat'],
-            $information['doc-format'],
-            $workingDir
-        );
+        if (!$input->getOption('no-git')) {
+            (new Generator\GushConfigGenerator($twig, $filesystem))->generate(
+                $information['name'],
+                $information['author'],
+                'MIT',
+                $workingDir
+            );
+
+            (new Generator\GitConfigGenerator($twig, $filesystem))->generate(
+                $information['enable-phpunit'],
+                $information['enable-phpspec'],
+                $information['enable-behat'],
+                $information['doc-format'],
+                $workingDir
+            );
+        }
 
         (new Generator\TestingConfigGenerator($twig, $filesystem))->generate(
             $information['name'],
