@@ -98,4 +98,7 @@ without restrictions.
 The templates for creating Symfony bundles were originally
 copied from the SensioGeneratorBundle.
 
+The Configurator Loader Dependencies/Ordered resolving logic is a
+direct copy of the Doctrine DataFixtures package.
+
 [LICENSE](LICENSE)

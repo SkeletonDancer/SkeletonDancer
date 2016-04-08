@@ -30,4 +30,31 @@ final class StringUtil
             )
         );
     }
+
+    /**
+     * Camelizes a string.
+     *
+     * @param string $id A string to camelize.
+     *
+     * @return string The camelized string
+     */
+    public static function camelize($id)
+    {
+        return strtr(ucwords(strtr($id, ['_' => ' ', '.' => '_ ', '\\' => '_ '])), [' ' => '']);
+    }
+
+    /**
+     * @param string $text
+     *
+     * @return string
+     */
+    public static function humanize($text)
+    {
+        return trim(ucfirst(trim(strtolower(preg_replace(['/((?<![-._])[A-Z])/', '/[\s]+/'], ['-$1', '-'], $text)))), '-');
+    }
+
+    public static function shortProductName($name)
+    {
+        return preg_replace('#[^\w\d_-]|\s#', '', ucfirst($name));
+    }
 }

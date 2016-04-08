@@ -11,58 +11,52 @@
 
 namespace Rollerworks\Tools\SkeletonDancer\Generator;
 
-final class GitConfigGenerator extends AbstractGenerator
+use Rollerworks\Tools\SkeletonDancer\Generator;
+use Rollerworks\Tools\SkeletonDancer\Service\Filesystem;
+
+final class GitConfigGenerator implements Generator
 {
-    public function generate($enablePhpUnit, $enablePhpSpec, $enableBehat, $docFormat, $workingDir)
+    private $filesystem;
+    private $twig;
+
+    public function __construct(\Twig_Environment $twig, Filesystem $filesystem)
     {
+        $this->twig = $twig;
+        $this->filesystem = $filesystem;
+    }
+
+    public function generate(array $configuration)
+    {
+        $defaults = [
+            'ignore' => [],
+            'export-ignore' => ['.gitignore', '.gitattributes', '.gitmodules'],
+        ];
+
+        if (isset($configuration['git'])) {
+            $configuration['git'] = array_merge($defaults, $configuration['git']);
+        } else {
+            $configuration['git'] = $defaults;
+        }
+
         $this->filesystem->dumpFile(
-            $workingDir.'/.gitignore',
+            '.gitignore',
             $this->twig->render(
                 'gitignore.txt.twig',
-                [
-                    'phpUnitEnabled' => $enablePhpUnit,
-                    'phpSpecEnabled' => $enablePhpSpec,
-                    'behatEnabled' => $enableBehat,
-                    'docFormat' => $docFormat,
-                ]
+                ['patterns' => array_unique($configuration['git']['ignore'])]
             )
         );
 
         $this->filesystem->dumpFile(
-            $workingDir.'/.gitattributes',
+            '.gitattributes',
             $this->twig->render(
                 'gitattributes.txt.twig',
-                [
-                    'phpUnitEnabled' => $enablePhpUnit,
-                    'phpSpecEnabled' => $enablePhpSpec,
-                    'behatEnabled' => $enableBehat,
-                    'docFormat' => $docFormat,
-                ]
+                ['export_ignore' => array_unique($configuration['git']['export-ignore'])]
             )
         );
+    }
 
-        // IDE configuration should not be ignored by .gitignore
-        $this->filesystem->dumpFile(
-            $workingDir.'/.git/info/exclude',
-            <<<OET
-# git ls-files --others --exclude-from=.git/info/exclude
-# Lines that start with '#' are comments.
-# For a project mostly in C, the following would be a good set of
-# exclude patterns (uncomment them if you want to use them):
-# *.[oa]
-# *~
-
-.temp
-Thumbs.db
-*.bak
-*.log
-*.orig
-*.vi
-*.swp
-*~
-
-/.idea
-OET
-        );
+    public function getConfigurators()
+    {
+        return [];
     }
 }

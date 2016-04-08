@@ -1,0 +1,27 @@
+profiles:
+    'symfony:bundle':
+        description: Generates the structure of a Symfony bundle for both private and shared (open-source) usage.
+        import: [ composer-package ]
+        defaults:
+            composer_type: symfony-bundle
+        generators:
+            - 'Rollerworks\Tools\SkeletonDancer\Generator\Symfony\BundleGenerator'
+            - 'Rollerworks\Tools\SkeletonDancer\Generator\TestingGenerator'
+            - 'Rollerworks\Tools\SkeletonDancer\Generator\DocumentationGenerator'
+            - 'Rollerworks\Tools\SkeletonDancer\Generator\PhpCsGenerator'
+        defaults:
+            php_cs_fixers:
+                - newline_after_open_tag
+                - ordered_class_elements
+                - ordered_use
+                - phpdoc_order
+
+    'symfony:shared-bundle':
+        description: |
+            Generates the structure of a shared (open-source) Symfony bundle.
+            With Git configuration, Gush configuration and Travis configuration set-up.
+        import: [ 'symfony:bundle' ]
+        generators:
+            - 'Rollerworks\Tools\SkeletonDancer\Generator\GitConfigGenerator'
+            - 'Rollerworks\Tools\SkeletonDancer\Generator\GushConfigGenerator'
+            - 'Rollerworks\Tools\SkeletonDancer\Generator\TravisConfigGenerator'

@@ -11,19 +11,42 @@
 
 namespace Rollerworks\Tools\SkeletonDancer\Generator;
 
-final class LicenseGenerator extends AbstractGenerator
+use Rollerworks\Tools\SkeletonDancer\Configurator\GeneralConfigurator;
+use Rollerworks\Tools\SkeletonDancer\Configurator\LicenseConfigurator;
+use Rollerworks\Tools\SkeletonDancer\Generator;
+use Rollerworks\Tools\SkeletonDancer\Service\Filesystem;
+
+final class LicenseGenerator implements Generator
 {
-    public function generate($name, $author, $license, $workingDir)
+    private $filesystem;
+    private $twig;
+
+    public function __construct(\Twig_Environment $twig, Filesystem $filesystem)
+    {
+        $this->twig = $twig;
+        $this->filesystem = $filesystem;
+    }
+
+    public function generate(array $configuration)
     {
         $this->filesystem->dumpFile(
-            $workingDir.'/LICENSE',
+            'LICENSE',
             $this->twig->render(
-                'Licenses/'.strtolower($license).'.txt.twig',
+                'Licenses/'.strtolower($configuration['license']).'.txt.twig',
                 [
-                    'productName' => $name,
-                    'author' => $this->extractAuthor($author),
+                    'productName' => $configuration['name'],
+                    'author' => [
+                        'name' => $configuration['author_name'],
+                        'email' => $configuration['author_email'],
+                    ],
+                    '_block' => 'file',
                 ]
             )
         );
+    }
+
+    public function getConfigurators()
+    {
+        return [GeneralConfigurator::class, LicenseConfigurator::class];
     }
 }

@@ -12,13 +12,34 @@
     "require": {
         "php": ">=5.5",
         "twig/twig": "^1.22",
-        "symfony/console": "^3.0",
+        "symfony/config": "^3.0",
         "symfony/process": "^3.0",
-        "symfony/filesystem": "^3.0"
+        "symfony/console": "^3.2@dev",
+        "symfony/filesystem": "^3.0",
+        "symfony/event-dispatcher": "^3.0",
+        "symfony/expression-language": "^3.0",
+        "symfony/yaml": "^3.0",
+        "pimple/pimple": "^3.0",
+        "psr/log": "^1.0",
+        "webmozart/console": "dev-feature-full-symfony-adapter@dev",
+        "sllh/styleci-fixers": "^4.3"
+    },
+    "require-dev": {
+        "matthiasnoback/symfony-config-test": "^2.0"
     },
     "autoload": {
         "psr-4": {
             "Rollerworks\\Tools\\SkeletonDancer\\": "src/"
         }
-    }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Rollerworks\\Tools\\SkeletonDancer\\Tests\\": "tests/"
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "repositories": [
+        { "type": "vcs", "url": "https://github.com/sstok/console.git" }
+    ]
 }

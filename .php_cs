@@ -1,8 +1,7 @@
-
 <?php
 
 $header = <<<EOF
-This file is part of the RollerworksSkeletonDancerBundle package.
+This file is part of the SkeletonDancer package.
 
 (c) Sebastiaan Stok <s.stok@rollerscapes.net>
 
@@ -29,6 +28,7 @@ return Symfony\CS\Config\Config::create()
     ->finder(
         Symfony\CS\Finder\DefaultFinder::create()
             ->in([__DIR__.'/src', __DIR__.'/tests'])
+            ->notName('*.twig')
             ->exclude(['doc', 'spec'])
     )
 ;

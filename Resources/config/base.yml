@@ -1,0 +1,36 @@
+import:
+ - 'symfony-profiles.yml'
+
+profiles:
+    dancer-init:
+        description: |
+            Initializes the .dancer directory and local configuration, for future usage.
+
+            This profile can be used for when you plan to use SkeletonDancer for
+            creating new parts inside your current project.
+
+            Note: This will generate the .dancer folder in the current directory,
+            which should be your project's root directory.
+        generators:
+            - 'Rollerworks\Tools\SkeletonDancer\Generator\SkeletonDancerInitGenerator'
+
+    application:
+        description: |
+            Generates a framework agnostic application.
+            This profile is best used as a template for other more fine grained profiles.
+        import: [ dancer-init, composer-package ]
+        defaults:
+            composer_type: application
+        generators:
+            - 'Rollerworks\Tools\SkeletonDancer\Generator\ComposerGenerator'
+            - 'Rollerworks\Tools\SkeletonDancer\Generator\ReadMeGenerator'
+
+    composer-package:
+        description: |
+            Generates a Composer package with Git configuration documentation skeletons set-up.
+            This profile is best used as a template for other more fine grained profiles.
+        generators:
+            - 'Rollerworks\Tools\SkeletonDancer\Generator\GitConfigGenerator'
+            - 'Rollerworks\Tools\SkeletonDancer\Generator\ComposerGenerator'
+            - 'Rollerworks\Tools\SkeletonDancer\Generator\ReadMeGenerator'
+            - 'Rollerworks\Tools\SkeletonDancer\Generator\LicenseGenerator'

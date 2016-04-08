@@ -1,5 +1,6 @@
 # Gush configuration file, any comments will be lost.
-meta-header: "This file is part of the {{ name|raw }} package.\n\n(c) {{ author|raw }}\n\nThis source file is subject to the {{ license }} license that is bundled\nwith this source code in the file LICENSE."
+meta-header: |
+    {{ include('Licenses/' ~ license|lower ~ '.txt.twig', { _block: 'header' })|trim|indent_lines }}
 table-pr:
     bug_fix: ['Bug Fix?', 'no']
     new_feature: ['New Feature?', 'no']

@@ -11,20 +11,45 @@
 
 namespace Rollerworks\Tools\SkeletonDancer\Generator;
 
-final class GushConfigGenerator extends AbstractGenerator
+use Rollerworks\Tools\SkeletonDancer\Configurator\GeneralConfigurator;
+use Rollerworks\Tools\SkeletonDancer\Generator;
+use Rollerworks\Tools\SkeletonDancer\Service\Filesystem;
+
+final class GushConfigGenerator implements Generator
 {
-    public function generate($name, $author, $license, $workingDir)
+    private $filesystem;
+    private $twig;
+
+    public function __construct(\Twig_Environment $twig, Filesystem $filesystem)
     {
+        $this->twig = $twig;
+        $this->filesystem = $filesystem;
+    }
+
+    public function generate(array $configuration)
+    {
+        if (!$this->filesystem->exists('.git/config')) {
+            return -1;
+        }
+
         $this->filesystem->dumpFile(
-            $workingDir.'/.gush.yml',
+            '.gush.yml',
             $this->twig->render(
                 'gush.yml.twig',
                 [
-                    'name' => $name,
-                    'author' => $author,
-                    'license' => $license,
+                    'name' => $configuration['name'],
+                    'author' => [
+                        'name' => $configuration['author_name'],
+                        'email' => $configuration['author_email'],
+                    ],
+                    'license' => $configuration['license'],
                 ]
             )
         );
+    }
+
+    public function getConfigurators()
+    {
+        return [GeneralConfigurator::class];
     }
 }
