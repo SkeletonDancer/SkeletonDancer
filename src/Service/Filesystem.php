@@ -247,6 +247,44 @@ class Filesystem
         $this->filesystem->dumpFile($file, $content);
     }
 
+    /**
+     * @internal
+     *
+     * @param string $name
+     *
+     * @return string
+     */
+    public function resolvePath($name)
+    {
+        if ('' === $name) {
+            throw new \InvalidArgumentException('An empty path is not valid to be resolved.');
+        }
+
+        if ($this->filesystem->isAbsolutePath($name)) {
+            return $name;
+        }
+
+        if ('@' !== $name[0]) {
+            return $this->currentDir.'/'.$name;
+        }
+
+        if (false !== strpos($name, '..')) {
+            throw new \RuntimeException(sprintf('Path "%s" contains invalid characters (..).', $name));
+        }
+
+        $dirPointer = substr($name, 1, strpos($name, '/') - 1);
+
+        if (!isset($this->paths[$dirPointer])) {
+            throw new \InvalidArgumentException(
+                sprintf('Unable to resolve unknown directory-pointer "%s" for "%s".', $dirPointer, $name)
+            );
+        }
+
+        $resolvedPath = substr_replace($name, $this->paths[$dirPointer], 0, strlen($dirPointer) + 1);
+
+        return $resolvedPath;
+    }
+
     private function fileExistsOperation($targetFile, $filename)
     {
         $overwrite = $this->overwrite;
@@ -318,44 +356,6 @@ class Filesystem
         }
 
         return $files;
-    }
-
-    /**
-     * @internal
-     *
-     * @param string $name
-     *
-     * @return string
-     */
-    public function resolvePath($name)
-    {
-        if ('' === $name) {
-            throw new \InvalidArgumentException('An empty path is not valid to be resolved.');
-        }
-
-        if ($this->filesystem->isAbsolutePath($name)) {
-            return $name;
-        }
-
-        if ('@' !== $name[0]) {
-            return $this->currentDir.'/'.$name;
-        }
-
-        if (false !== strpos($name, '..')) {
-            throw new \RuntimeException(sprintf('Path "%s" contains invalid characters (..).', $name));
-        }
-
-        $dirPointer = substr($name, 1, strpos($name, '/') - 1);
-
-        if (!isset($this->paths[$dirPointer])) {
-            throw new \InvalidArgumentException(
-                sprintf('Unable to resolve unknown directory-pointer "%s" for "%s".', $dirPointer, $name)
-            );
-        }
-
-        $resolvedPath = substr_replace($name, $this->paths[$dirPointer], 0, strlen($dirPointer) + 1);
-
-        return $resolvedPath;
     }
 
     /**

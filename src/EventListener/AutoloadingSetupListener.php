@@ -15,7 +15,7 @@ use Composer\Autoload\ClassLoader;
 use Rollerworks\Tools\SkeletonDancer\Container;
 use Webmozart\Console\Api\Event\PreHandleEvent;
 
-final class AutoLoadingSetupListener
+final class AutoloadingSetupListener
 {
     private $container;
 

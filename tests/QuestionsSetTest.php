@@ -103,7 +103,9 @@ final class QuestionsSetTest extends \PHPUnit_Framework_TestCase
     public function it_executes_question_default_when_lazy()
     {
         $question1 = Question::ask('Name');
-        $question2 = Question::ask('Path', function ($config) { return $config['name'].'/'; });
+        $question2 = Question::ask('Path', function ($config) {
+            return $config['name'].'/';
+        });
 
         $questions = new QuestionsSet(
             function (SfQuestion $question) use ($question1, $question2) {
