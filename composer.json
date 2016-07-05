@@ -25,7 +25,8 @@
         "sllh/styleci-fixers": "^4.3"
     },
     "require-dev": {
-        "matthiasnoback/symfony-config-test": "^2.0"
+        "matthiasnoback/symfony-config-test": "^2.0",
+        "sllh/php-cs-fixer-styleci-bridge": "^2.0"
     },
     "autoload": {
         "psr-4": {
