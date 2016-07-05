@@ -13,12 +13,8 @@ core.autocrlf=lf
 .php_cs export-ignore
 
 # test config
-phpspec.yml.dist
 phpunit.xml.dist export-ignore
-behat.yml.dist export-ignore
 
 # dirs
 /tests export-ignore
-/spec export-ignore
 /doc export-ignore
-/features
