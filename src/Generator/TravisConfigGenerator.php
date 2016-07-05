@@ -11,21 +11,40 @@
 
 namespace Rollerworks\Tools\SkeletonDancer\Generator;
 
-final class TravisConfigGenerator extends AbstractGenerator
+use Rollerworks\Tools\SkeletonDancer\Configurator\GeneralConfigurator;
+use Rollerworks\Tools\SkeletonDancer\Generator;
+use Rollerworks\Tools\SkeletonDancer\Service\Filesystem;
+
+final class TravisConfigGenerator implements Generator
 {
-    public function generate($phpMin, $enablePhpUnit, $enablePhpSpec, $enableBehat, $workingDir)
+    private $filesystem;
+    private $twig;
+
+    public function __construct(\Twig_Environment $twig, Filesystem $filesystem)
     {
+        $this->twig = $twig;
+        $this->filesystem = $filesystem;
+    }
+
+    public function generate(array $configuration)
+    {
+        if (!$this->filesystem->exists('.git/config')) {
+            return;
+        }
+
         $this->filesystem->dumpFile(
-            $workingDir.'/.travis.yml',
+            '.travis.yml',
             $this->twig->render(
                 'travis.yml.twig',
                 [
-                    'phpMin' => $phpMin,
-                    'enablePhpUnit' => $enablePhpUnit,
-                    'enablePhpSpec' => $enablePhpSpec,
-                    'enableBehat' => $enableBehat,
+                    'phpMin' => $configuration['php_min'],
                 ]
             )
         );
+    }
+
+    public function getConfigurators()
+    {
+        return [GeneralConfigurator::class];
     }
 }

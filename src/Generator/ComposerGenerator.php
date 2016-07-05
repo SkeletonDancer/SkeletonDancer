@@ -11,65 +11,72 @@
 
 namespace Rollerworks\Tools\SkeletonDancer\Generator;
 
-use Symfony\Component\Process\ProcessBuilder;
+use Rollerworks\Tools\SkeletonDancer\Configurator\ComposerConfigurator;
+use Rollerworks\Tools\SkeletonDancer\Configurator\GeneralConfigurator;
+use Rollerworks\Tools\SkeletonDancer\Configurator\LicenseConfigurator;
+use Rollerworks\Tools\SkeletonDancer\Generator;
+use Rollerworks\Tools\SkeletonDancer\Service\Composer;
+use Rollerworks\Tools\SkeletonDancer\Service\Filesystem;
 
-final class ComposerGenerator extends AbstractGenerator
+final class ComposerGenerator implements Generator
 {
-    public function generate(
-        $name,
-        $namespace,
-        $type,
-        $license,
-        $author,
-        $phpMin,
-        $symfonyTest,
-        $enablePhpUnit,
-        $enablePhpSpec,
-        $enableBehat,
-        $workingDir
-    ) {
-        $this->filesystem->dumpFile(
-            $workingDir.'/composer.json',
-            $this->twig->render(
-                'composer.json.twig',
-                [
-                    'name' => $name,
-                    'type' => 'extension' === $type ? 'library' : $type,
-                    'license' => $license,
-                    'author' => $this->extractAuthor($author),
-                    'phpMin' => $phpMin,
-                    'namespace' => $namespace,
-                ]
-            )
-        );
+    private $filesystem;
+    private $composer;
 
-        $packages = [];
-
-        if ($enablePhpSpec) {
-            $packages[] = 'phpspec/phpspec';
-        }
-
-        if ($enablePhpUnit && $symfonyTest) {
-            $packages[] = 'symfony/phpunit-bridge';
-        }
-
-        if ($enableBehat) {
-            $packages[] = 'behat/behat';
-            $packages[] = 'behat/symfony2-extension';
-            $packages[] = 'behat/mink-extension';
-            $packages[] = 'behat/mink-browserkit-driver';
-            $packages[] = 'behat/mink-selenium2-driver';
-            $packages[] = 'behat/mink';
-            $packages[] = 'lakion/mink-debug-extension';
-        }
-
-        $this->requireDev($packages, $workingDir);
+    public function __construct(Filesystem $filesystem, Composer $composer)
+    {
+        $this->filesystem = $filesystem;
+        $this->composer = $composer;
     }
 
-    private function requireDev($name, $workingDir)
+    public function generate(array $configuration)
     {
-        $name = (array) $name;
+        $configuration['composer'] = array_merge(
+            [
+                'name' => $configuration['package_name'],
+                'description' => '',
+                'type' => 'library',
+                'license' => $configuration['license'],
+                'authors' => [
+                    [
+                        'name' => $configuration['author_name'],
+                        'email' => $configuration['author_email'],
+                    ],
+                ],
+                'require' => [],
+                'require-dev' => [],
+                'autoload' => [],
+            ],
+            isset($configuration['composer']) ? $configuration['composer'] : []
+        );
 
-        (new ProcessBuilder(array_merge(['composer.phar', 'require', '--dev', '--no-update'], $name) ))->setWorkingDirectory($workingDir)->getProcess()->run();
+        if (empty($configuration['composer']['autoload'])) {
+            $configuration['composer']['autoload'] = [
+                'psr-4' => [
+                    $configuration['namespace'].'\\' => $configuration['src_dir'],
+                ],
+            ];
+        }
+
+        $composer = $configuration['composer'];
+        $composer['require'] = [
+            'php' => '^'.$configuration['php_min'],
+        ];
+
+        unset($composer['require-dev']);
+
+         // Add extra newline to content to fix content mismatch when dumping
+        $this->filesystem->dumpFile(
+            'composer.json',
+            json_encode($composer, JSON_PRETTY_PRINT + JSON_UNESCAPED_SLASHES)."\n"
+        );
+
+        $this->composer->requirePackage($configuration['composer']['require']);
+        $this->composer->requireDevPackage($configuration['composer']['require-dev']);
+    }
+
+    public function getConfigurators()
+    {
+        return [GeneralConfigurator::class, LicenseConfigurator::class, ComposerConfigurator::class];
     }
 }

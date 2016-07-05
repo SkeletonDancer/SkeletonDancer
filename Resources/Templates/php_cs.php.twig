@@ -1,33 +1,50 @@
 <?php
+{% block php_use %}
 
+{% if styleci_bridge %}
+require_once __DIR__.'/vendor/sllh/php-cs-fixer-styleci-bridge/autoload.php';
+{% endif %}
+{% endblock php_use %}
+
+{% block header %}
+{% if license is not empty %}
 $header = <<<EOF
-This file is part of the {{ name|raw }} package.
-
-(c) {{ author|raw }}
-
-This source file is subject to the {{ license }} license that is bundled
-with this source code in the file LICENSE.
+{% block file_header %}
+{{ include('Licenses/' ~ license|lower ~ '.txt.twig', { _block: 'header' })|trim }}
+{% endblock file_header %}
 EOF;
 
 Symfony\CS\Fixer\Contrib\HeaderCommentFixer::setHeader($header);
+{% endif %}
+{% endblock header %}
 
-return Symfony\CS\Config\Config::create()
-    ->setUsingLinter(false)
-    // use SYMFONY_LEVEL:
-    ->level(Symfony\CS\FixerInterface::SYMFONY_LEVEL)
-    // and extra fixers:
+{% block body %}
+{% if styleci_bridge %}
+$config = SLLH\StyleCIBridge\ConfigBridge::create()
+    ->setUsingCache(true)
+;
+{% else %}
+$config = Symfony\CS\Config\Config::create()
+    ->setUsingLinter({{ linting ? 'true' : 'false' }})
+    ->setUsingCache(true)
+    ->level(Symfony\CS\FixerInterface::{{ level|upper }}_LEVEL)
+{% if fixers_v1 is not empty or disabled_fixers_v1 is not empty %}
     ->fixers([
-        'ordered_use',
-        //'strict',
-        'strict_param',
-        'short_array_syntax',
-        'phpdoc_order',
-        'header_comment',
-        '-psr0',
+        {% if fixers_v1 is not empty %}'{{ (fixers_v1|join("',\n        '"))|raw }}',{% endif %}
+        {% if disabled_fixers_v1 is not empty %}'-{{ (disabled_fixers_v1|join("',\n        '-"))|raw }}',{% endif %}
     ])
+{% endif %}
     ->finder(
         Symfony\CS\Finder\DefaultFinder::create()
-            ->in([__DIR__.'/src', __DIR__.'/tests'])
-            ->exclude(['doc', 'spec'])
+{% if finder.path is not empty %}
+            ->in([__DIR__.'/{{ (finder.path|join("', __DIR__.'/"))|raw }}')
+{% endif %}
+{% for type in ['not_path', 'exclude', 'name', 'not_name', 'contains', 'not_contains', 'depth'] if finder[type] is not empty %}
+            ->{{ type|camelize_method }}(['{{ (finder[type]|join("', '"))|raw }}'])
+{% endfor %}
     )
 ;
+{% endif %}
+
+return $config;
+{% endblock body %}

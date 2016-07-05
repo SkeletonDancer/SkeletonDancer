@@ -11,9 +11,7 @@
 
 require __DIR__.'/../vendor/autoload.php';
 
-use Rollerworks\Tools\SkeletonDancer\GenerateCommand;
-use Symfony\Component\Console\Application;
+use Rollerworks\Tools\SkeletonDancer\Cli\DancerApplicationConfig;
 
-$application = new Application();
-$application->add(new GenerateCommand());
-$application->run();
+$cli = new \Webmozart\Console\ConsoleApplication(new DancerApplicationConfig());
+$cli->run();

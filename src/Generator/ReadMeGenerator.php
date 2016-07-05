@@ -11,20 +11,39 @@
 
 namespace Rollerworks\Tools\SkeletonDancer\Generator;
 
-final class ReadMeGenerator extends AbstractGenerator
+use Rollerworks\Tools\SkeletonDancer\Configurator\GeneralConfigurator;
+use Rollerworks\Tools\SkeletonDancer\Generator;
+use Rollerworks\Tools\SkeletonDancer\Service\Filesystem;
+
+final class ReadMeGenerator implements Generator
 {
-    public function generate($name, $packageName, $phpMin, $workingDir)
+    private $filesystem;
+    private $twig;
+
+    public function __construct(\Twig_Environment $twig, Filesystem $filesystem)
+    {
+        $this->twig = $twig;
+        $this->filesystem = $filesystem;
+    }
+
+    public function generate(array $configuration)
     {
         $this->filesystem->dumpFile(
-            $workingDir.'/README.md',
+            'README.md',
             $this->twig->render(
                 'readme.md.twig',
                 [
-                    'name' => $name,
-                    'packageName' => $packageName,
-                    'phpMin' => $phpMin,
+                    'name' => $configuration['name'],
+                    'packageName' => $configuration['package_name'],
+                    'phpMin' => $configuration['php_min'],
+                    'authorName' => $configuration['author_name'],
                 ]
             )
         );
+    }
+
+    public function getConfigurators()
+    {
+        return [GeneralConfigurator::class];
     }
 }
