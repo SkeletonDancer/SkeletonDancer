@@ -26,7 +26,7 @@ final class StringProvider implements ExpressionFunctionProviderInterface
                     return sprintf('substr(%s, %d, %d)', $str, $start, $length);
                 },
                 function (array $values, $str, $start, $length = null) {
-                    return null === $length ? substr($str, $start, $length) : substr($str, $start);
+                    return null !== $length ? substr($str, $start, $length) : substr($str, $start);
                 }
             ),
             new ExpressionFunction(
