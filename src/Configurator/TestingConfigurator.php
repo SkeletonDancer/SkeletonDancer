@@ -33,7 +33,7 @@ final class TestingConfigurator implements Configurator
                 )
             );
         } else {
-            $questions->communicate('phpspec_shortname', null);
+            $questions->set('phpspec_shortname', null);
         }
 
         if ($questions->communicate('enable_behat', Question::confirm('Enable Behat?', false))) {
