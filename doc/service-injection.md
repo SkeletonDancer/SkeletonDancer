@@ -102,7 +102,7 @@ The `twig` service allows to render twig templates.
 
 Class: `\Twig_Environment`
 
-### process `Rollerworks\Tools\SkeletonDancer\Service\CliProcess`
+### process
 
 The `process` service allows to perform system operations
 using the Symfony Process component.
