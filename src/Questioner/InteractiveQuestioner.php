@@ -11,7 +11,6 @@
 
 namespace Rollerworks\Tools\SkeletonDancer\Questioner;
 
-use Rollerworks\Tools\SkeletonDancer\Configurator;
 use Rollerworks\Tools\SkeletonDancer\Questioner;
 use Rollerworks\Tools\SkeletonDancer\QuestionsSet;
 use Symfony\Component\Console\Style\SymfonyStyle;
@@ -29,11 +28,7 @@ final class InteractiveQuestioner implements Questioner
     }
 
     /**
-     * @param Configurator[] $configurators
-     * @param bool           $skipOptional
-     * @param array          $defaults
-     *
-     * @return array
+     * {@inheritdoc}
      */
     public function interact(array $configurators, $skipOptional = true, array $defaults = [])
     {
@@ -47,6 +42,6 @@ final class InteractiveQuestioner implements Questioner
             $configurator->interact($questions);
         }
 
-        return $questions->all();
+        return $questions;
     }
 }

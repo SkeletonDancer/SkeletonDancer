@@ -141,6 +141,6 @@ final class SkeletonDancerInitGenerator implements Generator
             $configurator->interact($questions);
         }
 
-        return $questions->all();
+        return $questions->getAnswers();
     }
 }

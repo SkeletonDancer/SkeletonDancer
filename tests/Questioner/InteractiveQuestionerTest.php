@@ -53,7 +53,7 @@ final class InteractiveQuestionerTest extends \PHPUnit_Framework_TestCase
             ),
         ];
 
-        $answers = $questioner->interact($configurators);
+        $answers = $questioner->interact($configurators)->getValues();
 
         $this->assertSame(['name' => 'Dancer', 'namespace' => 'Rollerworks\Something'], $answers);
     }
@@ -79,7 +79,7 @@ final class InteractiveQuestionerTest extends \PHPUnit_Framework_TestCase
             ),
         ];
 
-        $answers = $questioner->interact($configurators);
+        $answers = $questioner->interact($configurators)->getValues();
 
         $this->assertSame(['name' => 'Dancer', 'path' => '/'], $answers);
     }
@@ -105,7 +105,7 @@ final class InteractiveQuestionerTest extends \PHPUnit_Framework_TestCase
             ),
         ];
 
-        $answers = $questioner->interact($configurators, false);
+        $answers = $questioner->interact($configurators, false)->getValues();
 
         $this->assertSame(['name' => 'Dancer', 'path' => 'src/'], $answers);
     }
@@ -132,7 +132,7 @@ final class InteractiveQuestionerTest extends \PHPUnit_Framework_TestCase
             ),
         ];
 
-        $answers = $questioner->interact($configurators, true, ['path' => 'src/']);
+        $answers = $questioner->interact($configurators, true, ['path' => 'src/'])->getValues();
 
         $this->assertSame(['name' => 'Dancer', 'path' => 'src/'], $answers);
     }

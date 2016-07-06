@@ -94,7 +94,7 @@ abstract class GeneratorTestCase extends \PHPUnit_Framework_TestCase
         $this->initGenerator();
 
         $questioner = new UsingDefaultsQuestioner();
-        $configuration = $questioner->interact($this->configurators, true, $values);
+        $configuration = $questioner->interact($this->configurators, true, $values)->getValues();
 
         foreach ($this->configurators as $finalizer) {
             $finalizer->finalizeConfiguration($configuration);

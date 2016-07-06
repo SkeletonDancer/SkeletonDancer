@@ -40,7 +40,7 @@ final class QuestionsSetTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('Dancer', $questions->communicate('name', $question1));
         $this->assertEquals('src/', $questions->communicate('path', $question2));
 
-        $this->assertSame(['name' => 'Dancer', 'path' => 'src/'], $questions->all());
+        $this->assertSame(['name' => 'Dancer', 'path' => 'src/'], $questions->getAnswers());
         $this->assertEquals('Dancer', $questions->get('name'));
         $this->assertNull($questions->get('foo'));
 
@@ -67,7 +67,7 @@ final class QuestionsSetTest extends \PHPUnit_Framework_TestCase
 
         $this->assertEquals('Dancer', $questions->communicate('name', $question1));
         $this->assertEquals('/', $questions->communicate('path', $question2));
-        $this->assertSame(['name' => 'Dancer', 'path' => '/'], $questions->all());
+        $this->assertSame(['name' => 'Dancer', 'path' => '/'], $questions->getAnswers());
     }
 
     /**
@@ -94,7 +94,36 @@ final class QuestionsSetTest extends \PHPUnit_Framework_TestCase
 
         $this->assertEquals('Dancer', $questions->communicate('name', $question1));
         $this->assertEquals('src/', $questions->communicate('path', $question2));
-        $this->assertSame(['name' => 'Dancer', 'path' => 'src/'], $questions->all());
+        $this->assertSame(['name' => 'Dancer', 'path' => 'src/'], $questions->getAnswers());
+    }
+
+    /**
+     * @test
+     */
+    public function it_allows_optional_questions_to_be_null()
+    {
+        $question1 = Question::ask('Name');
+        $question2 = Question::ask('Path', '/')->markOptional('/');
+
+        $questions = new QuestionsSet(
+            function (SfQuestion $question) use ($question1, $question2) {
+                if ($question->getQuestion() === $question1->getLabel()) {
+                    return 'Dancer';
+                }
+
+                if ($question->getQuestion() === $question2->getLabel()) {
+                    return '/';
+                }
+            },
+            [],
+            false
+        );
+
+        $this->assertEquals('Dancer', $questions->communicate('name', $question1));
+        $this->assertEquals('/', $questions->communicate('path', $question2));
+
+        $this->assertSame(['name' => 'Dancer', 'path' => null], $questions->getValues());
+        $this->assertSame(['name' => 'Dancer', 'path' => '/'], $questions->getAnswers());
     }
 
     /**
@@ -121,7 +150,7 @@ final class QuestionsSetTest extends \PHPUnit_Framework_TestCase
 
         $this->assertEquals('Dancer', $questions->communicate('name', $question1));
         $this->assertEquals('Dancer/', $questions->communicate('path', $question2));
-        $this->assertSame(['name' => 'Dancer', 'path' => 'Dancer/'], $questions->all());
+        $this->assertSame(['name' => 'Dancer', 'path' => 'Dancer/'], $questions->getAnswers());
     }
 
     /**
@@ -141,7 +170,7 @@ final class QuestionsSetTest extends \PHPUnit_Framework_TestCase
 
         $this->assertEquals('Dancer', $questions->communicate('name', $question1));
         $this->assertEquals('src/', $questions->communicate('path', $question2));
-        $this->assertSame(['name' => 'Dancer', 'path' => 'src/'], $questions->all());
+        $this->assertSame(['name' => 'Dancer', 'path' => 'src/'], $questions->getAnswers());
     }
 
     /**

@@ -18,7 +18,7 @@ interface Questioner
      * @param bool           $skipOptional
      * @param array          $defaults
      *
-     * @return array
+     * @return QuestionsSet
      */
     public function interact(array $configurators, $skipOptional = true, array $defaults = []);
 }

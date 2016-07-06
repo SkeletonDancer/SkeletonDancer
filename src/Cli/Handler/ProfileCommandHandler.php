@@ -190,6 +190,6 @@ final class ProfileCommandHandler
             $configurator->interact($questions);
         }
 
-        return $questions->all();
+        return $questions->getValues();
     }
 }
