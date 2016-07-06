@@ -47,7 +47,7 @@ final class UsingDefaultsQuestioner implements Questioner
             $this->currentQuestion = null;
             $this->currentConfigurator = null;
 
-            return $questions->all();
+            return $questions;
         } catch (\Exception $e) {
             if (null !== $this->currentQuestion) {
                 throw new \RuntimeException(

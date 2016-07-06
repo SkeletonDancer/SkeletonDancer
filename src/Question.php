@@ -28,6 +28,16 @@ final class Question
     private $question;
 
     /**
+     * @var \Closure|null
+     */
+    private $validator;
+
+    /**
+     * @var \Closure|null
+     */
+    private $normalizer;
+
+    /**
      * @var array
      */
     private $autosuggestionValues;
@@ -102,7 +112,10 @@ final class Question
             return (new WrappedQuestion($label.$help, $default))->setValidator($validator);
         };
 
-        return new self($question, $label, $default);
+        $object = new self($question, $label, $default);
+        $object->validator = $validator;
+
+        return $object;
     }
 
     /**
@@ -204,11 +217,32 @@ final class Question
     }
 
     /**
+     * @param string|string[] $nullValues Value(s) that mark the value as null (empty).
+     *
      * @return $this
      */
-    public function markOptional()
+    public function markOptional($nullValues = null)
     {
+        if (null === $this->default && null === $nullValues) {
+            throw new \InvalidArgumentException(
+                'Default value is NULL but but no $nullValues are provided. '.
+                'Provide a value that will be transformed to NULL or set a default.'
+            );
+        }
+
         $this->optional = true;
+
+        if (null !== $nullValues) {
+            $nullValues = (array) $nullValues;
+
+            $this->normalizer = function ($value) use ($nullValues) {
+                if (in_array($value, $nullValues, true)) {
+                    return;
+                }
+
+                return $value;
+            };
+        }
 
         return $this;
     }
@@ -266,5 +300,13 @@ final class Question
     public function getMaxAttempts()
     {
         return $this->maxAttempts;
+    }
+
+    /**
+     * @return \Closure|null
+     */
+    public function getNormalizer()
+    {
+        return $this->normalizer;
     }
 }

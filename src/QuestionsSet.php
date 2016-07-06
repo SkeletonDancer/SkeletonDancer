@@ -19,6 +19,11 @@ final class QuestionsSet
     private $answers = [];
 
     /**
+     * @var array
+     */
+    private $values = [];
+
+    /**
      * @var \Closure
      */
     private $communicator;
@@ -47,7 +52,7 @@ final class QuestionsSet
         }
 
         $default = isset($this->defaults[$name]) ? $this->defaults[$name] : null;
-        $default = $this->resolveDefault($question, $this->answers, $default);
+        $default = $this->resolveDefault($question, $this->values, $default);
 
         if ($this->skipOptional && $question->isOptional()) {
             $value = $default;
@@ -57,6 +62,7 @@ final class QuestionsSet
         }
 
         if (null !== $name) {
+            $this->values[$name] = $question->getNormalizer() ? call_user_func($question->getNormalizer(), $value) : $value;
             $this->answers[$name] = $value;
         }
 
@@ -68,6 +74,8 @@ final class QuestionsSet
         if (array_key_exists($name, $this->answers)) {
             throw new \InvalidArgumentException(sprintf('Question with name "%s" already exists in the QuestionsSet.', $name));
         }
+
+        $this->values[$name] = $value;
 
         return $this->answers[$name] = $value;
     }
@@ -82,9 +90,14 @@ final class QuestionsSet
         return array_key_exists($name, $this->answers);
     }
 
-    public function all()
+    public function getAnswers()
     {
         return $this->answers;
+    }
+
+    public function getValues()
+    {
+        return $this->values;
     }
 
     /**

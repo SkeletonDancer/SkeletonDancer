@@ -29,10 +29,10 @@ final class PhpCsConfigurator implements Configurator
             'php_cs_enabled_fixers',
             Question::ask(
                 'PHP-CS Fixers',
-                '',
+                'none',
                 function ($value) {
-                    if ('' === $value) {
-                        return '';
+                    if ('none' === $value) {
+                        return $value;
                     }
 
                     $fixers = $this->splitValues($value);
@@ -58,17 +58,17 @@ final class PhpCsConfigurator implements Configurator
 
                     return $value;
                 }
-            )->markOptional() // Optional, as this should be configured using a defaults value.
+            )->markOptional('none') // Optional, as this should be configured using a defaults value.
         );
 
         $questions->communicate(
             'php_cs_disabled_fixers',
             Question::ask(
                 'PHP-CS Disabled fixers',
-                '',
+                'none',
                 function ($value) {
-                    if ('' === $value) {
-                        return '';
+                    if ('none' === $value) {
+                        return $value;
                     }
 
                     $fixers = $this->splitValues($value);
@@ -84,7 +84,7 @@ final class PhpCsConfigurator implements Configurator
 
                     return $value;
                 }
-            )->markOptional() // Optional, as this should be configured using a defaults value.
+            )->markOptional('none') // Optional, as this should be configured using a defaults value.
         );
 
         $questions->communicate(
@@ -106,16 +106,16 @@ final class PhpCsConfigurator implements Configurator
 
         // Finder questions.
         $questions->communicate('php_cs_finder_path', Question::ask('PHP-CS Finder {path}', 'src', false)->markOptional());
-        $questions->communicate('php_cs_finder_not_path', Question::ask('PHP-CS Finder {not path}', false)->markOptional());
-        $questions->communicate('php_cs_finder_exclude', Question::ask('PHP-CS Finder {exclude dirs}', false)->markOptional());
+        $questions->communicate('php_cs_finder_not_path', Question::ask('PHP-CS Finder {not path}', '!*', false)->markOptional('!*'));
+        $questions->communicate('php_cs_finder_exclude', Question::ask('PHP-CS Finder {exclude dirs}', '!*', false)->markOptional('!*'));
 
-        $questions->communicate('php_cs_finder_name', Question::ask('PHP-CS Finder {name}', false)->markOptional());
-        $questions->communicate('php_cs_finder_not_name', Question::ask('PHP-CS Finder {not name}', false)->markOptional());
+        $questions->communicate('php_cs_finder_name', Question::ask('PHP-CS Finder {name}', '*', false)->markOptional('*'));
+        $questions->communicate('php_cs_finder_not_name', Question::ask('PHP-CS Finder {not name}', '!*', false)->markOptional('!*'));
 
-        $questions->communicate('php_cs_finder_contains', Question::ask('PHP-CS Finder {contains}', false)->markOptional());
-        $questions->communicate('php_cs_finder_not_contains', Question::ask('PHP-CS Finder {not contains}', false)->markOptional());
+        $questions->communicate('php_cs_finder_contains', Question::ask('PHP-CS Finder {contains}', '*', false)->markOptional('*'));
+        $questions->communicate('php_cs_finder_not_contains', Question::ask('PHP-CS Finder {not contains}', '!*', false)->markOptional('!*'));
 
-        $questions->communicate('php_cs_finder_depth', Question::ask('PHP-CS Finder {depth}', false)->markOptional());
+        $questions->communicate('php_cs_finder_depth', Question::ask('PHP-CS Finder {depth}', '*', false)->markOptional('*'));
     }
 
     public function finalizeConfiguration(array &$configuration)

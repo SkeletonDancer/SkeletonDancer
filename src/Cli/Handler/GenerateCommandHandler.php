@@ -116,7 +116,7 @@ final class GenerateCommandHandler
             $questioner = new UsingDefaultsQuestioner();
         }
 
-        $configuration = $questioner->interact($configurators, !$args->getOption('all'), $defaults);
+        $questionsSet = $questioner->interact($configurators, !$args->getOption('all'), $defaults);
 
         if (!$disableDefaults) {
             file_put_contents(
@@ -124,18 +124,20 @@ final class GenerateCommandHandler
                 json_encode(
                     [
                         'profile' => $profile,
-                        'defaults' => $configuration,
+                        'defaults' => $questionsSet->getAnswers(),
                     ],
                     JSON_PRETTY_PRINT
                 )
             );
         }
 
+        $values = $questionsSet->getValues();
+
         foreach ($configurators as $finalizer) {
-            $finalizer->finalizeConfiguration($configuration);
+            $finalizer->finalizeConfiguration($values);
         }
 
-        return $configuration;
+        return $values;
     }
 
     private function processSavedDefaults($profile, $disableDefaults = false)

@@ -112,16 +112,16 @@ final class GeneralConfigurator implements Configurator
                 function ($value) {
                     return trim($value, '/');
                 }
-            )->markOptional()
+            )->markOptional('.')
         );
     }
 
     public function finalizeConfiguration(array &$configuration)
     {
-        if ('' !== $configuration['src_dir']) {
-            $configuration['src_dir_norm'] = $configuration['src_dir'].'/';
-        } else {
+        if ('' === (string) $configuration['src_dir']) {
             $configuration['src_dir_norm'] = '';
+        } else {
+            $configuration['src_dir_norm'] = $configuration['src_dir'].'/';
         }
     }
 
