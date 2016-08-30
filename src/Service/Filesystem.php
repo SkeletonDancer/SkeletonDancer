@@ -235,7 +235,7 @@ class Filesystem
         $file = $this->resolvePath($filename);
 
         if (file_exists($file) &&
-            (($newContent = file_get_contents($file)) === $content || !$this->fileExistsOperation($file, $filename))
+            (file_get_contents($file) === $content || !$this->fileExistsOperation($file, $filename))
         ) {
             return;
         }
