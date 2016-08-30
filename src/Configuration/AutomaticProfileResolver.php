@@ -114,7 +114,7 @@ final class AutomaticProfileResolver implements ProfileResolver
      *
      * Use only / as directory separator (on Windows also).
      *
-     * @param string $str Pattern: regexp or dirname.
+     * @param string $str Pattern: regexp or dirname
      *
      * @return string regexp corresponding to a given string or regexp
      */

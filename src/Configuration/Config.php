@@ -180,8 +180,8 @@ final class Config
      * Returns the first none-null configuration value.
      *
      * @param string[]                    $keys    Array of single level keys like "adapters" or array-path
-     *                                             like ['profiles', 'symfony-bundle'] to check.
-     * @param string|int|float|bool|array $default Default value to use when no config is found (null).
+     *                                             like ['profiles', 'symfony-bundle'] to check
+     * @param string|int|float|bool|array $default Default value to use when no config is found (null)
      *
      * @return array|bool|float|int|string
      */
