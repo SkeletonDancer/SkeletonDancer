@@ -39,7 +39,7 @@ final class DancerApplicationConfig extends DefaultApplicationConfig
     /**
      * Creates the configuration.
      *
-     * @param Container $container The service container (only to be injected during tests).
+     * @param Container $container The service container (only to be injected during tests)
      */
     public function __construct(Container $container = null)
     {

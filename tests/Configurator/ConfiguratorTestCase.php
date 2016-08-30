@@ -87,7 +87,7 @@ abstract class ConfiguratorTestCase extends \PHPUnit_Framework_TestCase
      *
      * @param array $values
      *
-     * @return array The finalized answers.
+     * @return array The finalized answers
      */
     protected function runConfigurator(array $values)
     {

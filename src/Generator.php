@@ -17,7 +17,7 @@ interface Generator
      * Generates the file within the projects directory.
      *
      * @param array $configuration The resolved configuration for the
-     *                             generator.
+     *                             generator
      */
     public function generate(array $configuration);
 

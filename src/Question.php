@@ -217,7 +217,7 @@ final class Question
     }
 
     /**
-     * @param string|string[] $nullValues Value(s) that mark the value as null (empty).
+     * @param string|string[] $nullValues Value(s) that mark the value as null (empty)
      *
      * @return $this
      */

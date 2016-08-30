@@ -30,7 +30,7 @@ class Git
      * Returns whether the current directory is a Git directory.
      *
      * @param bool $requireRoot Require directory is the root of the Git repository,
-     *                          default is true.
+     *                          default is true
      *
      * @return bool Whether we are inside a git directory or not
      */

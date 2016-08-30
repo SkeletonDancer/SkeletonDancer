@@ -34,7 +34,7 @@ final class StringUtil
     /**
      * Camelizes a string.
      *
-     * @param string $id A string to camelize.
+     * @param string $id A string to camelize
      *
      * @return string The camelized string
      */

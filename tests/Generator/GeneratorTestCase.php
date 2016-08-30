@@ -87,7 +87,7 @@ abstract class GeneratorTestCase extends \PHPUnit_Framework_TestCase
      *
      * @param array $values
      *
-     * @return int The status of the execution (0=ok, 1=skipped).
+     * @return int The status of the execution (0=ok, 1=skipped)
      */
     protected function runGenerator(array $values, array $extraValues = [])
     {
