@@ -70,7 +70,7 @@ class Container extends \Pimple\Container
                 $files[] = $configFile;
             }
 
-            $config = (new ConfigLoader())->processFiles($files);
+            $config = (new ConfigLoader(realpath($container['dancer_directory'])))->processFiles($files);
             $config['current_dir'] = str_replace('\\', '//', realpath($container['current_dir']));
             $config['project_directory'] = str_replace('\\', '//', realpath($container['project_directory']));
             $config['current_dir_relative'] = mb_substr($config['current_dir'], strlen($config['project_directory']) + 1);
@@ -144,7 +144,7 @@ class Container extends \Pimple\Container
 
             if (isset($container['dancer_directory'])) {
                 if (is_dir($container['dancer_directory'].'/templates')) {
-                    $loader->addPath($container['dancer_directory'].'/templates');
+                    $loader->prependPath($container['dancer_directory'].'/templates');
                 }
 
                 $profile = str_replace(':', '_', (string) $container['config']->get('active_profile'));
@@ -170,6 +170,15 @@ class Container extends \Pimple\Container
                         return str_replace('\\\\', '\\', $value);
                     },
                     ['is_safe' => ['html', 'yml']]
+                )
+            );
+
+            $twig->addFilter(
+                new \Twig_SimpleFilter(
+                    'camelize',
+                    function ($value) {
+                        return StringUtil::camelize($value);
+                    }
                 )
             );
 
