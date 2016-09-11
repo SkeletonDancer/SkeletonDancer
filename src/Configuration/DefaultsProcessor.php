@@ -69,6 +69,10 @@ final class DefaultsProcessor
             throw new \InvalidArgumentException(
                 sprintf('Syntax error in expression `%s`. Error: %s', $value, $e->getMessage()), 0, $e
             );
+        } catch (\Exception $e) {
+            throw new \InvalidArgumentException(
+                sprintf('Error with expression `%s`. Error: %s', $value, $e->getMessage()), 0, $e
+            );
         }
     }
 }
