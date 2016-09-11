@@ -19,7 +19,7 @@ final class {{ extension_name }}Extension extends Extension
 {% endblock class_definition %}
 {
 {% block class_body %}
-    class EXTENSION_ALIAS = '{{ extension_alias }}';
+    const EXTENSION_ALIAS = '{{ extension_alias }}';
 
     public function load(array $configs, ContainerBuilder $container)
     {
