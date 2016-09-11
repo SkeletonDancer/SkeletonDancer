@@ -17,5 +17,5 @@ disabled:
 finder:
 {% for type in ['exclude', 'name', 'not_name', 'contains', 'not_contains', 'path', 'not_path', 'depth'] if finder[type] is not empty %}
     {{ type|replace('_', '-') }}:
-        - "{{ (finder[type]|join("\n        - "))|raw }}"
+        - '{{ (finder[type]|join("'\n        - '"))|raw }}'
 {% endfor %}
