@@ -23,9 +23,7 @@ class {{ bundle }} extends Bundle
 
     protected function getContainerExtensionClass()
     {
-        // return {{ extension_name }}Extension::class;
-
-        return $this->getNamespace().'\\DependencyInjection\\{{ extension_name }}Extension';
+        return {{ extension_name }}Extension::class;
     }
 {% endblock class_body %}
 }
