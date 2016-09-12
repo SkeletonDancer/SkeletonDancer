@@ -23,7 +23,7 @@
         "symfony/yaml": "^3.0",
         "pimple/pimple": "^3.0",
         "psr/log": "^1.0",
-        "webmozart/console": "dev-feature-full-symfony-adapter@dev",
+        "webmozart/console": "dev-master",
         "sllh/styleci-fixers": "^4.3"
     },
     "require-dev": {
@@ -41,8 +41,5 @@
         }
     },
     "minimum-stability": "dev",
-    "prefer-stable": true,
-    "repositories": [
-        { "type": "vcs", "url": "https://github.com/sstok/console.git" }
-    ]
+    "prefer-stable": true
 }
