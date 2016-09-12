@@ -70,7 +70,7 @@ final class StringUtil
      *
      * @param string $path
      * @param int    $index   Zero index position
-     * @param string $default Default value to return when the index doesn't exist.
+     * @param string $default Default value to return when the index doesn't exist
      *
      * @return string
      */

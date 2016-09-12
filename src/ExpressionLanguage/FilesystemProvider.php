@@ -70,7 +70,7 @@ final class FilesystemProvider implements ExpressionFunctionProviderInterface
             );
         } catch (NoSuchIndexException $e) {
             if ($allowUndefinedIndex) {
-                return null;
+                return;
             }
 
             throw new \InvalidArgumentException(
