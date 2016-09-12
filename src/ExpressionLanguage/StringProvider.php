@@ -120,6 +120,33 @@ final class StringProvider implements ExpressionFunctionProviderInterface
                     return StringUtil::humanize($input);
                 }
             ),
+            new ExpressionFunction(
+                'vendor_namespace',
+                function ($input) {
+                    return sprintf('\Rollerworks\Tools\SkeletonDancer\StringUtil::vendorNamespace(%s)', $input);
+                },
+                function (array $values, $input) {
+                    return StringUtil::vendorNamespace($input);
+                }
+            ),
+            new ExpressionFunction(
+                'nth_dirname',
+                function ($path, $index = 0, $default = '') {
+                    return sprintf('\Rollerworks\Tools\SkeletonDancer\StringUtil::getNthDirname(%s, $d, $s)', $path, $index, $default);
+                },
+                function (array $values, $path, $index = 0, $default = '') {
+                    return StringUtil::getNthDirname($path, $index, $default);
+                }
+            ),
+            new ExpressionFunction(
+                'getenv',
+                function ($key) {
+                    return sprintf('getenv(%s)', $key);
+                },
+                function (array $values, $path) {
+                    return getenv($path);
+                }
+            ),
         ];
     }
 }
