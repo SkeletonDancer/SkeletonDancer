@@ -18,6 +18,7 @@ use Rollerworks\Tools\SkeletonDancer\Configuration\DefaultsProcessor;
 use Rollerworks\Tools\SkeletonDancer\Configuration\InteractiveProfileResolver;
 use Rollerworks\Tools\SkeletonDancer\Configuration\ProfilesProcessor;
 use Rollerworks\Tools\SkeletonDancer\Configurator\Loader as ConfiguratorsLoader;
+use Rollerworks\Tools\SkeletonDancer\ExpressionLanguage\FilesystemProvider;
 use Rollerworks\Tools\SkeletonDancer\ExpressionLanguage\StringProvider;
 use Symfony\Component\Console\Helper\DebugFormatterHelper;
 use Symfony\Component\Console\Helper\HelperSet;
@@ -41,6 +42,7 @@ class Container extends \Pimple\Container
         $this['expression_language'] = function (Container $container) {
             $expressionLanguage = new ExpressionLanguage();
             $expressionLanguage->registerProvider(new StringProvider());
+            $expressionLanguage->registerProvider(new FilesystemProvider());
             $expressionLanguage->register(
                 'get_config',
                 function ($name, $default) {
