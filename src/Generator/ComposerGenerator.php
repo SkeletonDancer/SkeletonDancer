@@ -35,6 +35,7 @@ final class ComposerGenerator implements Generator
             [
                 'name' => $configuration['package_name'],
                 'description' => '',
+                'homepage' => '',
                 'type' => 'library',
                 'license' => $configuration['license'],
                 'authors' => [
@@ -50,6 +51,10 @@ final class ComposerGenerator implements Generator
             isset($configuration['composer']) ? $configuration['composer'] : []
         );
 
+        if ('' === $configuration['composer']['homepage']) {
+            unset($configuration['composer']['homepage']);
+        }
+
         if (empty($configuration['composer']['autoload'])) {
             $configuration['composer']['autoload'] = [
                 'psr-4' => [
@@ -63,12 +68,17 @@ final class ComposerGenerator implements Generator
             'php' => '^'.$configuration['php_min'],
         ];
 
-        unset($composer['require-dev']);
+        // XXX Remove when empty (same goes for other values)
+        $composer['require-dev'] = [];
 
-         // Add extra newline to content to fix content mismatch when dumping
+        // Add extra newline to content to fix content mismatch when dumping
         $this->filesystem->dumpFile(
             'composer.json',
-            json_encode($composer, JSON_PRETTY_PRINT + JSON_UNESCAPED_SLASHES)."\n"
+            preg_replace(
+                '/"require(-dev)?": \[\]/',
+                '"require$1": { }',
+                json_encode($composer, JSON_PRETTY_PRINT + JSON_UNESCAPED_SLASHES)."\n"
+            )
         );
 
         $this->composer->requirePackage($configuration['composer']['require']);
