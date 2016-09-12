@@ -57,4 +57,31 @@ final class StringUtil
     {
         return preg_replace('#[^\w\d_-]|\s#', '', ucfirst($name));
     }
+
+    public static function vendorNamespace($name)
+    {
+        return strtr(ucwords(strtr($name, ['_' => ' ', '.' => '_ ', '\\' => '_ ', '-' => ' '])), [' ' => '']);
+    }
+
+    /**
+     * Get Nth directory name of the path.
+     *
+     * Path `src/Generators/` with index 1 will return `Generators`.
+     *
+     * @param string $path
+     * @param int    $index   Zero index position
+     * @param string $default Default value to return when the index doesn't exist.
+     *
+     * @return string
+     */
+    public static function getNthDirname($path, $index, $default = '')
+    {
+        $dirs = explode('/', rtrim(str_replace('\\', '/', $path), '/'));
+
+        if (isset($dirs[$index])) {
+            return $dirs[$index];
+        }
+
+        return $default;
+    }
 }

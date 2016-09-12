@@ -32,12 +32,7 @@ final class ReadMeGenerator implements Generator
             'README.md',
             $this->twig->render(
                 'readme.md.twig',
-                [
-                    'name' => $configuration['name'],
-                    'packageName' => $configuration['package_name'],
-                    'phpMin' => $configuration['php_min'],
-                    'authorName' => $configuration['author_name'],
-                ]
+                $configuration
             )
         );
     }

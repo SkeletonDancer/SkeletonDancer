@@ -51,5 +51,7 @@ final class ComposerConfigurator implements Configurator
                 $configuration['composer']['prefer-stable'] = true;
             }
         }
+
+        $configuration['composer']['type'] = $configuration['composer_type'];
     }
 }

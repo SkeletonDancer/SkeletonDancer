@@ -61,7 +61,7 @@ final class GeneralConfigurator implements Configurator
                 'PHP Namespace',
                 null,
                 function ($namespace) {
-                    $namespace = str_replace('/', '\\', $namespace);
+                    $namespace = trim(str_replace('/', '\\', $namespace), '\\');
 
                     if (!preg_match('/^(?:[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*\\\?)+$/', $namespace)) {
                         throw new \InvalidArgumentException('The namespace contains invalid characters.');

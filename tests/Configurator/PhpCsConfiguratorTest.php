@@ -38,7 +38,7 @@ final class PhpCsConfiguratorTest extends ConfiguratorTestCase
         );
 
         self::assertArrayHasKeyAndValueEquals('php_cs_preset', $result, 'laravel');
-        self::assertArrayHasKeyAndValueEquals('php_cs_level', $result, 'none');
+        self::assertArrayHasKeyAndValueEquals('php_cs_level', $result, 'laravel');
 
         self::assertArrayHasKeyAndArrayValuesEquals('php_cs_enabled_fixers', $result, ['ereg_to_preg']);
         self::assertArrayHasKeyAndValueEquals('php_cs_enabled_fixers_v1', $result, []);

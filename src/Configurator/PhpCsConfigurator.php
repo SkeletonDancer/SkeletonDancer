@@ -182,7 +182,7 @@ final class PhpCsConfigurator implements Configurator
             $this->resolveAliases($this->splitValues($configuration['php_cs_disabled_fixers']))
         );
 
-        $configuration['php_cs_level'] = 'none';
+        $configuration['php_cs_level'] = $configuration['php_cs_preset'];
         $configuration['php_cs_enabled_fixers_v1'] = [];
         $configuration['php_cs_disabled_fixers_v1'] = [];
     }
@@ -192,7 +192,7 @@ final class PhpCsConfigurator implements Configurator
         $fixers = $this->resolveAliases($this->splitValues($configuration['php_cs_enabled_fixers']));
         $preset = strtolower($configuration['php_cs_preset']).'_fixers';
 
-        // When no level is not available for the preset set the level to none and merge fixers
+        // When no level is available for the preset set the level to none and merge fixers
         // of the preset with the enabled fixers.
         if (in_array($configuration['php_cs_preset'], ['laravel', 'recommended'], true)) {
             $configuration['php_cs_enabled_fixers'] = array_unique(array_merge($fixers, Fixers::${$preset}));

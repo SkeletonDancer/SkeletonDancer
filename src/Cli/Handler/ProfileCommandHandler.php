@@ -160,13 +160,9 @@ final class ProfileCommandHandler
         /** @var array $profileConfig */
         $profileConfig = $this->config->get(['profiles', $profile]);
         $generatorClasses = $profileConfig['generators'];
-        $defaults = $profileConfig['defaults'];
+        $defaults = array_merge($this->config->get('defaults', []), $profileConfig['defaults']);
 
-        $this->configuratorsLoader->clear();
-
-        foreach ($generatorClasses as $generatorClass) {
-            $this->configuratorsLoader->loadFromGenerator($generatorClass);
-        }
+        $this->initQuestioners($generatorClasses);
 
         $questionCommunicator = function (Question $question) {
             if ($question instanceof ChoiceQuestion && null !== $question->getDefault()) {
@@ -183,6 +179,23 @@ final class ProfileCommandHandler
             return $question->getDefault();
         };
 
+        return $this->getQuestionValues($questionCommunicator, $defaults)->getValues();
+    }
+
+    private function initQuestioners(array $generatorClasses)
+    {
+        $this->configuratorsLoader->clear();
+
+        foreach ($generatorClasses as $generatorClass) {
+            $this->configuratorsLoader->loadFromGenerator($generatorClass);
+        }
+    }
+
+    /**
+     * @return QuestionsSet
+     */
+    private function getQuestionValues($questionCommunicator, array $defaults)
+    {
         $questions = new QuestionsSet($questionCommunicator, $defaults, false);
         $configurators = $this->configuratorsLoader->getConfigurators();
 
@@ -190,6 +203,6 @@ final class ProfileCommandHandler
             $configurator->interact($questions);
         }
 
-        return $questions->getValues();
+        return $questions;
     }
 }

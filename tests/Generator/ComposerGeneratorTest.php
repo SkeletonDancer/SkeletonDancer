@@ -59,6 +59,7 @@ final class ComposerGeneratorTest extends GeneratorTestCase
                         'require' => [
                             'php' => '^5.5',
                         ],
+                        'require-dev' => [],
                         'autoload' => [
                             'psr-4' => [
                                 'Rollerworks\\Tools\\SkeletonDancer\\' => 'src',
@@ -108,6 +109,7 @@ final class ComposerGeneratorTest extends GeneratorTestCase
                         'require' => [
                             'php' => '^5.5',
                         ],
+                        'require-dev' => [],
                         'autoload' => [
                             'psr-4' => [
                                 'Rollerworks\\Tools\\SkeletonDancer\\' => 'src',
@@ -159,6 +161,7 @@ final class ComposerGeneratorTest extends GeneratorTestCase
                         'require' => [
                             'php' => '^5.5',
                         ],
+                        'require-dev' => [],
                         'autoload' => [
                             'psr-4' => [
                                 'Rollerworks\\Tools\\SkeletonDancer\\' => 'src',
@@ -211,6 +214,7 @@ final class ComposerGeneratorTest extends GeneratorTestCase
                         'require' => [
                             'php' => '^5.5',
                         ],
+                        'require-dev' => [],
                         'autoload' => [
                             'psr-4' => [
                                 'Rollerworks\\Tools\\SkeletonDancer\\' => 'src',
