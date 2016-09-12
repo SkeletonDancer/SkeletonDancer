@@ -39,7 +39,7 @@ final class TestingConfigurator implements Configurator
         if ($questions->communicate('enable_behat', Question::confirm('Enable Behat?', false))) {
             $questions->communicate(
                 'behat_suite_name',
-                Question::confirm(
+                Question::ask(
                     'Behat suite-name',
                     function (array $values) {
                         return isset($values['name']) ? StringUtil::shortProductName($values['name']) : null;
