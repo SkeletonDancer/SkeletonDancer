@@ -50,7 +50,7 @@ final class BundleConfigurator implements DependentConfigurator
         $questions->communicate(
             'sf_extension_name',
             Question::ask(
-                'Extension name',
+                'Bundle Extension name',
                 function (array $configuration) {
                     return substr($configuration['sf_bundle_name'], 0, -6);
                 }
@@ -60,7 +60,7 @@ final class BundleConfigurator implements DependentConfigurator
         $questions->communicate(
             'sf_extension_alias',
             Question::ask(
-                'Extension name',
+                'Bundle Extension alias',
                 function (array $configuration) {
                     return StringUtil::underscore(substr($configuration['sf_bundle_name'], 0, -6));
                 }
