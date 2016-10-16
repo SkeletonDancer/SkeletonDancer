@@ -289,7 +289,7 @@ class Filesystem
     {
         $overwrite = $this->overwrite;
 
-        if ('a' === $this->overwrite) {
+        if ('ask' === $this->overwrite) {
             $options = ['a' => 'abort', 's' => 'skip', 'y' => 'overwrite', 'b' => 'backup'];
             $overwrite = $options[$this->style->choice(
                 sprintf('File "%s" already exists, what to do?', $filename),
