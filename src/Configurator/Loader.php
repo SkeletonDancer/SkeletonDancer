@@ -92,9 +92,27 @@ final class Loader
     }
 
     /**
+     * Add a Generator by class-name to the resolver.
+     *
+     * If the configurator is registered added it's ignored.
+     *
+     * @param string $class
+     */
+    public function addConfiguratorClass($class)
+    {
+        $configuratorClass = ltrim($class, '\\');
+
+        if (!isset($this->configurators[$configuratorClass])) {
+            $this->addConfigurator($this->classInitializer->getNewInstance($class));
+        }
+    }
+
+    /**
      * Add a Generator object instance to the resolver.
      *
-     * @param Configurator $configurator
+     * If the configurator is registered added it's ignored.
+     *
+     * @param Configurator|string $configurator
      */
     public function addConfigurator(Configurator $configurator)
     {
