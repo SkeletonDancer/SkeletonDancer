@@ -32,12 +32,14 @@ final class ProfilesProcessorTest extends \PHPUnit_Framework_TestCase
             [
                 'first' => [
                     'generators' => ['one1', 'two1'],
+                    'configurators' => [],
                     'description' => 'Foo',
                     'import' => [],
                     'defaults' => [],
                 ],
                 'second' => [
                     'generators' => ['one2', 'two2'],
+                    'configurators' => [],
                     'description' => 'Bar',
                     'import' => [],
                     'defaults' => ['bar' => 'foo', 'bla' => 'poo', 'sum' => 'something'],
@@ -69,12 +71,14 @@ final class ProfilesProcessorTest extends \PHPUnit_Framework_TestCase
             [
                 'first' => [
                     'generators' => ['one2', 'two2', 'two1', 'one1'],
+                    'configurators' => [],
                     'description' => 'Foo',
                     'import' => ['second'],
                     'defaults' => ['bar' => 'foo', 'bla' => 'poo', 'sum' => 'something', 'he' => 'you'],
                 ],
                 'second' => [
                     'generators' => ['one2', 'two2', 'two1'],
+                    'configurators' => [],
                     'description' => 'Bar',
                     'import' => [],
                     'defaults' => ['bar' => 'foo', 'bla' => 'poo', 'sum' => 'something'],

@@ -67,12 +67,14 @@ final class ConfigurationTest extends \PHPUnit_Framework_TestCase
                 'profiles' => [
                     'first' => [
                         'generators' => ['one1', 'two1'],
+                        'configurators' => [],
                         'description' => '',
                         'import' => [],
                         'defaults' => [],
                     ],
                     'second' => [
                         'generators' => ['one2', 'two2'],
+                        'configurators' => [],
                         'description' => '',
                         'import' => [],
                         'defaults' => ['bar' => 'foo', 'bla' => 'poo', 'sum' => 'something'],

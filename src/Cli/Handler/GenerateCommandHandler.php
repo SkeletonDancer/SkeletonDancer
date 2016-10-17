@@ -69,6 +69,8 @@ final class GenerateCommandHandler
         $this->style->text(sprintf('Using profile: %s', $profile));
 
         $generators = $this->initGenerators($this->config->get(['profiles', $profile, 'generators']));
+        $this->loadAdditionalConfigurators($this->config->get(['profiles', $profile, 'configurators'], []));
+
         $configuration = $this->getConfiguration($args, $profile);
 
         if (!$this->executeGenerators($generators, $configuration)) {
@@ -91,6 +93,16 @@ final class GenerateCommandHandler
         }
 
         return $generators;
+    }
+
+    /**
+     * @param string[] $configuratorClasses
+     */
+    private function loadAdditionalConfigurators(array $configuratorClasses)
+    {
+        foreach ($configuratorClasses as $configuratorClass) {
+            $this->configuratorsLoader->addConfiguratorClass($configuratorClass);
+        }
     }
 
     /**
