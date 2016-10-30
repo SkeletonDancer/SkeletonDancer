@@ -45,7 +45,7 @@ final class SkeletonDancerInitGenerator implements Generator
 
     public function generate(array $configuration)
     {
-        if (!$this->io->isInteractive() || !$this->config->get('interactive', true)) {
+        if (!$this->io->isInteractive()) {
             throw new \RuntimeException('This generator can only be run in interactive mode.');
         }
 

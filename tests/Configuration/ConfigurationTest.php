@@ -28,7 +28,6 @@ final class ConfigurationTest extends \PHPUnit_Framework_TestCase
             ],
             [
                 'defaults' => ['bar' => 'foo', 'bla' => 'poo', 'sum' => 'something'],
-                'interactive' => true,
                 'overwrite' => 'ask',
                 'profiles' => [],
             ]
@@ -62,7 +61,6 @@ final class ConfigurationTest extends \PHPUnit_Framework_TestCase
             ],
             [
                 'defaults' => [],
-                'interactive' => true,
                 'overwrite' => 'ask',
                 'profiles' => [
                     'first' => [

@@ -26,7 +26,6 @@ final class Configuration implements ConfigurationInterface
 
         $rootNode
             ->children()
-                ->booleanNode('interactive')->defaultTrue()->end()
                 ->enumNode('overwrite')->values(['abort', 'skip', 'force', 'ask', 'backup'])->defaultValue('ask')->end()
                 ->append($this->addDefaultsNode())
                 ->variableNode('profile_resolver')

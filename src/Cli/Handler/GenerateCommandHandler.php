@@ -59,10 +59,6 @@ final class GenerateCommandHandler
             );
         }
 
-        if (!$io->isInteractive() && ($args->getOption('force-interactive') || $args->getOption('all'))) {
-            throw new \InvalidArgumentException('Unable to force interactive questioner for non-interactive session.');
-        }
-
         $profile = $this->profileResolver->resolve($args->getArgument('profile'));
         $this->config->setConstant('active_profile', $profile);
 

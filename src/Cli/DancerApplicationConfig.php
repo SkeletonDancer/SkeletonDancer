@@ -119,9 +119,7 @@ final class DancerApplicationConfig extends DefaultApplicationConfig
             ->beginCommand('generate')
                 ->setDescription('Generates a new skeleton structure in the current directory')
                 ->addArgument('profile', Argument::OPTIONAL, 'The name of the profile')
-                ->addOption('force-interactive', null, Option::BOOLEAN, 'Force interactive mode when configuration disabled interactive')
-                ->addOption('no-default-loading', null, Option::BOOLEAN, 'Disable automatic loading of questioner defaults (only interactive mode)')
-                ->addOption('all', null, Option::BOOLEAN, 'Ask all questions (including optional), implies --force-interactive')
+                ->addOption('all', null, Option::BOOLEAN, 'Ask all questions (including optional)')
                 ->setHandler(function () {
                     return new Handler\GenerateCommandHandler(
                         $this->container['style'],

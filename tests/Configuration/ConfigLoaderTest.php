@@ -49,7 +49,6 @@ final class ConfigLoaderTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(
             [
                 'defaults' => [],
-                'interactive' => true,
                 'overwrite' => 'ask',
                 'profiles' => [],
             ],

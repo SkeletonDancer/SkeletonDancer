@@ -88,10 +88,6 @@ class Container extends \Pimple\Container
                 $config['overwrite'] = $overwrite;
             }
 
-            if (!$container['console_io']->isInteractive()) {
-                $config['interactive'] = false;
-            }
-
             return new Config($config, ['current_dir', 'current_dir_relative', 'project_directory', 'dancer_directory', 'config_file']);
         };
 
@@ -108,11 +104,6 @@ class Container extends \Pimple\Container
         $this['profile_resolver'] = function (Container $container) {
             $automaticResolver = new AutomaticProfileResolver($container['config']);
             $interactive = $container['console_io']->isInteractive();
-
-            if ($interactive && !$container['config']->get('interactive', true)) {
-                $interactive = $container['console_args']->getOption('force-interactive');
-            }
-
             if ($interactive) {
                 return new InteractiveProfileResolver(
                     $container['config'],
