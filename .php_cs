@@ -21,7 +21,6 @@ if (class_exists('Symfony\CS\Fixer\Contrib\HeaderCommentFixer')) {
 
 $config = ConfigBridge::create()
     ->setUsingCache(true)
-    ->setUsingLinter(false)
 ;
 
 // PHP-CS-Fixer 2.x

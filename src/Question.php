@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the SkeletonDancer package.
  *
@@ -104,7 +106,9 @@ final class Question
                 };
             } else {
                 // No-op validator to allow empty value.
-                $validator = null;
+                $validator = function ($v) {
+                    return $v;
+                };
             }
         }
 

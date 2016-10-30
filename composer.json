@@ -10,7 +10,7 @@
         }
     ],
     "require": {
-        "php": ">=5.5",
+        "php": "^7.0",
         "twig/twig": "^1.22",
         "symfony/config": "^3.0",
         "symfony/process": "^3.0",
@@ -28,7 +28,8 @@
     },
     "require-dev": {
         "matthiasnoback/symfony-config-test": "^2.0",
-        "sllh/php-cs-fixer-styleci-bridge": "^2.0"
+        "sllh/php-cs-fixer-styleci-bridge": "^2.0",
+        "phpunit/phpunit": "^5.6.1"
     },
     "autoload": {
         "psr-4": {
