@@ -12,9 +12,10 @@
 namespace Rollerworks\Tools\SkeletonDancer\Cli;
 
 use Rollerworks\Tools\SkeletonDancer\Container;
-use Rollerworks\Tools\SkeletonDancer\EventListener\AutoLoadingSetupListener;
+use Rollerworks\Tools\SkeletonDancer\EventListener\AutoloadingSetupListener;
 use Rollerworks\Tools\SkeletonDancer\EventListener\ExpressionFunctionsProviderSetupListener;
 use Rollerworks\Tools\SkeletonDancer\EventListener\ProjectDirectorySetupListener;
+use Symfony\Component\EventDispatcher\EventDispatcher;
 use Webmozart\Console\Adapter\ArgsInput;
 use Webmozart\Console\Adapter\IOOutput;
 use Webmozart\Console\Api\Args\Format\Argument;
@@ -61,7 +62,7 @@ final class DancerApplicationConfig extends DefaultApplicationConfig
      */
     protected function configure()
     {
-        $this->setEventDispatcher($this->container->getEventDispatcherService());
+        $this->setEventDispatcher(new EventDispatcher());
 
         parent::configure();
 

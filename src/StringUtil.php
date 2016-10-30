@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the SkeletonDancer package.
  *
@@ -83,5 +85,36 @@ final class StringUtil
         }
 
         return $default;
+    }
+
+    public function camelizeMethodName(string $value): string
+    {
+        return lcfirst(self::camelize($value));
+    }
+
+    /**
+     * Comment all lines with the character.
+     *
+     * @param string $value
+     * @param string $char
+     *
+     * @return string
+     */
+    public static function commentLines(string $value, string $char = '#'): string
+    {
+        return preg_replace("/\n|\r\n/", "\n$char", $value);
+    }
+
+    /**
+     * Indent all lines with n-level.
+     *
+     * @param string $value
+     * @param int    $level
+     *
+     * @return string
+     */
+    public static function indentLines(string $value, int $level = 1): string
+    {
+        return preg_replace("/\n|\r\n/", "\n".str_repeat('    ', $level), $value);
     }
 }

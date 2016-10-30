@@ -18,16 +18,10 @@ use Rollerworks\Tools\SkeletonDancer\Configuration\DefaultsProcessor;
 use Rollerworks\Tools\SkeletonDancer\Configuration\InteractiveProfileResolver;
 use Rollerworks\Tools\SkeletonDancer\Configuration\ProfilesProcessor;
 use Rollerworks\Tools\SkeletonDancer\Configurator\Loader as ConfiguratorsLoader;
-use Rollerworks\Tools\SkeletonDancer\ExpressionLanguage\FilesystemProvider;
-use Rollerworks\Tools\SkeletonDancer\ExpressionLanguage\StringProvider;
-use Symfony\Component\Console\Helper\DebugFormatterHelper;
-use Symfony\Component\Console\Helper\HelperSet;
-use Symfony\Component\Console\Helper\ProcessHelper;
+use Rollerworks\Tools\SkeletonDancer\ExpressionLanguage\Factory;
+use Rollerworks\Tools\SkeletonDancer\Service\TwigTemplating;
 use Symfony\Component\Console\Style\SymfonyStyle;
-use Symfony\Component\EventDispatcher\EventDispatcher;
-use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
 use Symfony\Component\Filesystem\Filesystem as SfFilesystem;
-use Symfony\Component\Yaml\Yaml;
 
 class Container extends \Pimple\Container
 {
@@ -35,34 +29,11 @@ class Container extends \Pimple\Container
     {
         parent::__construct($values);
 
-        $this['dispatcher'] = function () {
-            return new EventDispatcher();
+        $this['config'] = function (Container $container) {
         };
 
         $this['expression_language'] = function (Container $container) {
-            $expressionLanguage = new ExpressionLanguage();
-            $expressionLanguage->registerProvider(new StringProvider());
-            $expressionLanguage->registerProvider(new FilesystemProvider());
-            $expressionLanguage->register(
-                'get_config',
-                function ($name, $default) {
-                    return sprintf("\$container['config']->get(%s, %s)", $name, $default);
-                },
-                function (array $arguments, $name, $default = null) use ($container) {
-                    return $container['config']->get($name, $default);
-                }
-            );
-            $expressionLanguage->register(
-                'date',
-                function ($format) {
-                    return sprintf('date(%s)', $format);
-                },
-                function (array $arguments, $format) {
-                    return date($format);
-                }
-            );
-
-            return $expressionLanguage;
+            return (new Factory($container['config']))->create();
         };
 
         $this['config'] = function (Container $container) {
@@ -124,129 +95,14 @@ class Container extends \Pimple\Container
             return new ClassInitializer($container);
         };
 
-        $this['twig'] = function (Container $container) {
-            $cacheDir = sys_get_temp_dir().'/twig';
-            $twig = new \Twig_Environment(
-                $loader = new \Twig_Loader_Filesystem(__DIR__.'/../Resources/Templates'),
-                [
-                    'debug' => true,
-                    'cache' => new \Twig_Cache_Filesystem($cacheDir),
-                    'strict_variables' => true,
-                ]
-            );
-
-            if (isset($container['dancer_directory'])) {
-                if (is_dir($container['dancer_directory'].'/templates')) {
-                    $loader->prependPath($container['dancer_directory'].'/templates');
-                }
-
-                $profile = str_replace(':', '_', (string) $container['config']->get('active_profile'));
-
-                if ('' !== $profile && is_dir($container['dancer_directory'].'/templates/'.$profile)) {
-                    $loader->addPath($container['dancer_directory'].'/templates/'.$profile);
-                }
-            }
-
-            $twig->addFunction(
-                new \Twig_SimpleFunction(
-                    'doc_header',
-                    function ($value, $format) {
-                        return $value."\n".str_repeat($format, strlen($value));
-                    }
-                )
-            );
-
-            $twig->addFilter(
-                new \Twig_SimpleFilter(
-                    'normalizeNamespace',
-                    function ($value) {
-                        return str_replace('\\\\', '\\', $value);
-                    },
-                    ['is_safe' => ['html', 'yml']]
-                )
-            );
-
-            $twig->addFilter(
-                new \Twig_SimpleFilter(
-                    'camelize',
-                    function ($value) {
-                        return StringUtil::camelize($value);
-                    }
-                )
-            );
-
-            $twig->addFilter(
-                new \Twig_SimpleFilter(
-                    'camelize_method',
-                    function ($value) {
-                        return lcfirst(StringUtil::camelize($value));
-                    },
-                    ['is_safe' => ['all']]
-                )
-            );
-
-            $twig->addFilter(
-                new \Twig_SimpleFilter(
-                    'underscore',
-                    function ($value) {
-                        return StringUtil::underscore($value);
-                    },
-                    ['is_safe' => ['all']]
-                )
-            );
-
-            $twig->addFilter(
-                new \Twig_SimpleFilter(
-                    'escape_namespace',
-                    'addslashes',
-                    ['is_safe' => ['html', 'yml']]
-                )
-            );
-
-            $twig->addFilter(
-                new \Twig_SimpleFilter(
-                    'indent_lines',
-                    function ($value, $level = 1) {
-                        return preg_replace("/\n/", "\n".str_repeat('    ', $level), $value);
-                    },
-                    ['is_safe' => ['all']]
-                )
-            );
-
-            $twig->addFilter(
-                new \Twig_SimpleFilter(
-                    'comment_lines',
-                    function ($value, $char = '#') {
-                        return preg_replace("/\n/", "\n.$char", $value);
-                    },
-                    ['is_safe' => ['all']]
-                )
-            );
-
-            $twig->addFilter(
-                new \Twig_SimpleFilter(
-                    'yaml_dump',
-                    function ($value, $inline = 4, $indent = 4, $flags = 0) {
-                        return Yaml::dump($value, $inline, 4, $indent, $flags);
-                    },
-                    ['is_safe' => ['yml', 'yaml']]
-                )
-            );
-
-            return $twig;
-        };
-
         // Services for configurators and generators
 
-        $this['process'] = function (Container $container) {
-            $helperSet = new HelperSet(
-                [
-                    new DebugFormatterHelper(),
-                    new ProcessHelper(),
-                ]
-            );
+        $this['twig'] = function (Container $container) {
+            return (new TwigTemplating($container['config']))->create();
+        };
 
-            return new Service\CliProcess($helperSet->get('process'), $container['sf.console_output']);
+        $this['process'] = function (Container $container) {
+            return new Service\CliProcess($container['sf.console_output']);
         };
 
         $this['composer'] = function (Container $container) {
@@ -271,14 +127,6 @@ class Container extends \Pimple\Container
                 $container['config']->get('overwrite', 'abort')
             );
         };
-    }
-
-    /**
-     * @return EventDispatcher
-     */
-    public function getEventDispatcherService()
-    {
-        return $this['dispatcher'];
     }
 
     /**
