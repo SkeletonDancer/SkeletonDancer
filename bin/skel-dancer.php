@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the SkeletonDancer package.
  *
@@ -14,8 +16,7 @@ require __DIR__.'/../vendor/autoload.php';
 use Rollerworks\Tools\SkeletonDancer\Cli\DancerApplicationConfig;
 
 \Symfony\Component\Debug\ErrorHandler::register();
-// \Symfony\Component\Debug\DebugClassLoader::enable(); -- (this needs fixing, good job PHPStorm...)
-// Case mismatch between loaded and declared class names: Rollerworks\Tools\SkeletonDancer\EventListener\AutoLoadingSetupListener vs Rollerworks\Tools\SkeletonDancer\EventListener\AutoloadingSetupListener
+\Symfony\Component\Debug\DebugClassLoader::enable();
 
 $cli = new \Webmozart\Console\ConsoleApplication(new DancerApplicationConfig());
 $cli->run();
