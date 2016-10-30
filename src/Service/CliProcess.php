@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the SkeletonDancer package.
  *
@@ -11,6 +13,8 @@
 
 namespace Rollerworks\Tools\SkeletonDancer\Service;
 
+use Symfony\Component\Console\Helper\DebugFormatterHelper;
+use Symfony\Component\Console\Helper\HelperSet;
 use Symfony\Component\Console\Helper\ProcessHelper;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Process\Exception\ProcessFailedException;
@@ -28,9 +32,10 @@ class CliProcess
      */
     private $output;
 
-    public function __construct(ProcessHelper $processHelper, OutputInterface $output)
+    public function __construct(OutputInterface $output)
     {
-        $this->processHelper = $processHelper;
+        $helperSet = new HelperSet([new DebugFormatterHelper(), new ProcessHelper()]);
+        $this->processHelper = $helperSet->get('process');
         $this->output = $output;
     }
 

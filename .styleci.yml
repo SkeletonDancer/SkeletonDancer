@@ -11,6 +11,7 @@ enabled:
 
     # Strict
     - strict_param
+    #- declare_strict_types
 
 finder:
     path:

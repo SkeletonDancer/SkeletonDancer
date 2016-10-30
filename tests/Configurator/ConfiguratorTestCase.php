@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the SkeletonDancer package.
  *
@@ -11,6 +13,8 @@
 
 namespace Rollerworks\Tools\SkeletonDancer\Tests\Configurator;
 
+use Rollerworks\Tools\SkeletonDancer\AnswersSet;
+use Rollerworks\Tools\SkeletonDancer\Configuration\ClassLoader;
 use Rollerworks\Tools\SkeletonDancer\Configurator;
 use Rollerworks\Tools\SkeletonDancer\Generator;
 use Rollerworks\Tools\SkeletonDancer\Questioner\UsingDefaultsQuestioner;
@@ -50,18 +54,17 @@ abstract class ConfiguratorTestCase extends \PHPUnit_Framework_TestCase
             return;
         }
 
-        $this->configurator = $this->container['class_initializer']->getNewInstance($this->getConfiguratorClass());
+        $loader = new ClassLoader($this->container['class_initializer']);
+        $loader->clear(); // Initialize
 
-        $configuratorLoader = $this->container->getConfiguratorsLoaderService();
-        $configuratorLoader->addConfigurator($this->configurator);
-
-        $this->configurators = $configuratorLoader->getConfigurators();
+        $loader->loadConfiguratorClasses([$class = $this->getConfiguratorClass()]);
+        $this->configurators = $loader->getConfigurators();
     }
 
     /**
      * @return string
      */
-    protected function getConfiguratorClass()
+    protected function getConfiguratorClass(): string
     {
         $class = substr(str_replace('\\Tests\\', '\\', get_class($this)), 0, -4);
 
@@ -85,6 +88,8 @@ abstract class ConfiguratorTestCase extends \PHPUnit_Framework_TestCase
      * - values are validated/transformed
      * - no duplicate answers are provided
      *
+     * Note: Expressions are not evaluated.
+     *
      * @param array $values
      *
      * @return array The finalized answers
@@ -93,14 +98,15 @@ abstract class ConfiguratorTestCase extends \PHPUnit_Framework_TestCase
     {
         $this->initConfigurator();
 
-        $questioner = new UsingDefaultsQuestioner();
-        $configuration = $questioner->interact($this->configurators, true, $values)->getValues();
+        $questioner = new UsingDefaultsQuestioner(function (array $variables, array $defaults) {
+            return new AnswersSet(
+                function ($v) {
+                    return $v;
+                }, $defaults
+            );
+        });
 
-        foreach ($this->configurators as $finalizer) {
-            $finalizer->finalizeConfiguration($configuration);
-        }
-
-        return array_merge_recursive($configuration);
+        return $questioner->interact($this->configurators, true, [], $values)->getFinalizedValues($this->configurators);
     }
 
     protected static function assertArrayHasKeyAndValueEquals($key, array $array, $value)

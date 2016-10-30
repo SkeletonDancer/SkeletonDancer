@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the SkeletonDancer package.
  *
@@ -12,6 +14,7 @@
 namespace Rollerworks\Tools\SkeletonDancer\Tests\Questioner;
 
 use Prophecy\Argument;
+use Rollerworks\Tools\SkeletonDancer\AnswersSet;
 use Rollerworks\Tools\SkeletonDancer\Configurator;
 use Rollerworks\Tools\SkeletonDancer\Question;
 use Rollerworks\Tools\SkeletonDancer\Questioner\InteractiveQuestioner;
@@ -30,9 +33,7 @@ final class InteractiveQuestionerTest extends \PHPUnit_Framework_TestCase
      */
     public function it_iterates_all_configurators()
     {
-        $style = $this->createStyle(['Dancer', 'Rollerworks\Something']);
-
-        $questioner = new InteractiveQuestioner($style);
+        $questioner = $this->createQuestioner(['Dancer', 'Rollerworks\Something']);
 
         $configurators = [
             $this->createConfigurator(
@@ -63,9 +64,7 @@ final class InteractiveQuestionerTest extends \PHPUnit_Framework_TestCase
      */
     public function it_skips_optional_questions()
     {
-        $style = $this->createStyle(['Dancer', '']);
-
-        $questioner = new InteractiveQuestioner($style);
+        $questioner = $this->createQuestioner(['Dancer', '']);
 
         $configurators = [
             $this->createConfigurator(
@@ -89,9 +88,7 @@ final class InteractiveQuestionerTest extends \PHPUnit_Framework_TestCase
      */
     public function it_asks_optional_questions_when_needed()
     {
-        $style = $this->createStyle(['Dancer', 'src/']);
-
-        $questioner = new InteractiveQuestioner($style);
+        $questioner = $this->createQuestioner(['Dancer', 'src/']);
 
         $configurators = [
             $this->createConfigurator(
@@ -116,9 +113,7 @@ final class InteractiveQuestionerTest extends \PHPUnit_Framework_TestCase
     public function it_provides_defaults_for_the_user()
     {
         // NB. "\n" means confirm as-is (the current default value).
-        $style = $this->createStyle(['Dancer', "\n"]);
-
-        $questioner = new InteractiveQuestioner($style);
+        $questioner = $this->createQuestioner(['Dancer', "\n"]);
 
         $configurators = [
             $this->createConfigurator(
@@ -127,7 +122,7 @@ final class InteractiveQuestionerTest extends \PHPUnit_Framework_TestCase
                     $builder = $args[0];
 
                     $builder->communicate('name', Question::ask('Name')->setMaxAttempts(1));
-                    $builder->communicate('path', Question::ask('Path')->setMaxAttempts(1));
+                    $builder->communicate('path', Question::ask('Path', 'src/')->setMaxAttempts(1));
                 }
             ),
         ];
@@ -150,7 +145,7 @@ final class InteractiveQuestionerTest extends \PHPUnit_Framework_TestCase
      *
      * @return SymfonyStyle
      */
-    private function createStyle($input)
+    private function createStyle(array $input)
     {
         $this->input = new ArrayInput([]);
         $this->input->setStream($this->getInputStream($input));
@@ -171,5 +166,21 @@ final class InteractiveQuestionerTest extends \PHPUnit_Framework_TestCase
         rewind($stream);
 
         return $stream;
+    }
+
+    private function createQuestioner(array $input): InteractiveQuestioner
+    {
+        $style = $this->createStyle($input);
+
+        return new InteractiveQuestioner(
+            $style,
+            function (array $variables = [], array $defaults = []) {
+                return new AnswersSet(
+                    function ($v) {
+                        return $v;
+                    }, $defaults
+                );
+            }
+        );
     }
 }

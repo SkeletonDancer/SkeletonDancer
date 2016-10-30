@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the SkeletonDancer package.
  *
@@ -22,21 +24,25 @@ final class InteractiveQuestioner implements Questioner
      */
     private $io;
 
-    public function __construct(SymfonyStyle $io)
+    /**
+     * @var callable
+     */
+    private $answerSetFactory;
+
+    public function __construct(SymfonyStyle $io, callable $answerSetFactory)
     {
         $this->io = $io;
+        $this->answerSetFactory = $answerSetFactory;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function interact(array $configurators, $skipOptional = true, array $defaults = [])
+    public function interact(array $configurators, $skipOptional = true, array $variables = [], array $defaults = []): QuestionsSet
     {
         $questionCommunicator = function ($question) {
             return $this->io->askQuestion($question);
         };
 
-        $questions = new QuestionsSet($questionCommunicator, $defaults, $skipOptional);
+        $answersSet = call_user_func($this->answerSetFactory, $variables, $defaults);
+        $questions = new QuestionsSet($questionCommunicator, $answersSet, $skipOptional);
 
         foreach ($configurators as $configurator) {
             $configurator->interact($questions);

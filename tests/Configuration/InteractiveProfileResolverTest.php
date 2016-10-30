@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the SkeletonDancer package.
  *
@@ -14,6 +16,7 @@ namespace Rollerworks\Tools\SkeletonDancer\Tests\Configuration;
 use Rollerworks\Tools\SkeletonDancer\Configuration\AutomaticProfileResolver;
 use Rollerworks\Tools\SkeletonDancer\Configuration\Config;
 use Rollerworks\Tools\SkeletonDancer\Configuration\InteractiveProfileResolver;
+use Rollerworks\Tools\SkeletonDancer\Profile;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\StreamOutput;
 use Symfony\Component\Console\Style\SymfonyStyle;
@@ -26,20 +29,13 @@ use Webmozart\Console\IO\OutputStream\NullOutputStream;
 final class InteractiveProfileResolverTest extends \PHPUnit_Framework_TestCase
 {
     /**
-     * @var Config
-     */
-    private $config;
-
-    /**
-     * @var InteractiveProfileResolver
-     */
-    private $resolver;
-
-    /**
      * @var IO
      */
     private $io;
 
+    /**
+     * @var ArrayInput
+     */
     private $input;
 
     /**
@@ -47,67 +43,63 @@ final class InteractiveProfileResolverTest extends \PHPUnit_Framework_TestCase
      */
     private $output;
 
-    /**
-     * @before
-     */
-    public function setUpResolver()
-    {
-        $this->io = new IO(new Input(new NullInputStream()), new Output(new NullOutputStream()), new Output(new NullOutputStream()));
-        $this->io->setInteractive(true);
-
-        $this->config = new Config(['current_dir_relative' => 'src/Bundle/MyBundle']);
-        $this->config->set('profiles', ['bundle' => [], 'library' => []]);
-    }
-
     /** @test */
     public function it_uses_the_auto_guessed_profile_as_default()
     {
-        $this->config->set(
-            'profile_resolver',
+        $resolver = $this->createProfileResolver(
+            ["\n"],
             [
                 'src/Bundle/' => 'bundle',
             ]
         );
 
-        $this->createResolver(["\n"]);
-
-        $this->assertEquals('bundle', $this->resolver->resolve());
+        $this->assertEquals('bundle', $resolver->resolve()->name);
     }
 
     /** @test */
     public function it_accepts_the_given_choice_as_profile()
     {
-        $this->config->set(
-            'profile_resolver',
+        $resolver = $this->createProfileResolver(
+            ['0'],
             [
                 'src/Bundle/' => 'bundle',
             ]
         );
 
-        $this->createResolver(['0']);
-
-        $this->assertEquals('bundle', $this->resolver->resolve());
+        $this->assertEquals('bundle', $resolver->resolve()->name);
     }
 
     /** @test */
     public function it_informs_when_passed_profile_is_unregistered()
     {
-        $this->createResolver(['0']);
+        $resolver = $this->createProfileResolver(['0']);
 
-        $this->resolver->resolve('foo');
+        $resolver->resolve('foo');
 
         $this->assertOutputMatches(
             'Profile "foo" is not registered, please use one of the following: bundle, library.'
         );
     }
 
-    private function createResolver(array $input = [])
+    private function createProfileResolver($input, $resolver = null): InteractiveProfileResolver
     {
-        $this->resolver = new InteractiveProfileResolver(
-            $this->config,
+        $this->io = new IO(
+            new Input(new NullInputStream()),
+            new Output(new NullOutputStream()),
+            new Output(new NullOutputStream())
+        );
+
+        $this->io->setInteractive(true);
+
+        $config = new Config(
+            ['profile_resolver' => $resolver, 'current_dir_relative' => 'src/Bundle/MyBundle'],
+            ['bundle' => new Profile('bundle'), 'library' => new Profile('library')]
+        );
+
+        return new InteractiveProfileResolver(
+            $config,
             $this->createStyle($input),
-            $this->io,
-            new AutomaticProfileResolver($this->config)
+            new AutomaticProfileResolver($config)
         );
     }
 

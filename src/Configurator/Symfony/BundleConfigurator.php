@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the SkeletonDancer package.
  *
@@ -79,7 +81,7 @@ final class BundleConfigurator implements DependentConfigurator
         $configuration['composer']['type'] = 'symfony-bundle';
     }
 
-    public function getDependencies()
+    public function getDependencies(): array
     {
         return [GeneralConfigurator::class];
     }

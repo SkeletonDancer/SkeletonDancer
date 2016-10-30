@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the SkeletonDancer package.
  *
@@ -11,18 +13,18 @@
 
 namespace Rollerworks\Tools\SkeletonDancer\Tests\Configuration;
 
-use Rollerworks\Tools\SkeletonDancer\Configuration\ConfigLoader;
+use Rollerworks\Tools\SkeletonDancer\Configuration\ConfigFileLoader;
 
-final class ConfigLoaderTest extends \PHPUnit_Framework_TestCase
+final class ConfigFileLoaderTest extends \PHPUnit_Framework_TestCase
 {
     /**
-     * @var ConfigLoader
+     * @var ConfigFileLoader
      */
     private $configLoader;
 
     protected function setUp()
     {
-        $this->configLoader = new ConfigLoader(__DIR__.'/../Fixtures/Project1/.dancer');
+        $this->configLoader = new ConfigFileLoader(__DIR__.'/../Fixtures/Project1/.dancer');
     }
 
     /** @test */
@@ -48,8 +50,8 @@ final class ConfigLoaderTest extends \PHPUnit_Framework_TestCase
 
         $this->assertEquals(
             [
+                'variables' => [],
                 'defaults' => [],
-                'interactive' => true,
                 'overwrite' => 'ask',
                 'profiles' => [],
             ],

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the SkeletonDancer package.
  *
@@ -21,9 +23,19 @@ final class UsingDefaultsQuestioner implements Questioner
     private $currentQuestion;
 
     /**
+     * @var callable
+     */
+    private $answerSetFactory;
+
+    public function __construct(callable $answerSetFactory)
+    {
+        $this->answerSetFactory = $answerSetFactory;
+    }
+
+    /**
      * {@inheritdoc}
      */
-    public function interact(array $configurators, $skipOptional = true, array $defaults = [])
+    public function interact(array $configurators, $skipOptional = true, array $variables = [], array $defaults = []): QuestionsSet
     {
         $questionCommunicator = function (Question $question, $name) {
             $this->currentQuestion = $name;
@@ -36,7 +48,8 @@ final class UsingDefaultsQuestioner implements Questioner
             return $value;
         };
 
-        $questions = new QuestionsSet($questionCommunicator, $defaults, false);
+        $answersSet = call_user_func($this->answerSetFactory, $variables, $defaults);
+        $questions = new QuestionsSet($questionCommunicator, $answersSet, false);
 
         try {
             foreach ($configurators as $configurator) {

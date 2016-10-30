@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the SkeletonDancer package.
  *
@@ -11,6 +13,8 @@
 
 namespace Rollerworks\Tools\SkeletonDancer\Configuration;
 
+use Rollerworks\Tools\SkeletonDancer\Profile;
+
 final class AutomaticProfileResolver implements ProfileResolver
 {
     private $config;
@@ -20,14 +24,16 @@ final class AutomaticProfileResolver implements ProfileResolver
         $this->config = $config;
     }
 
-    public function resolve($profile = null)
+    public function resolve($profile = null): Profile
     {
-        if (null !== $profile && !$this->config->has(['profiles', $profile])) {
+        $profiles = $this->config->getProfiles();
+
+        if (null !== $profile && !isset($profiles[$profile])) {
             throw new \InvalidArgumentException(
                 sprintf(
                     'Profile "%s" is not registered, please use one of the following: "%s".',
                     $profile,
-                    implode('", "', array_keys($this->config->get(['profiles'])))
+                    implode('", "', array_keys($profiles))
                 )
             );
         }
@@ -39,12 +45,12 @@ final class AutomaticProfileResolver implements ProfileResolver
             );
         }
 
-        $folder = $this->config->get('current_dir_relative');
+        $directory = $this->config->get('current_dir_relative');
 
         if (is_string($resolver)) {
-            $profile = $this->resolveByCustomClass($resolver, $folder);
+            $profile = $this->resolveByCustomClass($resolver, $directory);
         } else {
-            $profile = $this->resolveByPatternMap($resolver, $folder);
+            $profile = $this->resolveByPatternMap($resolver, $directory);
         }
 
         if (null === $profile) {
@@ -54,7 +60,7 @@ final class AutomaticProfileResolver implements ProfileResolver
             );
         }
 
-        if (!$this->config->has(['profiles', $profile])) {
+        if (!isset($profiles[$profile])) {
             throw new \InvalidArgumentException(
                 sprintf(
                     'Profile "%s" returned by the profile resolver is not registered, please check your configuration.',
@@ -63,7 +69,7 @@ final class AutomaticProfileResolver implements ProfileResolver
             );
         }
 
-        return $profile;
+        return $profiles[$profile];
     }
 
     private function resolveByCustomClass($class, $folder)

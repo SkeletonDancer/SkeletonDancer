@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the SkeletonDancer package.
  *
@@ -16,9 +18,10 @@ interface Questioner
     /**
      * @param Configurator[] $configurators
      * @param bool           $skipOptional
+     * @param array          $variables
      * @param array          $defaults
      *
      * @return QuestionsSet
      */
-    public function interact(array $configurators, $skipOptional = true, array $defaults = []);
+    public function interact(array $configurators, $skipOptional = true, array $variables = [], array $defaults = []): QuestionsSet;
 }

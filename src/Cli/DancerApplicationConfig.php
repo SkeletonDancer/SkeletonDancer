@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the SkeletonDancer package.
  *
@@ -12,9 +14,10 @@
 namespace Rollerworks\Tools\SkeletonDancer\Cli;
 
 use Rollerworks\Tools\SkeletonDancer\Container;
-use Rollerworks\Tools\SkeletonDancer\EventListener\AutoLoadingSetupListener;
+use Rollerworks\Tools\SkeletonDancer\EventListener\AutoloadingSetupListener;
 use Rollerworks\Tools\SkeletonDancer\EventListener\ExpressionFunctionsProviderSetupListener;
 use Rollerworks\Tools\SkeletonDancer\EventListener\ProjectDirectorySetupListener;
+use Symfony\Component\EventDispatcher\EventDispatcher;
 use Webmozart\Console\Adapter\ArgsInput;
 use Webmozart\Console\Adapter\IOOutput;
 use Webmozart\Console\Api\Args\Format\Argument;
@@ -61,7 +64,7 @@ final class DancerApplicationConfig extends DefaultApplicationConfig
      */
     protected function configure()
     {
-        $this->setEventDispatcher($this->container->getEventDispatcherService());
+        $this->setEventDispatcher(new EventDispatcher());
 
         parent::configure();
 
@@ -119,16 +122,14 @@ final class DancerApplicationConfig extends DefaultApplicationConfig
             ->beginCommand('generate')
                 ->setDescription('Generates a new skeleton structure in the current directory')
                 ->addArgument('profile', Argument::OPTIONAL, 'The name of the profile')
-                ->addOption('force-interactive', null, Option::BOOLEAN, 'Force interactive mode when configuration disabled interactive')
-                ->addOption('no-default-loading', null, Option::BOOLEAN, 'Disable automatic loading of questioner defaults (only interactive mode)')
-                ->addOption('all', null, Option::BOOLEAN, 'Ask all questions (including optional), implies --force-interactive')
+                ->addOption('all', null, Option::BOOLEAN, 'Ask all questions (including optional)')
+                ->addOption('dry-run', null, Option::BOOLEAN, 'Show what would have been executed, without actually executing')
                 ->setHandler(function () {
                     return new Handler\GenerateCommandHandler(
                         $this->container['style'],
-                        $this->container['configurator_loader'],
                         $this->container['config'],
-                        $this->container['profile_resolver'],
-                        $this->container['defaults_processor']
+                        $this->container['profile_config_resolver'],
+                        $this->container['answers_set_factory']
                     );
                 })
             ->end()
@@ -138,7 +139,7 @@ final class DancerApplicationConfig extends DefaultApplicationConfig
                 ->setHandler(function () {
                     return new Handler\ProfileCommandHandler(
                         $this->container['style'],
-                        $this->container['configurator_loader'],
+                        $this->container['profile_config_resolver'],
                         $this->container['config']
                     );
                 })

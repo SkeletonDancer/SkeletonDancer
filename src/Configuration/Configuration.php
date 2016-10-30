@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the SkeletonDancer package.
  *
@@ -26,8 +28,8 @@ final class Configuration implements ConfigurationInterface
 
         $rootNode
             ->children()
-                ->booleanNode('interactive')->defaultTrue()->end()
                 ->enumNode('overwrite')->values(['abort', 'skip', 'force', 'ask', 'backup'])->defaultValue('ask')->end()
+                ->append($this->addVariablesNode())
                 ->append($this->addDefaultsNode())
                 ->variableNode('profile_resolver')
                     ->validate()
@@ -86,6 +88,7 @@ final class Configuration implements ConfigurationInterface
                                 ->performNoDeepMerging()
                                 ->prototype('scalar')->end()
                             ->end()
+                            ->append($this->addVariablesNode())
                             ->append($this->addDefaultsNode())
                         ->end()
                     ->end()
@@ -94,6 +97,20 @@ final class Configuration implements ConfigurationInterface
         ;
 
         return $treeBuilder;
+    }
+
+    private function addVariablesNode()
+    {
+        $treeBuilder = new TreeBuilder();
+        $node = $treeBuilder->root('variables');
+
+        $node
+            ->useAttributeAsKey('name')
+            ->normalizeKeys(false)
+            ->prototype('scalar')->end()
+        ;
+
+        return $node;
     }
 
     private function addDefaultsNode()

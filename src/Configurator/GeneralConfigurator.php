@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the SkeletonDancer package.
  *
@@ -37,7 +39,9 @@ final class GeneralConfigurator implements Configurator
             Question::ask(
                 'Package name (<vendor>/<name>)',
                 function (array $config) {
-                    if (preg_match('/^(?P<vendor>[a-z0-9_.-]+)\s+(?P<name>[a-z0-9_.-]+)$/i', $config['name'], $regs)) {
+                    if ('' !== (string) $config['name'] &&
+                        preg_match('/^(?P<vendor>[a-z0-9_.-]+)\s+(?P<name>[a-z0-9_.-]+)$/i', $config['name'], $regs)
+                    ) {
                         return strtolower(StringUtil::humanize($regs[1]).'/'.StringUtil::humanize($regs[2]));
                     }
                 },
