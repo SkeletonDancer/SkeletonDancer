@@ -1,3 +1,5 @@
+TBD.
+
 # This is the configuration file used by SkeletonDancer to execute generators.
 # And allows to automate most of the work for you.
 #
@@ -53,36 +55,64 @@
 # Instead of having to duplicate all values for all profiles you can
 # specify the shared defaults here.
 #
-# Notice there are "variables" and "defaults", defaults are only used when
-# a question is asked. variables can be used to make defaults more dynamic.
+# Variables are used 
 #
-# A variable is resolved everytime it's requested by a default other variable,
-# but a default is only resolved once (for the question).
+# Variables allow for higly custom
+# default values. A variable is resolved everytime it's requested.
 #
-# The order of defining variables and defaults doesn't matter, SkeletonDancer
-# will get them from the list when requested.
+# A value can be a constant (as-is) or start with an `@` to be eveluated as an expression
+# http://symfony.com/doc/current/components/expression_language/syntax.html
+
+#
+# Tip: Defaults are used as they come, you can define custom defaults
+# that are only used by other defaults (using the expression language)
+# and never used by configurators.
 #
 # A value can be a constant (as-is) or start with an `@` to be eveluated as an expression
 # http://symfony.com/doc/current/components/expression_language/syntax.html
 #
+# Caution: variables are resolved by order, you cannot reference a variable
+# that's defined later in the list.
+#
 # Examples:
 # foo: "my_default_value" # Value used as-is, no expression used.
-# bar: "@variables["foo"]" # uses the value of variable `foo` as-is
+# bar: "@foo" # uses the value of variable `foo` as-is
 # peep: "@@foo" # will be transformed to `@foo`, and will not evaluated as an expression
-# foobar: "@substr(variables["foo"], 0, 2)" # will run variable `foo` trough the substr() function
+# foobar: "@substr(foo, 0, 2)" # will run variable `foo` trough the substr() function
 #
 # Expressions are a powerful tool to make your defaults more dynamic.
 # To get a value from the configuration use the `get_config()` function like:
 # namespace: "@'Acme\\Application\\' ~ ucfirst(get_config('current_dir_name'))"
 #
-# Caution: When a variable/answer is not defined (yet) it will trow an exception
-# you can use the `get("key", default = null)` function to fallback to the default.
-
-# variables:
-{% if shared_variables is not empty %}
-#    {{ shared_variables|yaml_dump|indent_lines|comment_lines('#') }}
+# defaults:
+{% if shared_defaults is not empty %}
+#    {{ shared_defaults|yaml_dump|indent_lines|comment_lines('#') }}
 {%- endif %}
 
+# Some profiles share the same generators (and configurators).
+# Instead of having to duplicate all values for all profiles you can
+# specify the shared defaults here.
+#
+# Tip: Defaults are used as they come, you can define custom defaults
+# that are only used by other defaults (using the expression language)
+# and never used by configurators.
+#
+# A value can be a constant (as-is) or start with an `@` to be eveluated as an expression
+# http://symfony.com/doc/current/components/expression_language/syntax.html
+#
+# Caution: variables are resolved by order, you cannot reference a variable
+# that's defined later in the list.
+#
+# Examples:
+# foo: "my_default_value" # Value used as-is, no expression used.
+# bar: "@foo" # uses the value of variable `foo` as-is
+# peep: "@@foo" # will be transformed to `@foo`, and will not evaluated as an expression
+# foobar: "@substr(foo, 0, 2)" # will run variable `foo` trough the substr() function
+#
+# Expressions are a powerful tool to make your defaults more dynamic.
+# To get a value from the configuration use the `get_config()` function like:
+# namespace: "@'Acme\\Application\\' ~ ucfirst(get_config('current_dir_name'))"
+#
 # defaults:
 {% if shared_defaults is not empty %}
 #    {{ shared_defaults|yaml_dump|indent_lines|comment_lines('#') }}
@@ -95,7 +125,7 @@
 # the template(s) rather then creating a completely new generator.
 #
 # profiles:
-#     # Name of the profile, in lowercase (can contain "-_:")
+#     # Name of the profile, in lowercase
 #     my-profile:
 #         # Give a nice description about what this profile does.
 #         description: Generates the directory structure of a custom module.

@@ -13,15 +13,15 @@ declare(strict_types=1);
 
 namespace Rollerworks\Tools\SkeletonDancer;
 
-interface DependentConfigurator extends Configurator
+interface OrderedGenerator extends Generator
 {
     /**
-     * Returns which other configurators this configurator depends on.
+     * Returns the order of this generator.
      *
-     * It ensures that this configurator can use the already resolved
-     * questions from other Configurators.
+     * It ensures that this generator can check and use
+     * the already generated structure.
      *
-     * @return string[] Returns an array with FQCN's
+     * @return int A value between -10 and 10 (lower will placed earlier in the list)
      */
-    public function getDependencies(): array;
+    public function getOrder(): int;
 }

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the SkeletonDancer package.
  *
@@ -29,7 +31,7 @@ final class SkeletonDancerInitConfigurator implements Configurator
     {
         $questions->communicate(
             'profiles',
-            Question::multiChoice('Profiles to enable (dumps all questions for ease of use)', array_keys($this->config->get('profiles', [])))
+            Question::multiChoice('Profiles to enable (dumps all questions for ease of use)', array_keys($this->config->getProfiles()))
         );
     }
 

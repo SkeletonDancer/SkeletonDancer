@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the SkeletonDancer package.
  *
@@ -27,6 +29,7 @@ final class ConfigurationTest extends \PHPUnit_Framework_TestCase
                 ['defaults' => ['bla' => 'poo', 'sum' => 'something']],
             ],
             [
+                'variables' => [],
                 'defaults' => ['bar' => 'foo', 'bla' => 'poo', 'sum' => 'something'],
                 'overwrite' => 'ask',
                 'profiles' => [],
@@ -60,6 +63,7 @@ final class ConfigurationTest extends \PHPUnit_Framework_TestCase
                 ],
             ],
             [
+                'variables' => [],
                 'defaults' => [],
                 'overwrite' => 'ask',
                 'profiles' => [
@@ -68,6 +72,7 @@ final class ConfigurationTest extends \PHPUnit_Framework_TestCase
                         'configurators' => [],
                         'description' => '',
                         'import' => [],
+                        'variables' => [],
                         'defaults' => [],
                     ],
                     'second' => [
@@ -75,6 +80,7 @@ final class ConfigurationTest extends \PHPUnit_Framework_TestCase
                         'configurators' => [],
                         'description' => '',
                         'import' => [],
+                        'variables' => [],
                         'defaults' => ['bar' => 'foo', 'bla' => 'poo', 'sum' => 'something'],
                     ],
                 ],

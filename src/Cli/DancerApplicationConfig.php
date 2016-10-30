@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the SkeletonDancer package.
  *
@@ -121,13 +123,13 @@ final class DancerApplicationConfig extends DefaultApplicationConfig
                 ->setDescription('Generates a new skeleton structure in the current directory')
                 ->addArgument('profile', Argument::OPTIONAL, 'The name of the profile')
                 ->addOption('all', null, Option::BOOLEAN, 'Ask all questions (including optional)')
+                ->addOption('dry-run', null, Option::BOOLEAN, 'Show what would have been executed, without actually executing')
                 ->setHandler(function () {
                     return new Handler\GenerateCommandHandler(
                         $this->container['style'],
-                        $this->container['configurator_loader'],
                         $this->container['config'],
-                        $this->container['profile_resolver'],
-                        $this->container['defaults_processor']
+                        $this->container['profile_config_resolver'],
+                        $this->container['answers_set_factory']
                     );
                 })
             ->end()
@@ -137,7 +139,7 @@ final class DancerApplicationConfig extends DefaultApplicationConfig
                 ->setHandler(function () {
                     return new Handler\ProfileCommandHandler(
                         $this->container['style'],
-                        $this->container['configurator_loader'],
+                        $this->container['profile_config_resolver'],
                         $this->container['config']
                     );
                 })

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the SkeletonDancer package.
  *
@@ -75,77 +77,5 @@ final class ConfigTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('/var/tmp/my-project', $this->config->getFirstNotNull(['current_dir', 'profile']));
         $this->assertEquals('boo', $this->config->getFirstNotNull([['bla', 'nil'], ['bla', 'bar']]));
         $this->assertEquals('nope', $this->config->getFirstNotNull([['bla', 'nil']], 'nope'));
-    }
-
-    /** @test */
-    public function it_allows_setting_values()
-    {
-        $this->assertFalse($this->config->has('foo'));
-
-        $this->config->set('foo', 'bar');
-
-        $this->assertTrue($this->config->has('foo'));
-        $this->assertEquals('bar', $this->config->get('foo'));
-    }
-
-    /** @test */
-    public function it_allows_removing_values()
-    {
-        $this->assertTrue($this->config->has('profile'));
-        $this->assertFalse($this->config->has('foo'));
-        $this->assertFalse($this->config->has('bar'));
-
-        $this->config->set('foo', 'bar');
-        $this->config->set('bar', ['foo' => 'something', 'bla' => 'boo']);
-
-        $this->assertTrue($this->config->has('foo'));
-        $this->assertTrue($this->config->has('bar'));
-
-        $this->config->remove('profile');
-        $this->config->remove(['bla', 'foo']);
-
-        $this->assertFalse($this->config->has('profile'));
-        $this->assertTrue($this->config->has('foo'));
-        $this->assertTrue($this->config->has('bla'));
-        $this->assertEquals(
-            [
-                'bar' => 'boo',
-                'nil' => null,
-            ],
-            $this->config->get('bla')
-        );
-    }
-
-    /** @test */
-    public function it_allows_setting_constant_values()
-    {
-        $this->assertFalse($this->config->has('foo'));
-
-        $this->config->setConstant('foo', 'bar');
-        $this->config->set('he', 'you');
-
-        $this->assertTrue($this->config->has('foo'));
-        $this->assertTrue($this->config->has('he'));
-        $this->assertEquals('bar', $this->config->get('foo'));
-    }
-
-    /** @test */
-    public function it_prohibits_overwriting_constant_values()
-    {
-        $this->config->setConstant('foo', 'bar');
-
-        $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionMessage('Configuration key "foo" is protected and cannot be overwritten.');
-
-        $this->config->setConstant('foo', 'bar');
-    }
-
-    /** @test */
-    public function it_prohibits_overwriting_initial_protected_values()
-    {
-        $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionMessage('Configuration key "current_dir" is protected and cannot be overwritten.');
-
-        $this->config->set('current_dir', 'bar');
     }
 }

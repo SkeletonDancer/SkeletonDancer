@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the SkeletonDancer package.
  *
@@ -11,58 +13,55 @@
 
 namespace Rollerworks\Tools\SkeletonDancer\Configuration;
 
+use Rollerworks\Tools\SkeletonDancer\Profile;
 use Symfony\Component\Console\Style\SymfonyStyle;
-use Webmozart\Console\Api\IO\IO;
 
 final class InteractiveProfileResolver implements ProfileResolver
 {
     private $config;
     private $style;
-    private $io;
     private $automaticResolver;
 
     public function __construct(
         Config $config,
         SymfonyStyle $style,
-        IO $io,
         AutomaticProfileResolver $automaticResolver
     ) {
         $this->config = $config;
         $this->style = $style;
-        $this->io = $io;
         $this->automaticResolver = $automaticResolver;
     }
 
-    public function resolve($profile = null)
+    public function resolve($profile = null): Profile
     {
-        if (null !== $profile && !$this->config->has(['profiles', $profile])) {
-            if ($this->io->isInteractive()) {
-                $this->style->error(
-                    sprintf(
-                        'Profile "%s" is not registered, please use one of the following: %s.',
-                        $profile,
-                        implode(', ', array_keys($this->config->get(['profiles'])))
-                    )
-                );
-            }
+        $profiles = $this->config->getProfiles();
+
+        if (null !== $profile && !isset($profiles[$profile])) {
+            $this->style->error(
+                sprintf(
+                    'Profile "%s" is not registered, please use one of the following: %s.',
+                    $profile,
+                    implode(', ', array_keys($profiles))
+                )
+            );
 
             $profile = null;
         }
 
         if (!$profile) {
             try {
-                $profile = $this->automaticResolver->resolve(null);
+                $profile = $this->automaticResolver->resolve(null)->name;
             } catch (\Exception $e) {
                 $profile = null;
             }
 
-            $profile = $this->style->choice('Profile', array_keys($this->config->get('profiles')), $profile);
+            $profile = $this->style->choice('Profile', array_keys($profiles), $profile);
         }
 
         if (!$profile) {
             throw new \InvalidArgumentException('No (valid) profile provided.');
         }
 
-        return $profile;
+        return $profiles[$profile];
     }
 }

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the SkeletonDancer package.
  *
@@ -14,16 +16,6 @@ namespace Rollerworks\Tools\SkeletonDancer;
 final class QuestionsSet
 {
     /**
-     * @var array
-     */
-    private $answers = [];
-
-    /**
-     * @var array
-     */
-    private $values = [];
-
-    /**
      * @var \Closure
      */
     private $communicator;
@@ -34,91 +26,83 @@ final class QuestionsSet
     private $skipOptional;
 
     /**
-     * @var array
+     * @var AnswersSet
      */
-    private $defaults;
+    private $answersSet;
 
-    public function __construct(\Closure $communicator, array $defaults = [], $skipOptional = true)
+    public function __construct(\Closure $communicator, AnswersSet $answersSet, $skipOptional = true)
     {
         $this->communicator = $communicator;
-        $this->defaults = $defaults;
+        $this->answersSet = $answersSet;
         $this->skipOptional = $skipOptional;
     }
 
-    public function communicate($name, Question $question)
+    public function communicate(string $name = null, Question $question)
     {
-        if (null !== $name && array_key_exists($name, $this->answers)) {
+        $this->answersSet->has($name);
+
+        if (null !== $name && $this->answersSet->has($name)) {
             throw new \InvalidArgumentException(sprintf('Question with name "%s" already exists in the QuestionsSet.', $name));
         }
 
-        $default = isset($this->defaults[$name]) ? $this->defaults[$name] : null;
-        $default = $this->resolveDefault($question, $this->values, $default);
+        $default = $this->answersSet->resolve($name, $question->getDefault());
 
         if ($this->skipOptional && $question->isOptional()) {
             $value = $default;
         } else {
-            $communicator = $this->communicator;
-            $value = $communicator($question->createQuestion($default), $name);
+            $value = ($this->communicator)($question->createQuestion($default), $name);
         }
 
         if (null !== $name) {
-            $this->values[$name] = $question->getNormalizer() ? call_user_func($question->getNormalizer(), $value) : $value;
-            $this->answers[$name] = $value;
+            $answer = $value;
+            $value = $question->getNormalizer() ? call_user_func($question->getNormalizer(), $value) : $value;
+
+            $this->answersSet->set($name, $answer, $value);
         }
 
         return $value;
     }
 
-    public function set($name, $value)
+    public function set(string $name, $value)
     {
-        if (array_key_exists($name, $this->answers)) {
-            throw new \InvalidArgumentException(sprintf('Question with name "%s" already exists in the QuestionsSet.', $name));
-        }
-
-        $this->values[$name] = $value;
-
-        return $this->answers[$name] = $value;
+        return $this->answersSet->set($name, $value, $value);
     }
 
-    public function get($name, $default = null)
+    public function get(string $name, $default = null)
     {
-        return isset($this->answers[$name]) ? $this->answers[$name] : $default;
+        return $this->answersSet->get($name, $default);
     }
 
-    public function has($name)
+    public function has(string $name): bool
     {
-        return array_key_exists($name, $this->answers);
+        return $this->answersSet->has($name);
     }
 
-    public function getAnswers()
+    public function getAnswers(): array
     {
-        return $this->answers;
-    }
-
-    public function getValues()
-    {
-        return $this->values;
+        return $this->answersSet->answers();
     }
 
     /**
-     * @param Question $question
-     * @param array    $configuration
-     * @param null     $default
+     * Returns the finalized values.
      *
-     * @return null|string
+     * @param Configurator[] $configurators
+     *
+     * @return array
      */
-    private function resolveDefault(Question $question, array $configuration, $default = null)
+    public function getFinalizedValues(array $configurators): array
     {
-        if (null !== $default) {
-            return $default;
+        $values = $this->getValues();
+
+        foreach ($configurators as $finalizer) {
+            $finalizer->finalizeConfiguration($values);
         }
 
-        $default = $question->getDefault();
+        return $values;
+    }
 
-        if ($default instanceof \Closure) {
-            $default = $default($configuration);
-        }
-
-        return $default;
+    public function getValues(): array
+    {
+        return $this->answersSet->values();
     }
 }

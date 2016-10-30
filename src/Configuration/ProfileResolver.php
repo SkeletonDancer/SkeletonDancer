@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the SkeletonDancer package.
  *
@@ -11,7 +13,9 @@
 
 namespace Rollerworks\Tools\SkeletonDancer\Configuration;
 
+use Rollerworks\Tools\SkeletonDancer\Profile;
+
 interface ProfileResolver
 {
-    public function resolve($input);
+    public function resolve($input): Profile;
 }

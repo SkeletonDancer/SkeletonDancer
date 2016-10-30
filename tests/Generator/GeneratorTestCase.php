@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the SkeletonDancer package.
  *
@@ -11,6 +13,8 @@
 
 namespace Rollerworks\Tools\SkeletonDancer\Tests\Generator;
 
+use Rollerworks\Tools\SkeletonDancer\AnswersSet;
+use Rollerworks\Tools\SkeletonDancer\Configuration\ClassLoader;
 use Rollerworks\Tools\SkeletonDancer\Configurator;
 use Rollerworks\Tools\SkeletonDancer\Generator;
 use Rollerworks\Tools\SkeletonDancer\Questioner\UsingDefaultsQuestioner;
@@ -50,18 +54,29 @@ abstract class GeneratorTestCase extends \PHPUnit_Framework_TestCase
             return;
         }
 
-        $this->generator = $this->container['class_initializer']->getNewInstance($this->getGeneratorClass());
+        $loader = new ClassLoader($this->container['class_initializer']);
+        $loader->clear(); // Initialize
 
-        $configuratorLoader = $this->container->getConfiguratorsLoaderService();
-        $configuratorLoader->loadFromGenerator($this->generator);
+        $loader->loadGeneratorClasses([$class = $this->getGeneratorClass()]);
 
-        $this->configurators = $configuratorLoader->getConfigurators();
+        // A generator can have dependencies. But we only care for the current generator.
+        $generators = $loader->getGenerators();
+
+        foreach ($generators as $generator) {
+            if ($generator instanceof $class) {
+                $this->generator = $generator;
+
+                break;
+            }
+        }
+
+        $this->configurators = $loader->getConfigurators();
     }
 
     /**
      * @return string
      */
-    protected function getGeneratorClass()
+    protected function getGeneratorClass(): string
     {
         $class = substr(str_replace('\\Tests\\', '\\', get_class($this)), 0, -4);
 
@@ -85,20 +100,28 @@ abstract class GeneratorTestCase extends \PHPUnit_Framework_TestCase
      * - values are validated/transformed
      * - no duplicate answers are provided
      *
-     * @param array $values
+     * Note: Expressions are not evaluated.
      *
-     * @return int The status of the execution (0=ok, 1=skipped)
+     * @param array $values
+     * @param array $extraValues
+     *
+     * @return int The status of the execution (0=ok, 1=skipped, 2=failure)
      */
-    protected function runGenerator(array $values, array $extraValues = [])
+    protected function runGenerator(array $values, array $extraValues = []): int
     {
         $this->initGenerator();
 
-        $questioner = new UsingDefaultsQuestioner();
-        $configuration = $questioner->interact($this->configurators, true, $values)->getValues();
+        $questioner = new UsingDefaultsQuestioner(function (array $variables, array $defaults) {
+            return new AnswersSet(
+                function ($v) {
+                    return $v;
+                }, $defaults
+            );
+        });
 
-        foreach ($this->configurators as $finalizer) {
-            $finalizer->finalizeConfiguration($configuration);
-        }
+        $configuration = $questioner->interact($this->configurators, true, [], $values)->getFinalizedValues(
+            $this->configurators
+        );
 
         $result = $this->generator->generate(array_merge_recursive($configuration, $extraValues));
 

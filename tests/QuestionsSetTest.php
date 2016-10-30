@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the SkeletonDancer package.
  *
@@ -11,6 +13,7 @@
 
 namespace Rollerworks\Tools\SkeletonDancer\Tests;
 
+use Rollerworks\Tools\SkeletonDancer\AnswersSet;
 use Rollerworks\Tools\SkeletonDancer\Question;
 use Rollerworks\Tools\SkeletonDancer\QuestionsSet;
 use Symfony\Component\Console\Question\Question as SfQuestion;
@@ -34,7 +37,12 @@ final class QuestionsSetTest extends \PHPUnit_Framework_TestCase
                 if ($question->getQuestion() === $question2->getLabel()) {
                     return 'src/';
                 }
-            }
+            },
+            new AnswersSet(
+                function ($v) {
+                    return $v;
+                }, []
+            )
         );
 
         $this->assertEquals('Dancer', $questions->communicate('name', $question1));
@@ -62,7 +70,12 @@ final class QuestionsSetTest extends \PHPUnit_Framework_TestCase
                 if ($question->getQuestion() === $question1->getLabel()) {
                     return 'Dancer';
                 }
-            }
+            },
+            new AnswersSet(
+                function ($v) {
+                    return $v;
+                }, []
+            )
         );
 
         $this->assertEquals('Dancer', $questions->communicate('name', $question1));
@@ -88,7 +101,11 @@ final class QuestionsSetTest extends \PHPUnit_Framework_TestCase
                     return 'src/';
                 }
             },
-            [],
+            new AnswersSet(
+                function ($v) {
+                    return $v;
+                }, []
+            ),
             false
         );
 
@@ -115,12 +132,16 @@ final class QuestionsSetTest extends \PHPUnit_Framework_TestCase
                     return '/';
                 }
             },
-            [],
+            new AnswersSet(
+                function ($v) {
+                    return $v;
+                }, []
+            ),
             false
         );
 
         $this->assertEquals('Dancer', $questions->communicate('name', $question1));
-        $this->assertEquals('/', $questions->communicate('path', $question2));
+        $this->assertEquals(null, $questions->communicate('path', $question2));
 
         $this->assertSame(['name' => 'Dancer', 'path' => null], $questions->getValues());
         $this->assertSame(['name' => 'Dancer', 'path' => '/'], $questions->getAnswers());
@@ -145,7 +166,12 @@ final class QuestionsSetTest extends \PHPUnit_Framework_TestCase
                 if ($question->getQuestion() === $question2->getLabel()) {
                     return $question->getDefault();
                 }
-            }
+            },
+            new AnswersSet(
+                function ($v) {
+                    return $v;
+                }, []
+            )
         );
 
         $this->assertEquals('Dancer', $questions->communicate('name', $question1));
@@ -165,7 +191,11 @@ final class QuestionsSetTest extends \PHPUnit_Framework_TestCase
             function (SfQuestion $question) {
                 return $question->getDefault();
             },
-            ['name' => 'Dancer', 'path' => 'src/']
+            new AnswersSet(
+                function ($v) {
+                    return $v;
+                }, ['name' => 'Dancer', 'path' => 'src/']
+            )
         );
 
         $this->assertEquals('Dancer', $questions->communicate('name', $question1));
@@ -184,7 +214,12 @@ final class QuestionsSetTest extends \PHPUnit_Framework_TestCase
         $questions = new QuestionsSet(
             function (SfQuestion $question) {
                 return $question->getDefault();
-            }
+            },
+            new AnswersSet(
+                function ($v) {
+                    return $v;
+                }, []
+            )
         );
 
         $questions->communicate('name', $question1);

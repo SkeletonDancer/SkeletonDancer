@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the SkeletonDancer package.
  *
@@ -11,8 +13,9 @@
 
 namespace Rollerworks\Tools\SkeletonDancer\Generator;
 
+use Rollerworks\Tools\SkeletonDancer\AnswersSet;
 use Rollerworks\Tools\SkeletonDancer\Configuration\Config;
-use Rollerworks\Tools\SkeletonDancer\Configurator\Loader as ConfiguratorsLoader;
+use Rollerworks\Tools\SkeletonDancer\Configuration\ProfileConfigResolver;
 use Rollerworks\Tools\SkeletonDancer\Configurator\SkeletonDancerInitConfigurator;
 use Rollerworks\Tools\SkeletonDancer\Generator;
 use Rollerworks\Tools\SkeletonDancer\QuestionsSet;
@@ -24,20 +27,24 @@ use Webmozart\Console\Api\IO\IO;
 final class SkeletonDancerInitGenerator implements Generator
 {
     private $config;
-    private $configuratorsLoader;
     private $filesystem;
     private $twig;
     private $io;
 
+    /**
+     * @var ProfileConfigResolver
+     */
+    private $profileConfigResolver;
+
     public function __construct(
         Config $config,
-        ConfiguratorsLoader $configuratorLoader,
+        ProfileConfigResolver $profileConfigResolver,
         Filesystem $filesystem,
         \Twig_Environment $twig,
         IO $consoleIo
     ) {
         $this->config = $config;
-        $this->configuratorsLoader = $configuratorLoader;
+        $this->profileConfigResolver = $profileConfigResolver;
         $this->filesystem = $filesystem;
         $this->twig = $twig;
         $this->io = $consoleIo;
@@ -51,15 +58,18 @@ final class SkeletonDancerInitGenerator implements Generator
 
         $this->filesystem->mkdir('.dancer');
 
+        $sharedVariables = [];
         $sharedDefaults = [];
         $profilesDefaults = [];
 
         if ($configuration['profiles']) {
             foreach ($configuration['profiles'] as $name) {
-                $profilesDefaults[$name]['defaults'] = $this->getProfileQuestionsAndDefaults($name);
+                $profilesDefaults[$name] = $this->getProfileResolvedConfig($name);
             }
 
-            list($sharedDefaults, $profilesDefaults) = $this->resolveSharedDefaults($profilesDefaults);
+            list($sharedVariables, $sharedDefaults, $profilesDefaults) = $this->resolveSharedCommons(
+                $profilesDefaults
+            );
         }
 
         $this->filesystem->dumpFile(
@@ -67,6 +77,7 @@ final class SkeletonDancerInitGenerator implements Generator
             $this->twig->render(
                 'dancer.yml.twig',
                 [
+                    'shared_variables' => $sharedVariables,
                     'shared_defaults' => $sharedDefaults,
                     'profiles_defaults' => $profilesDefaults,
                 ]
@@ -79,8 +90,9 @@ final class SkeletonDancerInitGenerator implements Generator
         return [SkeletonDancerInitConfigurator::class];
     }
 
-    private function resolveSharedDefaults(array $profiles)
+    private function resolveSharedCommons(array $profiles)
     {
+        $sharedVariables = [];
         $sharedDefaults = [];
 
         foreach ($profiles as $name => $profile) {
@@ -91,6 +103,7 @@ final class SkeletonDancerInitGenerator implements Generator
 
                 // Search for keys that exist in both the first and second defaults list.
                 // Add them to the shared list and remove from both lists.
+
                 foreach (array_intersect_key($profile['defaults'], $profile2['defaults']) as $keyName => $v) {
                     if ($profile['defaults'][$keyName] !== $profile2['defaults'][$keyName]) {
                         continue;
@@ -100,29 +113,30 @@ final class SkeletonDancerInitGenerator implements Generator
 
                     unset($profiles[$name]['defaults'][$keyName], $profiles[$name2]['defaults'][$keyName]);
                 }
+
+                foreach (array_intersect_key($profile['variables'], $profile2['variables']) as $keyName => $v) {
+                    if ($profile['variables'][$keyName] !== $profile2['variables'][$keyName]) {
+                        continue;
+                    }
+
+                    $sharedDefaults[$keyName] = $profile['variables'][$keyName];
+
+                    unset($profiles[$name]['variables'][$keyName], $profiles[$name2]['variables'][$keyName]);
+                }
             }
         }
 
-        return [$sharedDefaults, $profiles];
+        return [$sharedVariables, $sharedDefaults, $profiles];
     }
 
-    private function getProfileQuestionsAndDefaults($profile)
+    private function getProfileResolvedConfig(string $profile)
     {
-        /** @var array $profileConfig */
-        $profileConfig = $this->config->get(['profiles', $profile]);
-        $generatorClasses = $profileConfig['generators'];
-        $defaults = $profileConfig['defaults'];
-
-        $this->configuratorsLoader->clear();
-
-        foreach ($generatorClasses as $generatorClass) {
-            $this->configuratorsLoader->loadFromGenerator($generatorClass);
-        }
+        $profileConfig = $this->profileConfigResolver->resolve($profile);
 
         $questionCommunicator = function (Question $question) {
             if ($question instanceof ChoiceQuestion && null !== $question->getDefault()) {
                 $choices = $question->getChoices();
-                $default = explode(',', $question->getDefault());
+                $default = explode(',', (string) $question->getDefault());
 
                 foreach ($default as &$defaultVal) {
                     $defaultVal = $choices[$defaultVal];
@@ -131,16 +145,21 @@ final class SkeletonDancerInitGenerator implements Generator
                 return implode(', ', $default);
             }
 
-            return $question->getDefault();
+            return $question->getDefault() ?? '';
         };
 
-        $questions = new QuestionsSet($questionCommunicator, $defaults, false);
-        $configurators = $this->configuratorsLoader->getConfigurators();
+        $answersSet = new AnswersSet(
+            function ($value) {
+                return null === $value ? '' : $value;
+            }, $profileConfig->defaults
+        );
 
-        foreach ($configurators as $configurator) {
+        $questions = new QuestionsSet($questionCommunicator, $answersSet, false);
+
+        foreach ($profileConfig->configurators as $configurator) {
             $configurator->interact($questions);
         }
 
-        return $questions->getAnswers();
+        return ['variables' => $profileConfig->variables, 'defaults' => $questions->getAnswers()];
     }
 }

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the SkeletonDancer package.
  *
@@ -13,19 +15,29 @@ namespace Rollerworks\Tools\SkeletonDancer\Configuration;
 
 use Symfony\Component\Config\Definition\Processor;
 use Symfony\Component\Config\FileLocator;
+use Symfony\Component\Yaml\Exception\ParseException;
 use Symfony\Component\Yaml\Yaml;
 
-final class ConfigLoader
+/**
+ * ConfigFileLoader loads configuration from a YAML file and it's children.
+ */
+final class ConfigFileLoader
 {
     private $locator;
     private $configs = [];
 
-    public function __construct($dancerFolder = null)
+    /**
+     * Constructor.
+     *
+     * @param string|null $dancerDirectory The dancer directory to use
+     *                                     for searching configuration files
+     */
+    public function __construct($dancerDirectory = null)
     {
         $configFolders = [];
 
-        if ($dancerFolder) {
-            $configFolders[] = $dancerFolder;
+        if ($dancerDirectory) {
+            $configFolders[] = $dancerDirectory;
         }
 
         $this->locator = new FileLocator($configFolders);
@@ -47,10 +59,32 @@ final class ConfigLoader
         return (new Processor())->processConfiguration(new Configuration(), $this->configs);
     }
 
+    /**
+     * Normalize the path (realpath and forward slashes).
+     *
+     * @param string $path
+     *
+     * @return string|null
+     */
+    public static function normalizePath(string $path = null)
+    {
+        if (null === $path) {
+            return;
+        }
+
+        if (false === $realPath = realpath($path)) {
+            throw new \InvalidArgumentException(
+                sprintf('Unable to normalize path "%s", no such file or directory.', $path)
+            );
+        }
+
+        return str_replace('\\', '//', $realPath);
+    }
+
     private function loadFile($filename, $currentLocation = null, $loading = [])
     {
         $filename = $this->locator->locate($filename, $currentLocation, true);
-        $filename = str_replace('\\', '/', realpath($filename));
+        $filename = self::normalizePath($filename);
 
         if (is_dir($filename)) {
             throw new \InvalidArgumentException(
@@ -72,7 +106,13 @@ final class ConfigLoader
 
         $loading[] = $filename;
 
-        $config = Yaml::parse(file_get_contents($filename));
+        try {
+            $config = Yaml::parse(file_get_contents($filename));
+        } catch (ParseException $e) {
+            $e->setParsedFile($filename);
+
+            throw $e;
+        }
 
         if (null !== $config && !is_array($config)) {
             throw new \InvalidArgumentException(

@@ -13,13 +13,13 @@ declare(strict_types=1);
 
 namespace Rollerworks\Tools\SkeletonDancer;
 
-interface DependentConfigurator extends Configurator
+interface DependentGenerator extends Configurator
 {
     /**
-     * Returns which other configurators this configurator depends on.
+     * Returns which other generators this generator depends on.
      *
-     * It ensures that this configurator can use the already resolved
-     * questions from other Configurators.
+     * It ensures that this generator can use the already
+     * generated structure from other generator.
      *
      * @return string[] Returns an array with FQCN's
      */

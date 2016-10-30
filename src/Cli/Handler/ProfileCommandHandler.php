@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the SkeletonDancer package.
  *
@@ -11,9 +13,12 @@
 
 namespace Rollerworks\Tools\SkeletonDancer\Cli\Handler;
 
+use Rollerworks\Tools\SkeletonDancer\AnswersSet;
 use Rollerworks\Tools\SkeletonDancer\Configuration\Config;
-use Rollerworks\Tools\SkeletonDancer\Configurator\Loader;
+use Rollerworks\Tools\SkeletonDancer\Configuration\ProfileConfigResolver;
+use Rollerworks\Tools\SkeletonDancer\Profile;
 use Rollerworks\Tools\SkeletonDancer\QuestionsSet;
+use Rollerworks\Tools\SkeletonDancer\ResolvedProfile;
 use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Output\BufferedOutput;
 use Symfony\Component\Console\Question\ChoiceQuestion;
@@ -26,17 +31,21 @@ use Webmozart\Console\Api\IO\IO;
 final class ProfileCommandHandler
 {
     private $style;
-    private $configuratorsLoader;
     private $config;
     private $bufferedOut;
 
+    /**
+     * @var ProfileConfigResolver
+     */
+    private $profileConfigResolver;
+
     public function __construct(
         SymfonyStyle $style,
-        Loader $configuratorsLoader,
+        ProfileConfigResolver $profileConfigResolver,
         Config $config
     ) {
         $this->style = $style;
-        $this->configuratorsLoader = $configuratorsLoader;
+        $this->profileConfigResolver = $profileConfigResolver;
         $this->config = $config;
 
         $this->bufferedOut = new BufferedOutput(null, $this->style->isDecorated(), $this->style->getFormatter());
@@ -50,18 +59,18 @@ final class ProfileCommandHandler
             $this->style->text(
                 [
                     sprintf('// Using config file: %s', $this->config->get('config_file', '')),
-                    sprintf('// Project directory: %s', $this->config->get('project_directory', '')),
                     sprintf('// Dancer config directory: %s', $this->config->get('dancer_directory', '')),
+                    sprintf('// Project directory: %s', $this->config->get('project_directory', '')),
                 ]
             );
         }
 
-        $profiles = $this->config->get(['profiles']);
+        $profiles = $this->config->getProfiles();
         $verbose = $io->isVerbose();
 
         foreach ($profiles as $profileName => $profile) {
             $this->style->section($profileName);
-            $this->renderProfile($profileName, $profile, $verbose);
+            $this->renderSimpleProfile($profile, $verbose);
         }
 
         return 0;
@@ -81,39 +90,76 @@ final class ProfileCommandHandler
             );
         }
 
+        $profileNames = array_keys($this->config->getProfiles());
+
         if (!$profileName = $args->getArgument('name')) {
-            $profileName = $this->style->choice('Profile to show', array_keys($this->config->get(['profiles'])));
+            $profileName = $this->style->choice('Profile to show', $profileNames);
         }
 
-        $profile = $this->config->get(['profiles', $profileName]);
-
-        if (null === $profile) {
+        if (null === $profileName) {
             $this->style->error(sprintf('Unable to find a profile with name "%s".', $profileName));
 
             return 1;
         }
 
         $this->style->section($profileName);
-        $this->renderProfile($profileName, $profile, true);
+        $this->renderResolvedProfile($this->config->getProfiles()[$profileName], $io->isVerbose());
 
         return 0;
     }
 
-    private function renderProfile($profileName, array $profile, $verbose = false)
+    private function renderResolvedProfile(Profile $profile, $verbose = false)
     {
+        $profileConfig = $this->getProfileResolvedConfig($profile->name);
+
         $row = [
-            ['Description', $profile['description']],
-            ['Import', $profile['import'] ? implode(', ', $profile['import']) : '[ ]'],
-            ['Generators', $profile['generators'] ? '* '.implode("\n* ", $profile['generators']) : '[ ]'],
+            ['Description', $profile->description],
+            ['Import', $profile->imports ? implode(', ', $profile->imports) : '[ ]'],
+            ['Generators', $profileConfig->generators ? '- '.implode("\n- ", array_map('get_class', $profileConfig->generators)) : '[ ]'],
+            ['Configurators', $profileConfig->configurators ? '- '.implode("\n- ", array_map('get_class', $profileConfig->configurators)) : '[ ]'],
         ];
 
         if ($verbose) {
+            $variablesTable = [];
             $defaultsTable = [];
 
-            foreach ($this->getProfileQuestionsAndDefaults($profileName) as $name => $value) {
+            foreach ($profileConfig->variables as $name => $value) {
+                $variablesTable[] = [$name, Yaml::dump($value, 4, 1)];
+            }
+
+            foreach ($profileConfig->defaults as $name => $value) {
                 $defaultsTable[] = [$name, Yaml::dump($value, 4, 1)];
             }
 
+            $row[] = ['Variables', $this->detailsTable($variablesTable, true)];
+            $row[] = ['Defaults', $this->detailsTable($defaultsTable, true)];
+        }
+
+        $this->style->write($this->detailsTable($row), false, SymfonyStyle::OUTPUT_RAW);
+    }
+
+    private function renderSimpleProfile(Profile $profile, $verbose = false)
+    {
+        $row = [
+            ['Description', $profile->description],
+            ['Import', $profile->imports ? implode(', ', $profile->imports) : '[ ]'],
+            ['Generators', $profile->generators ? '- '.implode("\n- ", $profile->generators) : '[ ]'],
+            ['Configurators', $profile->configurators ? '- '.implode("\n- ", $profile->configurators) : '[ ]'],
+        ];
+
+        if ($verbose) {
+            $variablesTable = [];
+            $defaultsTable = [];
+
+            foreach ($profile->variables as $name => $value) {
+                $variablesTable[] = [$name, Yaml::dump($value, 4, 1)];
+            }
+
+            foreach ($profile->defaults as $name => $value) {
+                $defaultsTable[] = [$name, Yaml::dump($value, 4, 1)];
+            }
+
+            $row[] = ['Variables', $this->detailsTable($variablesTable, true)];
             $row[] = ['Defaults', $this->detailsTable($defaultsTable, true)];
         }
 
@@ -153,21 +199,14 @@ final class ProfileCommandHandler
         return $this->bufferedOut->fetch();
     }
 
-    // Same as \Rollerworks\Tools\SkeletonDancer\Generator\SkeletonDancerInitGenerator::getProfileQuestionsAndDefaults
-    // Needs to be refactored to a class.
-    private function getProfileQuestionsAndDefaults($profile)
+    private function getProfileResolvedConfig(string $profile): ResolvedProfile
     {
-        /** @var array $profileConfig */
-        $profileConfig = $this->config->get(['profiles', $profile]);
-        $generatorClasses = $profileConfig['generators'];
-        $defaults = array_merge($this->config->get('defaults', []), $profileConfig['defaults']);
-
-        $this->initQuestioners($generatorClasses);
+        $profileConfig = $this->profileConfigResolver->resolve($profile);
 
         $questionCommunicator = function (Question $question) {
             if ($question instanceof ChoiceQuestion && null !== $question->getDefault()) {
                 $choices = $question->getChoices();
-                $default = explode(',', $question->getDefault());
+                $default = explode(',', (string) $question->getDefault());
 
                 foreach ($default as &$defaultVal) {
                     $defaultVal = $choices[$defaultVal];
@@ -176,33 +215,21 @@ final class ProfileCommandHandler
                 return implode(', ', $default);
             }
 
-            return $question->getDefault();
+            return $question->getDefault() ?? '';
         };
 
-        return $this->getQuestionValues($questionCommunicator, $defaults)->getValues();
-    }
+        $answersSet = new AnswersSet(
+            function ($value) {
+                return null === $value ? '' : $value;
+            }, $profileConfig->defaults
+        );
 
-    private function initQuestioners(array $generatorClasses)
-    {
-        $this->configuratorsLoader->clear();
+        $questions = new QuestionsSet($questionCommunicator, $answersSet, false);
 
-        foreach ($generatorClasses as $generatorClass) {
-            $this->configuratorsLoader->loadFromGenerator($generatorClass);
-        }
-    }
-
-    /**
-     * @return QuestionsSet
-     */
-    private function getQuestionValues($questionCommunicator, array $defaults)
-    {
-        $questions = new QuestionsSet($questionCommunicator, $defaults, false);
-        $configurators = $this->configuratorsLoader->getConfigurators();
-
-        foreach ($configurators as $configurator) {
+        foreach ($profileConfig->configurators as $configurator) {
             $configurator->interact($questions);
         }
 
-        return $questions;
+        return $profileConfig;
     }
 }
