@@ -27,5 +27,10 @@ final class StringUtilTest extends \PHPUnit_Framework_TestCase
         self::assertEquals('src', StringUtil::getNthDirname('src/Generators/', 0));
         self::assertEquals('src', StringUtil::getNthDirname('src\\Generators/', 0));
         self::assertEquals('NotExistent', StringUtil::getNthDirname('Generators/', 1, 'NotExistent'));
+
+        // Reverse look-up
+        self::assertEquals('Deeper', StringUtil::getNthDirname('src/Generators/Foo/Deeper', -1));
+        self::assertEquals('src', StringUtil::getNthDirname('src/', -1));
+        self::assertEquals('', StringUtil::getNthDirname('src/', -2));
     }
 }
