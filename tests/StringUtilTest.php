@@ -30,6 +30,7 @@ final class StringUtilTest extends \PHPUnit_Framework_TestCase
 
         // Reverse look-up
         self::assertEquals('Deeper', StringUtil::getNthDirname('src/Generators/Foo/Deeper', -1));
+        self::assertEquals('Foo', StringUtil::getNthDirname('src/Generators/Foo/Deeper', -2));
         self::assertEquals('src', StringUtil::getNthDirname('src/', -1));
         self::assertEquals('', StringUtil::getNthDirname('src/', -2));
     }
