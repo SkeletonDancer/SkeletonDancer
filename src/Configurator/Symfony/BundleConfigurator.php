@@ -29,7 +29,7 @@ final class BundleConfigurator implements DependentConfigurator
                 'Bundle name',
                 function (array $configuration) {
                     $bundleName = strtr($configuration['namespace'], ['\\Bundle\\' => '', '\\' => '']);
-                    $bundleName .= substr($bundleName, -6) === 'Bundle' ? '' : 'Bundle';
+                    $bundleName .= mb_substr($bundleName, -6) === 'Bundle' ? '' : 'Bundle';
 
                     return $bundleName;
                 },
@@ -54,7 +54,7 @@ final class BundleConfigurator implements DependentConfigurator
             Question::ask(
                 'Bundle Extension name',
                 function (array $configuration) {
-                    return substr($configuration['sf_bundle_name'], 0, -6);
+                    return mb_substr($configuration['sf_bundle_name'], 0, -6);
                 }
             )->markOptional()
         );
@@ -64,7 +64,7 @@ final class BundleConfigurator implements DependentConfigurator
             Question::ask(
                 'Bundle Extension alias',
                 function (array $configuration) {
-                    return StringUtil::underscore(substr($configuration['sf_bundle_name'], 0, -6));
+                    return StringUtil::underscore(mb_substr($configuration['sf_bundle_name'], 0, -6));
                 }
             )->markOptional()
         );

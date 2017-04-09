@@ -171,7 +171,7 @@ final class PhpCsConfigurator implements Configurator
         $configuration['composer']['require-dev'][] = 'sllh/php-cs-fixer-styleci-bridge';
 
         $fixers = $this->resolveAliases($this->splitValues($configuration['php_cs_enabled_fixers']));
-        $preset = strtolower($configuration['php_cs_preset']).'_fixers';
+        $preset = mb_strtolower($configuration['php_cs_preset']).'_fixers';
 
         if ('none' !== $configuration['php_cs_preset']) {
             foreach (array_intersect($fixers, Fixers::${$preset}) as $i => $fixer) {
@@ -192,7 +192,7 @@ final class PhpCsConfigurator implements Configurator
     private function processWithBridgeDisabled(array &$configuration)
     {
         $fixers = $this->resolveAliases($this->splitValues($configuration['php_cs_enabled_fixers']));
-        $preset = strtolower($configuration['php_cs_preset']).'_fixers';
+        $preset = mb_strtolower($configuration['php_cs_preset']).'_fixers';
 
         // When no level is available for the preset set the level to none and merge fixers
         // of the preset with the enabled fixers.

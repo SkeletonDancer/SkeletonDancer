@@ -28,7 +28,7 @@ final class StringProvider implements ExpressionFunctionProviderInterface
                     return sprintf('substr(%s, %d, %d)', $str, $start, $length);
                 },
                 function (array $values, $str, $start, $length = null) {
-                    return is_int($length) ? substr($str, $start, $length) : substr($str, $start);
+                    return is_int($length) ? mb_substr($str, $start, $length) : mb_substr($str, $start);
                 }
             ),
             new ExpressionFunction(
@@ -37,7 +37,7 @@ final class StringProvider implements ExpressionFunctionProviderInterface
                     return sprintf('strpos(%s, %s, %d)', $haystack, $needle, $offset);
                 },
                 function (array $values, $haystack, $needle, $offset = 0) {
-                    return strpos($haystack, $needle, $offset);
+                    return mb_strpos($haystack, $needle, $offset);
                 }
             ),
             new ExpressionFunction(
@@ -46,7 +46,7 @@ final class StringProvider implements ExpressionFunctionProviderInterface
                     return sprintf('strrpos(%s, %s, %d)', $haystack, $needle, $offset);
                 },
                 function (array $values, $haystack, $needle, $offset = 0) {
-                    return strrpos($haystack, $needle, $offset);
+                    return mb_strrpos($haystack, $needle, $offset);
                 }
             ),
             new ExpressionFunction(
@@ -64,7 +64,7 @@ final class StringProvider implements ExpressionFunctionProviderInterface
                     return sprintf('strtolower(%s)', $str);
                 },
                 function (array $values, $str) {
-                    return strtolower($str);
+                    return mb_strtolower($str);
                 }
             ),
             new ExpressionFunction(
@@ -73,7 +73,7 @@ final class StringProvider implements ExpressionFunctionProviderInterface
                     return sprintf('strtoupper(%s)', $str);
                 },
                 function (array $values, $str) {
-                    return strtoupper($str);
+                    return mb_strtoupper($str);
                 }
             ),
             new ExpressionFunction(

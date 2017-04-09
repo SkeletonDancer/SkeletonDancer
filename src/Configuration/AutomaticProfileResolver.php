@@ -144,8 +144,8 @@ final class AutomaticProfileResolver implements ProfileResolver
             return false;
         }
 
-        $start = substr($m[1], 0, 1);
-        $end = substr($m[1], -1);
+        $start = mb_substr($m[1], 0, 1);
+        $end = mb_substr($m[1], -1);
 
         if ($start === $end) {
             return !preg_match('/[*?[:alnum:] \\\\]/', $start);

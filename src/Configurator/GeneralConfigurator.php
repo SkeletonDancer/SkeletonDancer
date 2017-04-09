@@ -42,7 +42,7 @@ final class GeneralConfigurator implements Configurator
                     if ('' !== (string) $config['name'] &&
                         preg_match('/^(?P<vendor>[a-z0-9_.-]+)\s+(?P<name>[a-z0-9_.-]+)$/i', $config['name'], $regs)
                     ) {
-                        return strtolower(StringUtil::humanize($regs[1]).'/'.StringUtil::humanize($regs[2]));
+                        return mb_strtolower(StringUtil::humanize($regs[1]).'/'.StringUtil::humanize($regs[2]));
                     }
                 },
                 function ($name) {
@@ -75,7 +75,7 @@ final class GeneralConfigurator implements Configurator
                     $reserved = self::getReservedWords();
 
                     foreach (explode('\\', $namespace) as $word) {
-                        if (in_array(strtolower($word), $reserved, true)) {
+                        if (in_array(mb_strtolower($word), $reserved, true)) {
                             throw new \InvalidArgumentException(
                                 sprintf('The namespace cannot contain PHP reserved words ("%s").', $word)
                             );
@@ -107,7 +107,7 @@ final class GeneralConfigurator implements Configurator
             )
         );
 
-        $questions->communicate('php_min', Question::ask('Php-min', substr(PHP_VERSION, 0, 3)));
+        $questions->communicate('php_min', Question::ask('Php-min', mb_substr(PHP_VERSION, 0, 3)));
         $questions->communicate(
             'src_dir',
             Question::ask(

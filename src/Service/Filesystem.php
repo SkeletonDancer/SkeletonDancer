@@ -195,7 +195,7 @@ class Filesystem
     {
         $targetDirFull = realpath($this->resolvePath($targetDir));
         $originDirFull = realpath($this->resolvePath($originDir));
-        $override = isset($options['override']) ? $options['override'] : false;
+        $override = $options['override'] ?? false;
 
         if (null === $iterator) {
             $iterator = new \RecursiveIteratorIterator(
@@ -270,11 +270,11 @@ class Filesystem
             return $this->currentDir.'/'.$name;
         }
 
-        if (false !== strpos($name, '..')) {
+        if (false !== mb_strpos($name, '..')) {
             throw new \RuntimeException(sprintf('Path "%s" contains invalid characters (..).', $name));
         }
 
-        $dirPointer = substr($name, 1, strpos($name, '/') - 1);
+        $dirPointer = mb_substr($name, 1, mb_strpos($name, '/') - 1);
 
         if (!isset($this->paths[$dirPointer])) {
             throw new \InvalidArgumentException(
@@ -282,7 +282,7 @@ class Filesystem
             );
         }
 
-        $resolvedPath = substr_replace($name, $this->paths[$dirPointer], 0, strlen($dirPointer) + 1);
+        $resolvedPath = substr_replace($name, $this->paths[$dirPointer], 0, mb_strlen($dirPointer) + 1);
 
         return $resolvedPath;
     }
@@ -303,14 +303,12 @@ class Filesystem
         switch ($overwrite) {
             case 'abort':
                 throw new \RuntimeException(sprintf('File "%s" already exists. Aborted.', $filename));
-
             case 'skip':
                 if ($this->style->isVerbose()) {
                     $this->style->note(sprintf('File "%s" already exists. Ignoring.', $filename));
                 }
 
                 return false;
-
             case 'backup':
                 $this->createFileBackup($targetFile, $targetFile);
                 break;

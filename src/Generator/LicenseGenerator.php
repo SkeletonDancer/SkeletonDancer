@@ -34,7 +34,7 @@ final class LicenseGenerator implements Generator
         $this->filesystem->dumpFile(
             'LICENSE',
             $this->twig->render(
-                'Licenses/'.strtolower($configuration['license']).'.txt.twig',
+                'Licenses/'.mb_strtolower($configuration['license']).'.txt.twig',
                 [
                     'productName' => $configuration['name'],
                     'author' => [

@@ -46,6 +46,10 @@ final class AnswersSetFactory
 
     /**
      * @internal
+     *
+     * @param mixed $value
+     *
+     * @return string|float|int|bool|array
      */
     public function resolveValue($value, VariablesProvider $variables, AnswersProvider $answers)
     {
