@@ -10,12 +10,6 @@
 # Optionally you can choose to separate your configuration into multiple
 # smaller files, loaded relative from the `.dancer` folder.
 #
-# Note a profile's "generators" and "import" must be defined completely as it will
-# be overwritten rather then being merged!
-#
-# Instead of overwriting you can also choose to create your own, and then import
-# the base profile.
-#
 # import: [ 'config/profiles.yml' ]
 
 # Generators configuration
@@ -33,7 +27,7 @@
 #
 # overwrite: ask
 
-# Once interactive mode is disabled, the system needs to know which profile to use when.
+# Once interactive mode is disabled, the system needs to know which profile to use then.
 # Fortunately SkeletonDancer provides two ways to automate this:
 #
 # pattern-map: Use an associative array where the key is a relative path like 'Bundles'
@@ -90,6 +84,12 @@
 
 # SkeletonDancer already comes pre-bundled with many profiles.
 # But it's also possible to define your own, or overwrite existing profiles.
+#
+# Note a profile's "generators" and "import" must be defined completely as it will
+# be overwritten rather then being merged!
+#
+# Instead of overwriting you can also choose to create your own, and then import
+# the base profile.
 #
 # Note: If you only want to overwrite a small portion it may be better to overwrite
 # the template(s) rather then creating a completely new generator.

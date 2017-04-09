@@ -1,21 +1,29 @@
 preset: symfony
 
-linting: true
+risky: true
 
 enabled:
-    - newline_after_open_tag
-    - ordered_class_elements
-    - ordered_use
-    - phpdoc_order
     - short_array_syntax
-
-    # Strict
-    - strict_param
+    - combine_consecutive_unsets
     - declare_strict_types
+    - linebreak_after_opening_tag
+    - mb_str_functions
+    - no_short_echo_tag
+    - no_useless_else
+    - no_useless_return
+    - ordered_class_elements
+    - alpha_ordered_imports
+    - phpdoc_add_missing_param_annotation
+    - phpdoc_order
+    - semicolon_after_instruction
+    - strict_comparison
+    - strict_param
 
 disabled:
-    - phpdoc_no_empty_return
-    - simplified_null_return
+    - phpdoc_no_empty_return # PHP7 compatibility
+    # This breaks for variable @var blocks
+    - phpdoc_to_comment
+    - phpdoc_var_without_name
 
 finder:
     path:

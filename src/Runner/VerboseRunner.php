@@ -112,7 +112,7 @@ final class VerboseRunner implements Runner
     /**
      * Formats the elapsed time as a string.
      *
-     * @link https://github.com/sebastianbergmann/php-timer/
+     * @see https://github.com/sebastianbergmann/php-timer/
      *
      * @param float $time
      *
@@ -126,7 +126,7 @@ final class VerboseRunner implements Runner
             if ($ms >= $value) {
                 $time = floor($ms / $value * 100.0) / 100.0;
 
-                return $time.' '.($time == 1 ? $unit : $unit.'s');
+                return $time.' '.($time === 1 ? $unit : $unit.'s');
             }
         }
 

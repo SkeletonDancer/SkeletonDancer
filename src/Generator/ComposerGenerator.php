@@ -50,7 +50,7 @@ final class ComposerGenerator implements Generator
                 'require-dev' => [],
                 'autoload' => [],
             ],
-            isset($configuration['composer']) ? $configuration['composer'] : []
+            $configuration['composer'] ?? []
         );
 
         if ('' === $configuration['composer']['homepage']) {

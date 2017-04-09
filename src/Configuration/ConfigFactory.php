@@ -66,7 +66,7 @@ final class ConfigFactory
         $config['current_dir'] = $this->currentDir;
 
         if ($this->currentDir !== $this->projectDirectory) {
-            $config['current_dir_relative'] = mb_substr($this->currentDir, strlen($this->projectDirectory) + 1);
+            $config['current_dir_relative'] = mb_substr($this->currentDir, mb_strlen($this->projectDirectory) + 1);
         }
 
         if (null !== $this->overwriteSetting) {

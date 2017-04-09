@@ -78,7 +78,7 @@ abstract class GeneratorTestCase extends \PHPUnit_Framework_TestCase
      */
     protected function getGeneratorClass(): string
     {
-        $class = substr(str_replace('\\Tests\\', '\\', get_class($this)), 0, -4);
+        $class = mb_substr(str_replace('\\Tests\\', '\\', get_class($this)), 0, -4);
 
         if (class_exists($class)) {
             return $class;

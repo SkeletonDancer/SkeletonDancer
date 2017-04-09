@@ -14,7 +14,6 @@ declare(strict_types=1);
 namespace Rollerworks\Tools\SkeletonDancer\Service;
 
 use Symfony\Component\Process\Exception\ProcessFailedException;
-use Symfony\Component\Process\Process;
 
 class Git
 {
@@ -117,6 +116,7 @@ class Git
     /**
      * @param string $config
      * @param string $section
+     * @param bool   $all
      *
      * @return string
      */

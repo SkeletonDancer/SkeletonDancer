@@ -43,7 +43,7 @@ class TwigTemplating
             new \Twig_SimpleFunction(
                 'doc_header',
                 function ($value, $format) {
-                    return $value."\n".str_repeat($format, strlen($value));
+                    return $value."\n".str_repeat($format, mb_strlen($value));
                 }
             )
         );
