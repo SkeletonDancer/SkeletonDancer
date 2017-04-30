@@ -1,16 +1,6 @@
 language: php
 
 php:
-{% if '5.4' == phpMin %}
-    - 5.4
-    - 5.5
-    - 5.6
-{% elseif '5.5' == phpMin %}
-    - 5.5
-    - 5.6
-{% elseif '5.6' == phpMin %}
-    - 5.6
-{% endif %}
     - 7.0
     - hhvm
 
@@ -19,6 +9,7 @@ matrix:
         - php: {{ phpMin }}
           env: DEPENDENCIES='low'
         - php: 7.0
+        - php: 7.1
           env: DEPENDENCIES='dev'
     allow_failures:
         - env: DEPENDENCIES='dev'

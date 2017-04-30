@@ -56,23 +56,6 @@ class Git
         $this->process->mustRun(['git', 'init']);
     }
 
-    public function addRemote($name, $url)
-    {
-        if (!$this->hasGitConfig('remote.'.$name.'.url')) {
-            $this->process->mustRun(['git', 'remote', 'add', $name, $url]);
-        } else {
-            $this->setGitConfig('remote.'.$name.'.url', $url, true);
-        }
-    }
-
-    public function updateGitIgnore($patterns, $append = true)
-    {
-    }
-
-    public function updateGitAttributes($patterns, $append = true)
-    {
-    }
-
     /**
      * @param string $config
      * @param string $section
