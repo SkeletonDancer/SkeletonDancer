@@ -22,7 +22,6 @@ final class Profile
     public $description = '';
     public $generators = [];
     public $configurators = [];
-    public $imports = [];
     public $variables = [];
     public $defaults = [];
 
@@ -30,14 +29,12 @@ final class Profile
         string $name,
         array $generators = [],
         array $configurators = [],
-        array $imports = [],
         array $variables = [],
         array $defaults = []
     ) {
         $this->name = $name;
         $this->generators = $generators;
         $this->configurators = $configurators;
-        $this->imports = $imports;
         $this->variables = $variables;
         $this->defaults = $defaults;
     }

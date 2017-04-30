@@ -48,7 +48,6 @@ final class ConfigurationTest extends \PHPUnit_Framework_TestCase
                         'second' => [
                             'generators' => ['one', 'two'],
                             'defaults' => ['bar' => 'foo', 'bla' => 'who'],
-                            'import' => ['import1', 'import2'],
                         ],
                     ],
                 ],
@@ -57,7 +56,6 @@ final class ConfigurationTest extends \PHPUnit_Framework_TestCase
                         'second' => [
                             'generators' => ['one2', 'two2'],
                             'defaults' => ['bla' => 'poo', 'sum' => 'something'],
-                            'import' => [],
                         ],
                     ],
                 ],
@@ -71,7 +69,6 @@ final class ConfigurationTest extends \PHPUnit_Framework_TestCase
                         'generators' => ['one1', 'two1'],
                         'configurators' => [],
                         'description' => '',
-                        'import' => [],
                         'variables' => [],
                         'defaults' => [],
                     ],
@@ -79,7 +76,6 @@ final class ConfigurationTest extends \PHPUnit_Framework_TestCase
                         'generators' => ['one2', 'two2'],
                         'configurators' => [],
                         'description' => '',
-                        'import' => [],
                         'variables' => [],
                         'defaults' => ['bar' => 'foo', 'bla' => 'poo', 'sum' => 'something'],
                     ],

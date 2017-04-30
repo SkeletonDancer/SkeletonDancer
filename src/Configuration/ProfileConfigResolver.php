@@ -18,8 +18,10 @@ use Rollerworks\Tools\SkeletonDancer\ResolvedProfile;
 
 final class ProfileConfigResolver
 {
+    /**
+     * @var Profile[]
+     */
     private $profiles;
-    private $loading = [];
 
     /**
      * @var ClassLoader
@@ -64,11 +66,10 @@ final class ProfileConfigResolver
         }
 
         $this->loader->clear();
-        $this->loading = [$profile];
 
-        $rootProfile = new Profile($profile, [], [], [], $this->variables, $this->defaults);
-        $this->processProfile($rootProfile, $this->profiles[$profile]);
-        $this->loading = [];
+        $rootProfile = clone $this->profiles[$profile];
+        $rootProfile->variables = array_merge($this->variables, $this->profiles[$profile]->variables);
+        $rootProfile->defaults = array_merge($this->defaults, $this->profiles[$profile]->defaults);
 
         $this->loader->loadGeneratorClasses(array_unique($rootProfile->generators));
         $this->loader->loadConfiguratorClasses(array_unique($rootProfile->configurators));
@@ -80,42 +81,5 @@ final class ProfileConfigResolver
             $rootProfile->variables,
             $rootProfile->defaults
         );
-    }
-
-    private function processProfile(Profile $base, Profile $profile)
-    {
-        if (count($profile->imports) > 0) {
-            $this->processImports($base, $profile->name, $profile->imports);
-        }
-
-        $base->generators = array_merge($base->generators, $profile->generators);
-        $base->configurators = array_merge($base->configurators, $profile->configurators);
-        $base->variables = array_merge($base->variables, $profile->variables);
-        $base->defaults = array_merge($base->defaults, $profile->defaults);
-    }
-
-    private function processImports(Profile $base, $name, array $imports)
-    {
-        foreach ($imports as $import) {
-            if (in_array($import, $this->loading, true)) {
-                throw new \InvalidArgumentException(
-                    sprintf(
-                        'Profile "%s" is already being imported by: "%s".',
-                        $import,
-                        implode('" -> "', $this->loading)
-                    )
-                );
-            }
-
-            if (!isset($this->profiles[$import])) {
-                throw new \InvalidArgumentException(
-                    sprintf('Unable to import unregistered profile "%s" for "%s".', $import, $name)
-                );
-            }
-
-            $this->loading[] = $import;
-
-            $this->processProfile($base, $this->profiles[$import]);
-        }
     }
 }

@@ -114,7 +114,6 @@ final class ProfileCommandHandler
 
         $row = [
             ['Description', $profile->description],
-            ['Import', $profile->imports ? implode(', ', $profile->imports) : '[ ]'],
             ['Generators', $profileConfig->generators ? '- '.implode("\n- ", array_map('get_class', $profileConfig->generators)) : '[ ]'],
             ['Configurators', $profileConfig->configurators ? '- '.implode("\n- ", array_map('get_class', $profileConfig->configurators)) : '[ ]'],
         ];
@@ -142,7 +141,6 @@ final class ProfileCommandHandler
     {
         $row = [
             ['Description', $profile->description],
-            ['Import', $profile->imports ? implode(', ', $profile->imports) : '[ ]'],
             ['Generators', $profile->generators ? '- '.implode("\n- ", $profile->generators) : '[ ]'],
             ['Configurators', $profile->configurators ? '- '.implode("\n- ", $profile->configurators) : '[ ]'],
         ];
