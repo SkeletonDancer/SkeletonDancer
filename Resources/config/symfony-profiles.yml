@@ -22,7 +22,7 @@ profiles:
     'symfony:shared-bundle':
         description: |
             Generates the structure of a shared (open-source) Symfony bundle.
-            With Git configuration, Gush configuration and Travis configuration set-up.
+            With Git and Travis configuration set-up.
         defaults:
             composer_type: symfony-bundle
         generators:
