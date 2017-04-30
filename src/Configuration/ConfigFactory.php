@@ -88,7 +88,6 @@ final class ConfigFactory
                 $name,
                 $config['generators'],
                 $config['configurators'],
-                $config['import'],
                 $config['variables'],
                 $config['defaults']
             );

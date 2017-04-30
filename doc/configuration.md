@@ -129,8 +129,6 @@ TBD.
 #     my-profile:
 #         # Give a nice description about what this profile does.
 #         description: Generates the directory structure of a custom module.
-#         # Optionally import other profiles
-#         # import: [ composer-package ]
 #
 #         # The variables of this profile.
 #         # This will be merged with the shared variables and variables from imported profiles.
