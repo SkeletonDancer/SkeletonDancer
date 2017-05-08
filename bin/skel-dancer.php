@@ -13,7 +13,7 @@ declare(strict_types=1);
 
 require __DIR__.'/../vendor/autoload.php';
 
-use Rollerworks\Tools\SkeletonDancer\Cli\DancerApplicationConfig;
+use SkeletonDancer\Cli\DancerApplicationConfig;
 
 \Symfony\Component\Debug\ErrorHandler::register();
 \Symfony\Component\Debug\DebugClassLoader::enable();

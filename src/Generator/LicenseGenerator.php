@@ -11,17 +11,15 @@ declare(strict_types=1);
  * with this source code in the file LICENSE.
  */
 
-namespace Rollerworks\Tools\SkeletonDancer\Generator;
+namespace SkeletonDancer\Generator;
 
-use Rollerworks\Tools\SkeletonDancer\Configurator\GeneralConfigurator;
-use Rollerworks\Tools\SkeletonDancer\Configurator\LicenseConfigurator;
-use Rollerworks\Tools\SkeletonDancer\Generator;
-use Rollerworks\Tools\SkeletonDancer\Service\Filesystem;
+use SkeletonDancer\Generator;
+use SkeletonDancer\Service\Filesystem;
 
 final class LicenseGenerator implements Generator
 {
-    private $filesystem;
     private $twig;
+    private $filesystem;
 
     public function __construct(\Twig_Environment $twig, Filesystem $filesystem)
     {
@@ -29,26 +27,28 @@ final class LicenseGenerator implements Generator
         $this->filesystem = $filesystem;
     }
 
-    public function generate(array $configuration)
+    public function generate(array $answers)
     {
-        $this->filesystem->dumpFile(
-            'LICENSE',
-            $this->twig->render(
-                'Licenses/'.mb_strtolower($configuration['license']).'.txt.twig',
-                [
-                    'productName' => $configuration['name'],
-                    'author' => [
-                        'name' => $configuration['author_name'],
-                        'email' => $configuration['author_email'],
-                    ],
-                    '_block' => 'file',
-                ]
-            )
-        );
-    }
+        if (!isset($answers['license'])) {
+            return self::STATUS_FAILURE;
+        }
 
-    public function getConfigurators()
-    {
-        return [GeneralConfigurator::class, LicenseConfigurator::class];
+        $filename = 'licenses/'.mb_strtolower(str_replace(['+', '-Clause'], '', $answers['license'])).'.txt';
+
+        if ($this->twig->getLoader()->exists($filename.'.twig')) {
+            $content = $this->twig->render(
+                $filename.'.twig',
+                [
+                    'author' => [
+                        'name' => $answers['author_name'],
+                        'email' => $answers['author_email'],
+                    ],
+                ]
+            );
+        } else {
+            $content = file_get_contents(__DIR__.'/../../templates/'.$filename);
+        }
+
+        $this->filesystem->dumpFile('LICENSE', $content);
     }
 }

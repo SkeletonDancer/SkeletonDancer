@@ -11,7 +11,7 @@ declare(strict_types=1);
  * with this source code in the file LICENSE.
  */
 
-namespace Rollerworks\Tools\SkeletonDancer;
+namespace SkeletonDancer;
 
 final class QuestionsSet
 {
@@ -26,26 +26,23 @@ final class QuestionsSet
     private $skipOptional;
 
     /**
-     * @var AnswersSet
+     * @var array
      */
-    private $answersSet;
+    private $answers = [];
 
-    public function __construct(\Closure $communicator, AnswersSet $answersSet, $skipOptional = true)
+    public function __construct(\Closure $communicator, $skipOptional = true)
     {
         $this->communicator = $communicator;
-        $this->answersSet = $answersSet;
         $this->skipOptional = $skipOptional;
     }
 
     public function communicate(string $name = null, Question $question)
     {
-        $this->answersSet->has($name);
-
-        if (null !== $name && $this->answersSet->has($name)) {
-            throw new \InvalidArgumentException(sprintf('Question with name "%s" already exists in the QuestionsSet.', $name));
+        if (null !== $name && array_key_exists($name, $this->answers)) {
+            throw new \InvalidArgumentException(sprintf('Answer "%s" already exists in the QuestionsSet.', $name));
         }
 
-        $default = $this->answersSet->resolve($name, $question->getDefault());
+        $default = $this->resolveDefault($question->getDefault());
 
         if ($this->skipOptional && $question->isOptional()) {
             $value = $default;
@@ -57,7 +54,7 @@ final class QuestionsSet
             $answer = $value;
             $value = $question->getNormalizer() ? call_user_func($question->getNormalizer(), $value) : $value;
 
-            $this->answersSet->set($name, $answer, $value);
+            $this->answers[$name] = $answer;
         }
 
         return $value;
@@ -65,44 +62,34 @@ final class QuestionsSet
 
     public function set(string $name, $value)
     {
-        return $this->answersSet->set($name, $value, $value);
+        if (array_key_exists($name, $this->answers)) {
+            throw new \InvalidArgumentException(sprintf('Answer "%s" already exists in the QuestionsSet.', $name));
+        }
+
+        return $this->answers[$name] = $value;
     }
 
     public function get(string $name, $default = null)
     {
-        return $this->answersSet->get($name, $default);
+        return array_key_exists($name, $this->answers) ? $this->answers[$name] : $default;
     }
 
     public function has(string $name): bool
     {
-        return $this->answersSet->has($name);
+        return array_key_exists($name, $this->answers);
     }
 
     public function getAnswers(): array
     {
-        return $this->answersSet->answers();
+        return $this->answers;
     }
 
-    /**
-     * Returns the finalized values.
-     *
-     * @param Configurator[] $configurators
-     *
-     * @return array
-     */
-    public function getFinalizedValues(array $configurators): array
+    private function resolveDefault($default = null)
     {
-        $values = $this->getValues();
-
-        foreach ($configurators as $finalizer) {
-            $finalizer->finalizeConfiguration($values);
+        if ($default instanceof \Closure) {
+            return $default($this->answers);
         }
 
-        return $values;
-    }
-
-    public function getValues(): array
-    {
-        return $this->answersSet->values();
+        return $default;
     }
 }

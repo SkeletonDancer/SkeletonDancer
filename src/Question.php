@@ -11,7 +11,7 @@ declare(strict_types=1);
  * with this source code in the file LICENSE.
  */
 
-namespace Rollerworks\Tools\SkeletonDancer;
+namespace SkeletonDancer;
 
 use Symfony\Component\Console\Question\ChoiceQuestion;
 use Symfony\Component\Console\Question\ConfirmationQuestion;
@@ -71,7 +71,7 @@ final class Question
      * @param string               $label
      * @param \Closure|string|null $default
      */
-    private function __construct(\Closure $question, $label, $default = null)
+    private function __construct(\Closure $question, string $label, $default = null)
     {
         $this->label = $label;
         $this->question = $question;
@@ -85,7 +85,7 @@ final class Question
      *
      * @return Question
      */
-    public static function ask($label, $default = null, $validator = true)
+    public static function ask(string $label, $default = null, $validator = true): Question
     {
         if (is_string($validator)) {
             $validator = function ($value) use ($validator) {
@@ -129,7 +129,7 @@ final class Question
      *
      * @return Question
      */
-    public static function choice($label, array $choices, $default = null)
+    public static function choice(string $label, array $choices, $default = null): Question
     {
         $question = function ($default, $help) use ($label, $choices) {
             if (null !== $default && !isset($choices[$default])) {
@@ -149,7 +149,7 @@ final class Question
      *
      * @return Question
      */
-    public static function multiChoice($label, array $choices, array $default = null)
+    public static function multiChoice(string $label, array $choices, array $default = null): Question
     {
         $question = function ($defaults, $help) use ($label, $choices) {
             if (null !== $defaults) {
@@ -177,7 +177,7 @@ final class Question
      *
      * @return Question
      */
-    public static function confirm($label, $default = true, $trueAnswerRegex = '/^y/i')
+    public static function confirm(string $label, $default = true, string $trueAnswerRegex = '/^y/i'): Question
     {
         $question = function ($default, $help) use ($label, $trueAnswerRegex) {
             return new ConfirmationQuestion($label.$help, $default, $trueAnswerRegex);
@@ -191,7 +191,7 @@ final class Question
      *
      * @return WrappedQuestion
      */
-    public function createQuestion($default)
+    public function createQuestion($default): WrappedQuestion
     {
         $question = $this->question;
         $help = $this->help ? ' ('.$this->help.')' : '';
@@ -204,10 +204,7 @@ final class Question
         return $actualQuestion;
     }
 
-    /**
-     * @return bool
-     */
-    public function isOptional()
+    public function isOptional(): bool
     {
         return $this->optional;
     }
@@ -223,9 +220,9 @@ final class Question
     /**
      * @param string|string[] $nullValues Value(s) that mark the value as null (empty)
      *
-     * @return $this
+     * @return Question
      */
-    public function markOptional($nullValues = null)
+    public function markOptional($nullValues = null): Question
     {
         if (null === $this->default && null === $nullValues) {
             throw new \InvalidArgumentException(
@@ -251,66 +248,49 @@ final class Question
         return $this;
     }
 
-    public function setHelp($text)
+    public function setHelp(string $text): Question
     {
         $this->help = $text;
 
         return $this;
     }
 
-    /**
-     * @return string
-     */
-    public function getLabel()
+    public function getLabel(): string
     {
         return $this->label;
     }
 
-    /**
-     * @return string|null
-     */
-    public function getHelp()
+    public function getHelp(): ?string
     {
         return $this->help;
     }
 
-    /**
-     * @param null|array|\Traversable $autosuggestionValues
-     *
-     * @return Question
-     */
-    public function setAutosuggestionValues($autosuggestionValues)
+    public function setAutosuggestionValues(?iterable $autosuggestionValues): Question
     {
         $this->autosuggestionValues = $autosuggestionValues;
 
         return $this;
     }
 
-    /**
-     * @param int|null $maxAttempts
-     *
-     * @return Question
-     */
-    public function setMaxAttempts($maxAttempts)
+    public function setMaxAttempts(int $maxAttempts = null): Question
     {
         $this->maxAttempts = $maxAttempts;
 
         return $this;
     }
 
-    /**
-     * @return int|null
-     */
-    public function getMaxAttempts()
+    public function getMaxAttempts(): ?int
     {
         return $this->maxAttempts;
     }
 
-    /**
-     * @return \Closure|null
-     */
-    public function getNormalizer()
+    public function getNormalizer(): ?\Closure
     {
         return $this->normalizer;
+    }
+
+    public function getValidator(): ?\Closure
+    {
+        return $this->validator;
     }
 }

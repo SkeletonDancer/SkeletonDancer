@@ -11,15 +11,12 @@ declare(strict_types=1);
  * with this source code in the file LICENSE.
  */
 
-namespace Rollerworks\Tools\SkeletonDancer\Service;
+namespace SkeletonDancer\Service;
 
 use Symfony\Component\Process\Exception\ProcessFailedException;
 
 class Git
 {
-    /**
-     * @var CliProcess
-     */
     private $process;
 
     public function __construct(CliProcess $process)
@@ -28,14 +25,14 @@ class Git
     }
 
     /**
-     * Returns whether the current directory is a Git directory.
+     * Returns whether the current directory is a Git repository.
      *
      * @param bool $requireRoot Require directory is the root of the Git repository,
      *                          default is true
      *
-     * @return bool Whether we are inside a git directory or not
+     * @return bool
      */
-    public function isGitDirectory($requireRoot = true)
+    public function isGitDirectory(bool $requireRoot = true): bool
     {
         try {
             $process = $this->process->mustRun(['git', 'rev-parse', '--show-toplevel']);
@@ -51,19 +48,12 @@ class Git
         return true;
     }
 
-    public function initRepo()
+    public function initRepo(): void
     {
         $this->process->mustRun(['git', 'init']);
     }
 
-    /**
-     * @param string $config
-     * @param string $section
-     * @param null   $expectedValue
-     *
-     * @return bool
-     */
-    public function hasGitConfig($config, $section = 'local', $expectedValue = null)
+    public function hasGitConfig(string $config, string $section = 'local', string $expectedValue = null): bool
     {
         $process = $this->process->run(['git', 'config', '--'.$section, '--get', $config]);
         $value = trim($process->getOutput());
@@ -75,35 +65,18 @@ class Git
         return true;
     }
 
-    /**
-     * @param string $config
-     * @param string $value
-     * @param bool   $overwrite
-     * @param string $section
-     */
-    public function setGitConfig($config, $value, $overwrite = false, $section = 'local')
+    public function setGitConfig(string $config, string $value, bool $overwrite = false)
     {
-        if ($this->hasGitConfig($config, $section, $value) && !$overwrite) {
+        if ($this->hasGitConfig($config, 'local', $value) && !$overwrite) {
             throw new \RuntimeException(
-                sprintf(
-                    'Unable to set git config "%s" at %s, because the value is already set.',
-                    $config,
-                    $section
-                )
+                sprintf('Unable to set git config "%s", because the value is already set.', $config)
             );
         }
 
-        $this->process->mustRun(['git', 'config', $config, $value, '--'.$section]);
+        $this->process->mustRun(['git', 'config', $config, $value, '--local']);
     }
 
-    /**
-     * @param string $config
-     * @param string $section
-     * @param bool   $all
-     *
-     * @return string
-     */
-    public function getGitConfig($config, $section = 'local', $all = false)
+    public function getGitConfig(string $config, string $section = 'local', bool $all = false): string
     {
         $process = $this->process->run(
             ['git', 'config', '--'.$section, '--'.($all ? 'get-all' : 'get'), $config]

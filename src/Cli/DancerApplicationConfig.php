@@ -11,12 +11,9 @@ declare(strict_types=1);
  * with this source code in the file LICENSE.
  */
 
-namespace Rollerworks\Tools\SkeletonDancer\Cli;
+namespace SkeletonDancer\Cli;
 
-use Rollerworks\Tools\SkeletonDancer\Container;
-use Rollerworks\Tools\SkeletonDancer\EventListener\AutoloadingSetupListener;
-use Rollerworks\Tools\SkeletonDancer\EventListener\ExpressionFunctionsProviderSetupListener;
-use Rollerworks\Tools\SkeletonDancer\EventListener\ProjectDirectorySetupListener;
+use SkeletonDancer\Container;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Webmozart\Console\Adapter\ArgsInput;
 use Webmozart\Console\Adapter\IOOutput;
@@ -24,7 +21,6 @@ use Webmozart\Console\Api\Args\Format\Argument;
 use Webmozart\Console\Api\Args\Format\Option;
 use Webmozart\Console\Api\Event\ConsoleEvents;
 use Webmozart\Console\Api\Event\PreHandleEvent;
-use Webmozart\Console\Api\Formatter\Style;
 use Webmozart\Console\Config\DefaultApplicationConfig;
 
 final class DancerApplicationConfig extends DefaultApplicationConfig
@@ -48,8 +44,12 @@ final class DancerApplicationConfig extends DefaultApplicationConfig
     {
         if (null === $container) {
             $parameters = [];
-            $parameters['current_dir'] = getcwd().'/';
-            $parameters['dancer_directory'] = null;
+            $parameters['current_dir'] = getcwd().DIRECTORY_SEPARATOR;
+            $parameters['dancers_directory'] = getenv('SKELETONDANCER_HOME') ?: getenv('HOME').'/.skeleton_dancer';
+
+            if (!is_dir($parameters['dancers_directory'])) {
+                mkdir($parameters['dancers_directory']);
+            }
 
             $container = new Container($parameters);
         }
@@ -69,90 +69,60 @@ final class DancerApplicationConfig extends DefaultApplicationConfig
         parent::configure();
 
         $this
-            ->setName('dancer')
+            ->setName('SkeletonDancer')
             ->setDisplayName('SkeletonDancer')
-            ->addOption(
-                'project-directory',
-                null,
-                Option::OPTIONAL_VALUE,
-                'The root directory of the project, this is where the ".dancer" directory is located. '.
-                'When omitted the directory is automatically searched by the first occurrence of the ".dancer" directory
-                in the parent directory structure, and falls back to the current working directory.'
-            )
-            ->addOption(
-                'config-file',
-                null,
-                Option::OPTIONAL_VALUE | Option::NULLABLE,
-                'Configuration file to load. When omitted the file `.dancer.yml` is automatically searched in the parent directory structure. Pass "null" to disable',
-                ''
-            )
-            ->addOption('overwrite', null, Option::REQUIRED_VALUE, 'Default operation for existing files: abort, skip, force, ask, backup')
-
             ->setVersion(self::VERSION)
-            ->setDebug('true' === getenv('SKELETON_DANCER_DEBUG'))
-            ->addStyle(Style::tag('good')->fgGreen())
-            ->addStyle(Style::tag('bad')->fgRed())
-            ->addStyle(Style::tag('warn')->fgYellow())
-            ->addStyle(Style::tag('hl')->fgGreen())
+            ->setDebug((bool) getenv('SKELETON_DANCER_DEBUG'))
         ;
 
         $this->addEventListener(
             ConsoleEvents::PRE_HANDLE,
             function (PreHandleEvent $event) {
                 // Set-up the IO for the Symfony Helper classes.
-                if (!isset($this->container['console_io'])) {
+                if (!isset($this->container['console.io'])) {
                     $io = $event->getIO();
                     $args = $event->getArgs();
 
                     $input = new ArgsInput($args->getRawArgs(), $args);
                     $input->setInteractive($io->isInteractive());
 
-                    $this->container['console_io'] = $io;
-                    $this->container['console_args'] = $args;
+                    $this->container['console.io'] = $io;
+                    $this->container['console.args'] = $args;
                     $this->container['sf.console_input'] = $input;
                     $this->container['sf.console_output'] = new IOOutput($io);
                 }
             }
         );
-        $this->addEventListener(ConsoleEvents::PRE_HANDLE, new ProjectDirectorySetupListener($this->container));
-        $this->addEventListener(ConsoleEvents::PRE_HANDLE, new AutoLoadingSetupListener($this->container));
-        $this->addEventListener(ConsoleEvents::PRE_HANDLE, new ExpressionFunctionsProviderSetupListener($this->container));
 
         $this
-            ->beginCommand('generate')
+            ->beginCommand('dance')
                 ->setDescription('Generates a new skeleton structure in the current directory')
-                ->addArgument('profile', Argument::OPTIONAL, 'The name of the profile')
+                ->addArgument('name', Argument::OPTIONAL, 'The name of the dance')
+                ->addOption('import', null, Option::OPTIONAL_VALUE, 'Answers file to use instead of asking (values must be normalized)')
                 ->addOption('all', null, Option::BOOLEAN, 'Ask all questions (including optional)')
                 ->addOption('dry-run', null, Option::BOOLEAN, 'Show what would have been executed, without actually executing')
-                ->setHandler(function () {
-                    return new Handler\GenerateCommandHandler(
-                        $this->container['style'],
-                        $this->container['config'],
-                        $this->container['profile_config_resolver'],
-                        $this->container['answers_set_factory']
-                    );
-                })
+                ->addOption('force-overwrite', null, Option::BOOLEAN, 'Overwrite existing files (instead of aborting)')
+                ->setHandler($this->container['command.dance'])
             ->end()
 
-            ->beginCommand('profile')
-                ->setDescription('Manage the profiles of your project')
-                ->setHandler(function () {
-                    return new Handler\ProfileCommandHandler(
-                        $this->container['style'],
-                        $this->container['profile_config_resolver'],
-                        $this->container['config']
-                    );
-                })
+            ->beginCommand('install')
+                ->setDescription('Installs a skeleton to your local system')
+                ->addArgument('name', Argument::REQUIRED | Argument::MULTI_VALUED, 'The name of the dance')
+                ->setHandler($this->container['command.install'])
+            ->end()
 
-                ->beginSubCommand('list')
-                    ->setHandlerMethod('handleList')
-                    ->markDefault()
-                ->end()
+            ->beginCommand('list')
+                ->setDescription('Shows a list of all the installed dances')
+                ->setHandler($this->container['command.dances'])
+                ->setHandlerMethod('handleList')
+            ->end()
 
-                ->beginSubCommand('show')
-                    ->addArgument('name', Argument::OPTIONAL, 'The name of the profile')
-                    ->setHandlerMethod('handleShow')
-                ->end()
+            ->beginCommand('show')
+                ->setDescription('Displays useful information about an installed dance')
+                ->addArgument('dance', Argument::OPTIONAL)
+                ->addOption('check-updates', null, Option::BOOLEAN, 'Check if there are new versions available')
+                ->setHandler($this->container['command.dances'])
+                ->setHandlerMethod('handleShow')
             ->end()
         ;
     }

@@ -11,24 +11,38 @@ declare(strict_types=1);
  * with this source code in the file LICENSE.
  */
 
-namespace Rollerworks\Tools\SkeletonDancer;
+namespace SkeletonDancer;
 
 final class StringUtil
 {
     /**
-     * A string to underscore.
+     * Split lines to an array.
      *
-     * @param string $id The string to underscore
+     * @param string $input
      *
-     * @return string The underscored string
+     * @return string[]
      */
-    public static function underscore($id)
+    public static function splitLines(string $input): array
+    {
+        $input = trim($input);
+
+        return ('' === $input) ? [] : preg_split('{\r?\n}', $input);
+    }
+
+    /**
+     * Converts to string to underscore.
+     *
+     * @param string $string
+     *
+     * @return string The under_scored string
+     */
+    public static function underscore(string $string): string
     {
         return mb_strtolower(
             preg_replace(
                 ['/([A-Z]+)([A-Z][a-z])/', '/([a-z\d])([A-Z])/'],
                 ['\\1_\\2', '\\1_\\2'],
-                str_replace('.', '_', $id)
+                str_replace('.', '_', $string)
             )
         );
     }
@@ -36,33 +50,37 @@ final class StringUtil
     /**
      * Camelizes a string.
      *
-     * @param string $id A string to camelize
+     * @param string $string
      *
-     * @return string The camelized string
+     * @return string The string in CamelCase
      */
-    public static function camelize($id)
+    public static function camelize(string $string): string
     {
-        return strtr(ucwords(strtr($id, ['_' => ' ', '.' => '_ ', '\\' => '_ '])), [' ' => '']);
+        return strtr(ucwords(strtr($string, ['_' => ' ', '.' => '_ ', '\\' => '_ '])), [' ' => '']);
     }
 
     /**
+     * Convert a string to camelCase (first character is lowercase).
+     *
+     * @param string $string
+     *
+     * @return string The string in snakeCase
+     */
+    public static function camelHumps(string $string): string
+    {
+        return lcfirst(self::camelize($string));
+    }
+
+    /**
+     * Humanize a string.
+     *
      * @param string $text
      *
      * @return string
      */
-    public static function humanize($text)
+    public static function humanize(string $text): string
     {
-        return trim(ucfirst(trim(mb_strtolower(preg_replace(['/((?<![-._])[A-Z])/', '/[\s]+/'], ['-$1', '-'], $text)))), '-');
-    }
-
-    public static function shortProductName($name)
-    {
-        return preg_replace('#[^\w\d_-]|\s#', '', ucfirst($name));
-    }
-
-    public static function vendorNamespace($name)
-    {
-        return strtr(ucwords(strtr($name, ['_' => ' ', '.' => '_ ', '\\' => '_ ', '-' => ' '])), [' ' => '']);
+        return ucfirst(mb_strtolower(trim(preg_replace(['/([A-Z])/', '/[_\s]+/'], ['_$1', ' '], $text))));
     }
 
     /**
@@ -76,7 +94,7 @@ final class StringUtil
      *
      * @return string
      */
-    public static function getNthDirname($path, $index, $default = '')
+    public static function getNthDirname(string $path, int $index, string $default = ''): string
     {
         $dirs = explode('/', rtrim(str_replace('\\', '/', $path), '/'));
 
@@ -84,41 +102,43 @@ final class StringUtil
             $index = count($dirs) - abs($index);
         }
 
-        if (isset($dirs[$index])) {
-            return $dirs[$index];
-        }
-
-        return $default;
-    }
-
-    public function camelizeMethodName(string $value): string
-    {
-        return lcfirst(self::camelize($value));
+        return $dirs[$index] ?? $default;
     }
 
     /**
      * Comment all lines with the character.
      *
-     * @param string $value
-     * @param string $char
+     * @param string $text
+     * @param string $comment Comment character(s)
      *
      * @return string
      */
-    public static function commentLines(string $value, string $char = '#'): string
+    public static function commentLines(string $text, string $comment = '#'): string
     {
-        return preg_replace("/\n|\r\n/", "\n$char", $value);
+        if ('' === $text) {
+            return '';
+        }
+
+        return $comment.preg_replace("/(\n|\r\n)/", "\\1$comment", $text);
     }
 
     /**
      * Indent all lines with n-level.
      *
-     * @param string $value
-     * @param int    $level
+     * @param string $text
+     * @param int    $level  Level of the indention (starting with 1)
+     * @param string $indent The indentation (eg. 4 space characters)
      *
      * @return string
      */
-    public static function indentLines(string $value, int $level = 1): string
+    public static function indentLines(string $text, int $level = 1, string $indent = '    '): string
     {
-        return preg_replace("/\n|\r\n/", "\n".str_repeat('    ', $level), $value);
+        if ('' === $text) {
+            return '';
+        }
+
+        $indentation = str_repeat($indent, $level);
+
+        return $indentation.preg_replace("/(\n|\r\n)/", '\\1'.$indentation, $text);
     }
 }

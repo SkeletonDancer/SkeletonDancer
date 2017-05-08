@@ -11,17 +11,14 @@ declare(strict_types=1);
  * with this source code in the file LICENSE.
  */
 
-namespace Rollerworks\Tools\SkeletonDancer;
+namespace SkeletonDancer;
 
 interface Questioner
 {
     /**
-     * @param Configurator[] $configurators
-     * @param bool           $skipOptional
-     * @param array          $variables
-     * @param array          $defaults
+     * Interacts with the QuestionsSet to set answers.
      *
-     * @return QuestionsSet
+     * @param QuestionsSet $questions
      */
-    public function interact(array $configurators, $skipOptional = true, array $variables = [], array $defaults = []): QuestionsSet;
+    public function interact(QuestionsSet $questions);
 }

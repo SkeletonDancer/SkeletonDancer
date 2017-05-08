@@ -1,7 +1,0 @@
-import:
-    - 'Config/file1.yml'
-
-defaults:
-    name: "Rollerworks SearchBundle"
-    doc_format2: "rst"
-    doc_format: "@doc_format2"

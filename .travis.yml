@@ -9,7 +9,7 @@ branches:
 matrix:
     include:
         - php: '7.1'
-          env: coverage=1
+          #env: coverage=1
         - php: '7.1'
           env: deps='dev'
 
@@ -33,6 +33,14 @@ script:
     - export SYMFONY_DEPRECATIONS_HELPER=strict
     - if [[ $coverage = 1 ]]; then phpdbg -qrr -dmemory_limit=-1 vendor/bin/phpunit  --verbose --coverage-php build/cov/coverage-phpunit.cov; else vendor/bin/phpunit --verbose; fi
     - if [[ $coverage = 1 ]]; then phpdbg -qrr phpcov.phar merge --clover build/logs/clover.xml build/cov; fi
+
+    - export SKELETONDANCER_HOME=/tmp/.dances
+    - export DANCE_BIN="php `pwd`/bin/skel-dancer.php"
+    - $DANCE_BIN install SkeletonDancer/test.dance -vvv
+    - $DANCE_BIN install SkeletonDancer/test.dance:v1.0.0 -vvv
+    - $DANCE_BIN install SkeletonDancer/test.dance:master -vvv
+    - $DANCE_BIN install SkeletonDancer/test.dance:v1.0.0 -vvv
+    - $DANCE_BIN dance SkeletonDancer/test
 
 after_success:
     - if [[ $coverage = 1 ]]; then travis_retry php coveralls.phar; fi

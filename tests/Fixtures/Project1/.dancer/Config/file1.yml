@@ -1,5 +1,0 @@
-import: [file2.yml]
-
-defaults:
-    name: "MyProject"
-    bla: who
