@@ -11,7 +11,7 @@ declare(strict_types=1);
  * with this source code in the file LICENSE.
  */
 
-namespace Rollerworks\Tools\SkeletonDancer\Service;
+namespace SkeletonDancer\Service;
 
 use Symfony\Component\Console\Helper\DebugFormatterHelper;
 use Symfony\Component\Console\Helper\HelperSet;
@@ -50,7 +50,7 @@ class CliProcess
      *
      * @return Process The process that ran
      */
-    public function run($cmd, $error = null, callable $callback = null, $verbosity = OutputInterface::VERBOSITY_VERY_VERBOSE)
+    public function run($cmd, $error = null, callable $callback = null, $verbosity = OutputInterface::VERBOSITY_VERY_VERBOSE): Process
     {
         return $this->processHelper->run($this->output, $cmd, $error, $callback, $verbosity);
     }
@@ -61,10 +61,10 @@ class CliProcess
      * This is identical to run() except that an exception is thrown if the process
      * exits with a non-zero exit code.
      *
-     * @param string|Process $cmd      An instance of Process or a command to run
-     * @param string|null    $error    An error message that must be displayed if something went wrong
-     * @param callable|null  $callback A PHP callback to run whenever there is some
-     *                                 output available on STDOUT or STDERR
+     * @param string|array|Process $cmd      An instance of Process or a command to run
+     * @param string|null          $error    An error message that must be displayed if something went wrong
+     * @param callable|null        $callback A PHP callback to run whenever there is some
+     *                                       output available on STDOUT or STDERR
      *
      * @throws ProcessFailedException
      *
@@ -72,7 +72,7 @@ class CliProcess
      *
      * @see run()
      */
-    public function mustRun($cmd, $error = null, callable $callback = null)
+    public function mustRun($cmd, $error = null, callable $callback = null): Process
     {
         return $this->processHelper->mustRun($this->output, $cmd, $error, $callback);
     }
@@ -85,7 +85,7 @@ class CliProcess
      *
      * @return callable
      */
-    public function wrapCallback(Process $process, callable $callback = null)
+    public function wrapCallback(Process $process, callable $callback = null): callable
     {
         return $this->processHelper->wrapCallback($this->output, $process, $callback);
     }

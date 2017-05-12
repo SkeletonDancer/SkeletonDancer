@@ -11,10 +11,10 @@ declare(strict_types=1);
  * with this source code in the file LICENSE.
  */
 
-namespace Rollerworks\Tools\SkeletonDancer\Generator;
+namespace SkeletonDancer\Generator;
 
-use Rollerworks\Tools\SkeletonDancer\Generator;
-use Rollerworks\Tools\SkeletonDancer\Service\Git;
+use SkeletonDancer\Generator;
+use SkeletonDancer\Service\Git;
 
 final class GitInitGenerator implements Generator
 {
@@ -25,15 +25,10 @@ final class GitInitGenerator implements Generator
         $this->git = $git;
     }
 
-    public function generate(array $configuration)
+    public function generate(array $answers)
     {
         if (!$this->git->isGitDirectory(false)) {
             $this->git->initRepo();
         }
-    }
-
-    public function getConfigurators()
-    {
-        return [];
     }
 }

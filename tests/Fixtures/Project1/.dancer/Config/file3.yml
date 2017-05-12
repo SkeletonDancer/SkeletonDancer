@@ -1,5 +1,0 @@
-import: [../invalid_imports.yml]
-
-defaults:
-    name: "MyProject"
-    bla: who

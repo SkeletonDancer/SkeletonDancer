@@ -11,10 +11,8 @@ declare(strict_types=1);
  * with this source code in the file LICENSE.
  */
 
-namespace Rollerworks\Tools\SkeletonDancer\Service;
+namespace SkeletonDancer\Service;
 
-use Symfony\Component\Console\Exception\RuntimeException;
-use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\Filesystem\Exception\IOException;
 use Symfony\Component\Filesystem\Filesystem as SfFilesystem;
 
@@ -22,44 +20,28 @@ use Symfony\Component\Filesystem\Filesystem as SfFilesystem;
  * Filesystem service for generators.
  *
  * This service is a wrapper around the Symfony Filesystem component.
- *
- * * All relative path's are resolved with the "current-directory".
- * * Depending on the configuration, overwriting existing files will eg.
- *   ask, abort, backup original, skip or continue the operation.
- * * Removing of files is not possible with this service, as generators should
- *   only generate content, not remove existing files.
+ * Removing files is not possible with this service, as generators should
+ * only generate content, not remove existing files.
  */
 class Filesystem
 {
     private $filesystem;
-    private $style;
-
-    /**
-     * @var string
-     */
     private $currentDir;
-
-    /**
-     * @var string
-     */
     private $overwrite;
 
-    /**
-     * @var array
-     */
-    private $paths;
-
-    public function __construct(SfFilesystem $filesystem, SymfonyStyle $style, array $paths, $overwrite = 'ask')
+    public function __construct(SfFilesystem $filesystem, string $currentDir, bool $overwrite = false)
     {
-        if (!isset($paths['currentDir'], $paths['projectDir'])) {
-            throw new \InvalidArgumentException('Missing "currentDir" and/or "projectDir" in provided paths.');
-        }
-
         $this->filesystem = $filesystem;
-        $this->style = $style;
-        $this->currentDir = $paths['currentDir'];
-        $this->paths = $paths;
+        $this->currentDir = $currentDir;
         $this->overwrite = $overwrite;
+    }
+
+    /**
+     * @return string
+     */
+    public function getCurrentDir(): string
+    {
+        return $this->currentDir;
     }
 
     /**
@@ -69,32 +51,25 @@ class Filesystem
      * If the target file is newer, it is overwritten only when the
      * $overwriteNewerFiles option is set to true.
      *
-     * @param string $originFile          The original filename
-     * @param string $targetFile          The target filename
-     * @param bool   $overwriteNewerFiles If true, target files newer than origin files are overwritten
+     * @param string $originFile The original filename
+     * @param string $targetFile The target filename
      */
-    public function copy($originFile, $targetFile, $overwriteNewerFiles = false)
+    public function copy($originFile, $targetFile)
     {
         $originFileFull = $this->resolvePath($originFile);
         $targetFileFull = $this->resolvePath($targetFile);
 
-        if ('force' !== $this->overwrite && file_exists($targetFileFull)) {
-            $doCopy = true;
-
-            if (!$overwriteNewerFiles && null === parse_url($originFileFull, PHP_URL_HOST)) {
-                $doCopy = filemtime($originFileFull) > filemtime($targetFileFull);
-            }
-
-            if (!$doCopy) {
+        if (file_exists($targetFileFull)) {
+            if (hash_file('sha1', $originFileFull) === hash_file('sha1', $targetFileFull)) {
                 return;
             }
 
-            if (!$this->fileExistsOperation($targetFileFull, $targetFile)) {
-                return;
+            if (!$this->overwrite) {
+                throw new IOException(sprintf('File "%s" already exists. Aborted.', $targetFileFull));
             }
         }
 
-        $this->filesystem->copy($originFileFull, $targetFileFull, $overwriteNewerFiles);
+        $this->filesystem->copy($originFileFull, $targetFileFull);
     }
 
     /**
@@ -187,15 +162,11 @@ class Filesystem
      * @param string       $originDir The origin directory
      * @param string       $targetDir The target directory
      * @param \Traversable $iterator  A Traversable instance
-     * @param array        $options   An array of boolean options
-     *                                Valid options are:
-     *                                - $options['override'] Whether to override an existing file on copy or not (see copy())
      */
-    public function mirror($originDir, $targetDir, \Traversable $iterator = null, $options = [])
+    public function mirror($originDir, $targetDir, \Traversable $iterator = null)
     {
         $targetDirFull = realpath($this->resolvePath($targetDir));
         $originDirFull = realpath($this->resolvePath($originDir));
-        $override = $options['override'] ?? false;
 
         if (null === $iterator) {
             $iterator = new \RecursiveIteratorIterator(
@@ -214,7 +185,7 @@ class Filesystem
             $target = str_replace($originDirFull, $targetDirFull, $file->getPathname());
 
             if (is_file($file)) {
-                $this->copy($file, $target, $override);
+                $this->copy($file, $target);
             } elseif (is_dir($file)) {
                 $this->filesystem->mkdir($target);
             } else {
@@ -236,17 +207,38 @@ class Filesystem
     {
         $file = $this->resolvePath($filename);
 
-        if (file_exists($file) &&
-            (file_get_contents($file) === $content || !$this->fileExistsOperation($file, $filename))
-        ) {
+        if (file_exists($file) && file_get_contents($file) === $content) {
             return;
         }
 
-        if ($this->style->isVeryVerbose()) {
-            $this->style->comment('Dumping to file: '.$file);
+        if (file_exists($file) && !$this->overwrite) {
+            throw new IOException(sprintf('File "%s" already exists. Aborted.', $file));
         }
 
         $this->filesystem->dumpFile($file, $content);
+    }
+
+    /**
+     * Reads the contents of a file.
+     *
+     * @param string $filename
+     * @param bool   $allowMissing
+     *
+     * @return null|string
+     */
+    public function readFile(string $filename, bool $allowMissing = false): ?string
+    {
+        $file = $this->resolvePath($filename);
+
+        if (!file_exists($file)) {
+            if (!$allowMissing) {
+                throw new IOException(sprintf('File "%s" does not exist.', $file));
+            }
+
+            return null;
+        }
+
+        return file_get_contents($file);
     }
 
     /**
@@ -266,82 +258,11 @@ class Filesystem
             return $name;
         }
 
-        if ('@' !== $name[0]) {
-            return $this->currentDir.'/'.$name;
-        }
-
         if (false !== mb_strpos($name, '..')) {
             throw new \RuntimeException(sprintf('Path "%s" contains invalid characters (..).', $name));
         }
 
-        $dirPointer = mb_substr($name, 1, mb_strpos($name, '/') - 1);
-
-        if (!isset($this->paths[$dirPointer])) {
-            throw new \InvalidArgumentException(
-                sprintf('Unable to resolve unknown directory-pointer "%s" for "%s".', $dirPointer, $name)
-            );
-        }
-
-        $resolvedPath = substr_replace($name, $this->paths[$dirPointer], 0, mb_strlen($dirPointer) + 1);
-
-        return $resolvedPath;
-    }
-
-    private function fileExistsOperation($targetFile, $filename)
-    {
-        $overwrite = $this->overwrite;
-
-        if ('ask' === $this->overwrite) {
-            $options = ['a' => 'abort', 's' => 'skip', 'y' => 'overwrite', 'b' => 'backup'];
-            $overwrite = $options[$this->style->choice(
-                sprintf('File "%s" already exists, what to do?', $filename),
-                $options,
-                'abort'
-            )];
-        }
-
-        switch ($overwrite) {
-            case 'abort':
-                throw new \RuntimeException(sprintf('File "%s" already exists. Aborted.', $filename));
-            case 'skip':
-                if ($this->style->isVerbose()) {
-                    $this->style->note(sprintf('File "%s" already exists. Ignoring.', $filename));
-                }
-
-                return false;
-            case 'backup':
-                $this->createFileBackup($targetFile, $targetFile);
-                break;
-        }
-
-        return true;
-    }
-
-    private function createFileBackup($origFile, $filename)
-    {
-        $backupFile = $backupFilePattern = $origFile.'.bak';
-        $i = 0;
-
-        while (file_exists($backupFile)) {
-            if ($i > 10) {
-                throw new RuntimeException(
-                    sprintf('More then 10 back-up files exist for "%s", aborting.', $origFile)
-                );
-            }
-
-            $backupFile = $backupFilePattern.$i;
-
-            ++$i;
-        }
-
-        $this->filesystem->copy($origFile, $backupFile, true);
-        $this->style->note(
-            sprintf(
-                'Original file "%s" backed-up as "%s".',
-                $this->removePrefix($filename),
-                $this->removePrefix($backupFile)
-            )
-        );
+        return $this->currentDir.'/'.$name;
     }
 
     /**
@@ -356,21 +277,5 @@ class Filesystem
         }
 
         return $files;
-    }
-
-    /**
-     * @internal
-     *
-     * @param string $name
-     *
-     * @return string
-     */
-    private function removePrefix($name)
-    {
-        if (!$this->filesystem->isAbsolutePath($name)) {
-            return $name;
-        }
-
-        return mb_substr($name, mb_strlen($this->paths['projectDir']) + 1);
     }
 }

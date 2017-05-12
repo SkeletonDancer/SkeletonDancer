@@ -1,4 +1,0 @@
-defaults:
-    name: "Rollerworks SearchBundle"
-    doc_format2: "rst"
-    doc_format: "@doc_format2"

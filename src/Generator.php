@@ -11,10 +11,14 @@ declare(strict_types=1);
  * with this source code in the file LICENSE.
  */
 
-namespace Rollerworks\Tools\SkeletonDancer;
+namespace SkeletonDancer;
 
 interface Generator
 {
+    public const STATUS_SUCCESS = 0;
+    public const STATUS_SKIPPED = 1;
+    public const STATUS_FAILURE = 2;
+
     /**
      * Generates the file within the projects directory.
      *
@@ -22,17 +26,4 @@ interface Generator
      *                             generator
      */
     public function generate(array $configuration);
-
-    /**
-     * Returns a list of configurators that this generator depends on.
-     *
-     * Note. Only the configurators "THIS" generator depends on
-     * must be listed. Parent configurators are already loaded.
-     *
-     * The complete list of configurators is merged and sorted
-     * in the correct order later.
-     *
-     * @return string[]
-     */
-    public function getConfigurators();
 }

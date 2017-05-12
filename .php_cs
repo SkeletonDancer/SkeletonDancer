@@ -41,6 +41,7 @@ return PhpCsFixer\Config::create()
         'phpdoc_to_comment' => false,
         'phpdoc_var_without_name' => false,
         'semicolon_after_instruction' => true,
+        'single_import_per_statement' => false,
         'strict_comparison' => true,
         'strict_param' => true,
     ))

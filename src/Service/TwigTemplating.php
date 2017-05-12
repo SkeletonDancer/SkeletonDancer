@@ -11,33 +11,27 @@ declare(strict_types=1);
  * with this source code in the file LICENSE.
  */
 
-namespace Rollerworks\Tools\SkeletonDancer\Service;
+namespace SkeletonDancer\Service;
 
-use Rollerworks\Tools\SkeletonDancer\Configuration\Config;
-use Rollerworks\Tools\SkeletonDancer\StringUtil;
+use SkeletonDancer\Dance;
+use SkeletonDancer\StringUtil;
 use Symfony\Component\Yaml\Yaml;
 
 class TwigTemplating
 {
-    private $config;
-
-    public function __construct(Config $config)
+    public function create(Dance $dance): \Twig_Environment
     {
-        $this->config = $config;
-    }
+        $loader = new \Twig_Loader_Filesystem(__DIR__.'/../../templates');
+        $loader->addPath($dance->directory.'/templates');
 
-    public function create(string $profile = ''): \Twig_Environment
-    {
         $twig = new \Twig_Environment(
-            $loader = new \Twig_Loader_Filesystem(__DIR__.'/../../Resources/Templates'),
+            $loader,
             [
                 'debug' => true,
                 'cache' => new \Twig_Cache_Filesystem(sys_get_temp_dir().'/twig'),
                 'strict_variables' => true,
             ]
         );
-
-        $this->configureLoader($loader, $profile);
 
         $twig->addFunction(
             new \Twig_SimpleFunction(
@@ -54,7 +48,7 @@ class TwigTemplating
                 function ($value) {
                     return str_replace('\\\\', '\\', $value);
                 },
-                ['is_safe' => ['html', 'yml']]
+                ['is_safe' => ['html', 'yml', 'yaml']]
             )
         );
 
@@ -85,7 +79,7 @@ class TwigTemplating
             new \Twig_SimpleFilter(
                 'escape_namespace',
                 'addslashes',
-                ['is_safe' => ['html', 'yml']]
+                ['is_safe' => ['html', 'yml', 'yaml']]
             )
         );
 
@@ -116,22 +110,5 @@ class TwigTemplating
         );
 
         return $twig;
-    }
-
-    private function configureLoader(\Twig_Loader_Filesystem $loader, string $profile)
-    {
-        if (null === $dancerDir = $this->config->get('dancer_directory')) {
-            return;
-        }
-
-        if (is_dir($dancerDir.'/templates')) {
-            $loader->prependPath($dancerDir.'/templates');
-        }
-
-        $profile = str_replace(':', '_', $profile);
-
-        if ('' !== $profile && is_dir($dancerDir.'/templates/'.$profile)) {
-            $loader->addPath($dancerDir.'/templates/'.$profile);
-        }
     }
 }

@@ -11,21 +11,18 @@ declare(strict_types=1);
  * with this source code in the file LICENSE.
  */
 
-namespace Rollerworks\Tools\SkeletonDancer;
+namespace SkeletonDancer;
 
 /**
  * A Runner executes the.
  */
 interface Runner
 {
-    public function skipOptional(): bool;
-
     /**
-     * Execute the runner with the profile.
+     * Execute the runner with the dance.
      *
-     * @param ResolvedProfile $profile
-     * @param Generator[]     $generators
-     * @param QuestionsSet    $answers
+     * @param Dance        $dance
+     * @param QuestionsSet $answers
      */
-    public function run(ResolvedProfile $profile, array $generators, QuestionsSet $answers);
+    public function run(Dance $dance, QuestionsSet $answers);
 }

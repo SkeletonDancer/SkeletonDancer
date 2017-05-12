@@ -11,7 +11,7 @@ declare(strict_types=1);
  * with this source code in the file LICENSE.
  */
 
-namespace Rollerworks\Tools\SkeletonDancer;
+namespace SkeletonDancer;
 
 use Pimple\Container as ServiceLocator;
 
@@ -27,7 +27,7 @@ final class ClassInitializer
         $this->container = $container;
     }
 
-    public function getNewInstance($className)
+    public function getNewInstance(string $className, string $expectedClass = null)
     {
         $r = new \ReflectionClass($className);
 
@@ -39,10 +39,16 @@ final class ClassInitializer
                 $instanceArguments[] = $this->resolveArgument($parameter);
             }
 
-            return new $className(...$instanceArguments);
+            $instance = new $className(...$instanceArguments);
+        } else {
+            $instance = new $className();
         }
 
-        return new $className();
+        if (null !== $expectedClass && !$instance instanceof $expectedClass) {
+            throw new \InvalidArgumentException(sprintf('Class "%s" is expected to implement "%s".', $className, $expectedClass));
+        }
+
+        return $instance;
     }
 
     private function resolveArgument(\ReflectionParameter $parameter)
