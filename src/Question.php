@@ -67,9 +67,9 @@ final class Question
     /**
      * GenericQuestion constructor.
      *
-     * @param \Closure             $question
-     * @param string               $label
-     * @param \Closure|string|null $default
+     * @param \Closure $question
+     * @param string   $label
+     * @param mixed    $default
      */
     private function __construct(\Closure $question, string $label, $default = null)
     {

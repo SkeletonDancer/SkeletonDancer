@@ -52,6 +52,7 @@ class Installer
     public function install(string $name, ?string $version = null): ?Dance
     {
         $gitPath = $this->executableFinder->find('git');
+        $message = '';
 
         if (null === $gitPath) {
             throw new \InvalidArgumentException(sprintf(

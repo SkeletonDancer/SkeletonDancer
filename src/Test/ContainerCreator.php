@@ -27,7 +27,7 @@ use Webmozart\Console\Api\Args\Format\Option;
  * Method annotations to suppress analyzer warnings.
  *
  * @method prophesize($class)
- * @method getMockWithoutInvokingTheOriginalConstructor($class)
+ * @method createMock($class)
  */
 trait ContainerCreator
 {
@@ -71,7 +71,7 @@ trait ContainerCreator
         $this->container['console.args'] = (new Args($format))->setOption('overwrite', 'force');
 
         $this->container['style'] = function () {
-            return $this->getMockWithoutInvokingTheOriginalConstructor(SymfonyStyle::class);
+            return $this->createMock(SymfonyStyle::class);
         };
 
         $this->container['filesystem'] = function () {
