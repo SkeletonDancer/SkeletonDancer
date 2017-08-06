@@ -21,8 +21,6 @@ use Symfony\Component\Debug\DebugClassLoader;
  * See http://www.php-fig.org/psr/psr-4/
  *
  * @author Alexander M. Turek <me@derrabus.de>
- *
- * @internal
  */
 class Psr4ClassLoader
 {

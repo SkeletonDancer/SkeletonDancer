@@ -242,8 +242,6 @@ class Filesystem
     }
 
     /**
-     * @internal
-     *
      * @param string $name
      *
      * @return string

@@ -16,9 +16,6 @@ namespace SkeletonDancer\Autoloading;
 use SkeletonDancer\Container;
 use SkeletonDancer\Dance;
 
-/**
- * @internal
- */
 final class AutoloadingSetup
 {
     /**

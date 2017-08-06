@@ -20,7 +20,6 @@ use SkeletonDancer\Questioner;
 use SkeletonDancer\QuestionInteractor;
 use SkeletonDancer\QuestionsSet;
 
-/** @internal */
 final class UsingDefaultsProvidedQuestionInteractor implements QuestionInteractor
 {
     private $classInitializer;
