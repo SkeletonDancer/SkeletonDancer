@@ -43,8 +43,11 @@ final class AutoloadingSetup
             return $danceDirectory.trim($dir, '\\/');
         };
 
-        foreach ($dance->autoloading['psr-4'] ?? [] as $prefix => $dir) {
-            $this->classLoader->addPrefix($prefix, $dirPrefixer($dir));
+        foreach ($dance->autoloading['psr-4'] ?? [] as $prefix => $dirs) {
+            $dirs = (array) $dirs;
+            foreach ($dirs as $dir) {
+                $this->classLoader->addPrefix($prefix, $dirPrefixer($dir));
+            }
         }
 
         foreach ($dance->autoloading['files'] ?? [] as $file) {
