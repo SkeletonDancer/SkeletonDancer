@@ -16,12 +16,12 @@ namespace SkeletonDancer\Tests;
 use PHPUnit\Framework\TestCase;
 use SkeletonDancer\Configuration\Loader;
 use SkeletonDancer\Dance;
-use SkeletonDancer\Dances;
+use SkeletonDancer\LocalDances;
 use SkeletonDancer\Test\OutputAssertionTrait;
 use Symfony\Component\Filesystem\Exception\IOException;
 use Webmozart\Console\IO\BufferedIO;
 
-final class DancesTest extends TestCase
+final class LocalDancesTest extends TestCase
 {
     use OutputAssertionTrait;
 
@@ -31,14 +31,14 @@ final class DancesTest extends TestCase
     private $io;
 
     /**
-     * @var Dances
+     * @var LocalDances
      */
     private $dances;
 
     protected function setUp(): void
     {
         $this->io = new BufferedIO();
-        $this->dances = new Dances(__DIR__.'/Fixtures/Dances', $this->io, new Loader());
+        $this->dances = new LocalDances(__DIR__.'/Fixtures/LocalDances/somewhere/over/the', $this->io, new Loader());
     }
 
     /** @test */
@@ -54,9 +54,9 @@ final class DancesTest extends TestCase
     public function it_throws_exception_when_dances_directory_does_not_exist()
     {
         $this->expectException(IOException::class);
-        $this->expectExceptionMessage('Directory "/NOT" does not exist.');
+        $this->expectExceptionMessage('No local ".dances" directory could be found.');
 
-        $this->dances = new Dances('/NOT', $this->io, new Loader());
+        $this->dances = new LocalDances('/NOT', $this->io, new Loader());
     }
 
     /** @test */
@@ -66,65 +66,47 @@ final class DancesTest extends TestCase
         self::assertFalse($this->dances->has('dummy'));
         self::assertFalse($this->dances->has('skeletondancer/dummy'));
         self::assertFalse($this->dances->has('skeletondancer/corrupted'));
-        self::assertFalse($this->dances->has('skeletondancer/corrupted2'));
-        self::assertTrue($this->dances->has('skeletondancer/empty'));
+        self::assertFalse($this->dances->has('corrupted2'));
+        self::assertTrue($this->dances->has('empty'));
     }
 
     /** @test */
-    public function it_gets_an_installed_dance()
+    public function it_returns_all_installed_local_dances()
     {
-        $dance = new Dance(
-            'skeletondancer/empty',
-            __DIR__.'/Fixtures/Dances/skeletondancer/empty',
-            [],
-            ['SkeletonDancer\\Generator\\GitInitGenerator']
-        );
-        $dance->title = 'Empty SkeletonDancer Dance project';
-        $dance->description = 'Empty SkeletonDancer Dance project';
+        $dancesDirectory = __DIR__.'/Fixtures/LocalDances/.dances';
 
-        self::assertEquals($dance, $this->dances->get('skeletondancer/empty'));
-    }
-
-    /** @test */
-    public function it_returns_all_installed_dances()
-    {
-        $dancesDirectory = __DIR__.'/Fixtures/Dances';
         $content = [
             <<<TAG
-Dance "skeletondancer/corrupted" is damaged: Missing .git directory in "{$dancesDirectory}/skeletondancer/corrupted"
+Dance "corrupted" is damaged: Config file ".dance.json" does not exist in "{$dancesDirectory}/corrupted.dance"
 TAG
 ,
             <<<TAG
-Dance "skeletondancer/corrupted2" is damaged: Config file ".dance.json" does not exist in "{$dancesDirectory}/skeletondancer/corrupted2"
-TAG
-,
-            <<<TAG
-Dance "skeletondancer/corrupted3" is damaged: Invalid configuration in "{$dancesDirectory}/skeletondancer/corrupted3/.dance.json":
+Dance "corrupted6" is damaged: Invalid configuration in "{$dancesDirectory}/corrupted6.dance/.dance.json":
       * [title] The property title is required
       * [description] The property description is required
       * [generators] The property generators is required
 TAG
-,
+            ,
             <<<TAG
-Dance "skeletondancer/corrupted4" is damaged: Parse error on line 2:
+Dance "corrupted5" is damaged: Parse error on line 2:
     ...   "questioners": [}
     ---------------------^
     Expected one of: 'STRING', 'NUMBER', 'NULL', 'TRUE', 'FALSE', '{', '[', ']'
-    in {$dancesDirectory}/skeletondancer/corrupted4/.dance.json
+    in {$dancesDirectory}/corrupted5.dance/.dance.json
 TAG
         ];
 
         self::assertDisplayMatches($content, false, $this->io->fetchErrors());
 
         $dance = new Dance(
-            'skeletondancer/empty',
-            $dancesDirectory.'/skeletondancer/empty',
+            'empty',
+            $dancesDirectory.'/empty.dance',
             [],
             ['SkeletonDancer\\Generator\\GitInitGenerator']
         );
         $dance->title = 'Empty SkeletonDancer Dance project';
         $dance->description = 'Empty SkeletonDancer Dance project';
 
-        self::assertEquals(['skeletondancer/empty' => $dance], $this->dances->all());
+        self::assertEquals(['empty' => $dance], $this->dances->all());
     }
 }

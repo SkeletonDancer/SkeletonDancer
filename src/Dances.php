@@ -19,9 +19,9 @@ use Webmozart\Console\Api\IO\IO;
 
 class Dances
 {
-    private $dancesDirectory;
-    private $dances = [];
-    private $loader;
+    protected $dancesDirectory;
+    protected $dances = [];
+    protected $loader;
 
     public function __construct(string $dancesDirectory, IO $io, Loader $loader)
     {
@@ -30,27 +30,7 @@ class Dances
         }
 
         $this->loader = $loader;
-
-        foreach (new \DirectoryIterator($dancesDirectory) as $node) {
-            if (!$node->isDir() || $node->isDot()) {
-                continue;
-            }
-
-            $vendorName = $node->getFilename();
-
-            foreach (new \DirectoryIterator($dancesDirectory.'/'.$vendorName) as $danceRepo) {
-                if (!$danceRepo->isDir() || $danceRepo->isDot()) {
-                    continue;
-                }
-
-                $name = $vendorName.'/'.$danceRepo->getFilename();
-
-                if (null !== $dance = $this->buildConfiguration($dancesDirectory, $io, $name)) {
-                    $this->dances[$name] = $dance;
-                }
-            }
-        }
-        $this->dancesDirectory = $dancesDirectory;
+        $this->loadDances($dancesDirectory, $io);
     }
 
     public function has(string $name): bool
@@ -89,6 +69,11 @@ class Dances
             return null;
         }
 
+        return $this->buildDance($danceDirectory, $io, $name);
+    }
+
+    protected function buildDance(string $danceDirectory, IO $io, string $name): ?Dance
+    {
         try {
             return $this->loader->load($danceDirectory, $name);
         } catch (\Exception $e) {
@@ -100,5 +85,29 @@ class Dances
 
             return null;
         }
+    }
+
+    private function loadDances(string $dancesDirectory, IO $io): void
+    {
+        foreach (new \DirectoryIterator($dancesDirectory) as $node) {
+            if (!$node->isDir() || $node->isDot()) {
+                continue;
+            }
+
+            $vendorName = $node->getFilename();
+
+            foreach (new \DirectoryIterator($dancesDirectory.'/'.$vendorName) as $danceRepo) {
+                if (!$danceRepo->isDir() || $danceRepo->isDot()) {
+                    continue;
+                }
+
+                $name = $vendorName.'/'.$danceRepo->getFilename();
+
+                if (null !== $dance = $this->buildConfiguration($dancesDirectory, $io, $name)) {
+                    $this->dances[$name] = $dance;
+                }
+            }
+        }
+        $this->dancesDirectory = $dancesDirectory;
     }
 }

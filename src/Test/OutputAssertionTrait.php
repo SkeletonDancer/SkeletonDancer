@@ -42,7 +42,17 @@ trait OutputAssertionTrait
 
     protected function assertOutputMatches($expectedLines, bool $regex = false)
     {
-        $output = preg_replace('/\s!\s/', ' ', trim($this->getDisplay()));
+        self::assertDisplayMatches($expectedLines, $regex, $this->getDisplay());
+    }
+
+    protected function assertOutputNotMatches($expectedLines, bool $regex = false)
+    {
+        self::assertDisplayNotMatches($expectedLines, $regex, $this->getDisplay());
+    }
+
+    protected static function assertDisplayMatches($expectedLines, bool $regex, string $display): void
+    {
+        $output = preg_replace('/\s!\s/', ' ', trim($display));
         $expectedLines = (array) $expectedLines;
 
         foreach ($expectedLines as $matchLine) {
@@ -61,9 +71,9 @@ trait OutputAssertionTrait
         }
     }
 
-    protected function assertOutputNotMatches($expectedLines, bool $regex = false)
+    protected static function assertDisplayNotMatches($expectedLines, bool $regex, string $display): void
     {
-        $output = preg_replace('/\s!\s/', ' ', trim($this->getDisplay()));
+        $output = preg_replace('/\s!\s/', ' ', trim($display));
         $expectedLines = (array) $expectedLines;
 
         foreach ($expectedLines as $matchLine) {
