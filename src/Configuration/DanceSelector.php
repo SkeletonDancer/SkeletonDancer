@@ -46,11 +46,15 @@ final class DanceSelector
             throw new \InvalidArgumentException('Oh no there are no dances! Please install a dance before you continue');
         }
 
-        if (!$selectedDance && null === $selectedDance = $this->style->choice('Dance', $dances = array_keys($dances))) {
+        if (!$selectedDance && $this->container['sf.console_input']->isInteractive()) {
+            $selectedDance = $this->style->choice('Dance', $dances = array_keys($dances));
+        }
+
+        if (!$selectedDance) {
             throw new \InvalidArgumentException(
                 (null === $dance ? 'No Dance selected. ' : 'Dance "'.$dance.'" is not installed. ').
                 'Installed: '.
-                implode(', ', $dances)
+                implode(', ', array_keys($dances))
             );
         }
 

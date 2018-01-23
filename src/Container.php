@@ -32,6 +32,11 @@ class Container extends \Pimple\Container
         parent::__construct($values);
 
         $this['.dances'] = function (Container $container) {
+            $args = $container['console.args'];
+            if ($args->isOptionDefined('local') && $args->getOption('local')) {
+                return new LocalDances(getcwd(), $container['console.io'], new Loader());
+            }
+
             return new Dances($container['dancers_directory'], $container['console.io'], new Loader());
         };
 

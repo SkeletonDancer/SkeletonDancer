@@ -101,6 +101,7 @@ final class DancerApplicationConfig extends DefaultApplicationConfig
                 ->addOption('import', null, Option::OPTIONAL_VALUE, 'Answers file to use instead of asking (values must be normalized)')
                 ->addOption('all', null, Option::BOOLEAN, 'Ask all questions (including optional)')
                 ->addOption('dry-run', null, Option::BOOLEAN, 'Show what would have been executed, without actually executing')
+                ->addOption('local', null, Option::BOOLEAN, 'Use a local dance (searched in a higher directory till a .dances directory is found)')
                 ->addOption('force-overwrite', null, Option::BOOLEAN, 'Overwrite existing files (instead of aborting)')
                 ->setHandler($this->container['command.dance'])
             ->end()
@@ -113,6 +114,7 @@ final class DancerApplicationConfig extends DefaultApplicationConfig
 
             ->beginCommand('list')
                 ->setDescription('Shows a list of all the installed dances')
+                ->addOption('local', null, Option::BOOLEAN, 'Use a local dance (searched in a higher directory till a .dances directory is found)')
                 ->setHandler($this->container['command.dances'])
                 ->setHandlerMethod('handleList')
             ->end()
@@ -121,6 +123,7 @@ final class DancerApplicationConfig extends DefaultApplicationConfig
                 ->setDescription('Displays useful information about an installed dance')
                 ->addArgument('dance', Argument::OPTIONAL)
                 ->addOption('check-updates', null, Option::BOOLEAN, 'Check if there are new versions available')
+                ->addOption('local', null, Option::BOOLEAN, 'Use a local dance (searched in a higher directory till a .dances directory is found)')
                 ->setHandler($this->container['command.dances'])
                 ->setHandlerMethod('handleShow')
             ->end()
