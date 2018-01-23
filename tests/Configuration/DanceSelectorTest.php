@@ -146,8 +146,10 @@ final class DanceSelectorTest extends TestCase
         );
 
         $this->container = new Container();
+        $selector = new DanceSelector($dances->reveal(), $this->createStyle($input, $interactive), $this->container);
+        $this->container['sf.console_input'] = $this->input;
 
-        return new DanceSelector($dances->reveal(), $this->createStyle($input, $interactive), $this->container);
+        return $selector;
     }
 
     /**
