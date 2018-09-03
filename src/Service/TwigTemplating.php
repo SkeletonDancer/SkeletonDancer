@@ -22,7 +22,7 @@ class TwigTemplating
     public function create(Dance $dance): \Twig_Environment
     {
         $loader = new \Twig_Loader_Filesystem(__DIR__.'/../../templates');
-        $loader->addPath($dance->directory.'/templates');
+        $loader->prependPath($dance->directory.'/templates');
 
         $twig = new \Twig_Environment(
             $loader,
