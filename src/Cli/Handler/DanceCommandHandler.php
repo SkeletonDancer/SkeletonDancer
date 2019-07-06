@@ -60,11 +60,7 @@ final class DanceCommandHandler
         $dance = $this->danceSelector->resolve($args->getArgument('name'));
         $this->autoloadingSetup->setUpFor($dance);
 
-        if ($args->isOptionSet('import')) {
-            $questioner = new ConfigurationFileInteractor($this->classInitializer, $args->getOption('import'));
-        } else {
-            $questioner = new InteractiveQuestionInteractor($this->style, $io, $this->classInitializer);
-        }
+        $questioner = new InteractiveQuestionInteractor($this->style, $io, $this->classInitializer);
 
         $this->style->text(sprintf('Using dance: %s (%s)', $dance->name, $dance->directory));
         $this->createRunner($args)->run($dance, $questioner->interact($dance, !$args->getOption('all')));
