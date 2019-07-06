@@ -16,11 +16,9 @@ namespace SkeletonDancer\Cli\Handler;
 use SkeletonDancer\Autoloading\AutoloadingSetup;
 use SkeletonDancer\ClassInitializer;
 use SkeletonDancer\Configuration\DanceSelector;
-use SkeletonDancer\ConfigurationFileInteractor;
 use SkeletonDancer\InteractiveQuestionInteractor;
 use SkeletonDancer\Runner;
 use SkeletonDancer\Runner\CacheConfigurationRunner;
-use SkeletonDancer\Runner\DryRunner;
 use SkeletonDancer\Runner\VerboseRunner;
 use SkeletonDancer\Service\Filesystem;
 use Symfony\Component\Console\Style\SymfonyStyle;
@@ -68,11 +66,7 @@ final class DanceCommandHandler
 
     private function createRunner(Args $args): Runner
     {
-        if ($args->getOption('dry-run')) {
-            $runner = new DryRunner($this->style);
-        } else {
-            $runner = new VerboseRunner($this->style, $this->classInitializer);
-        }
+        $runner = new VerboseRunner($this->style, $this->classInitializer);
 
         return new CacheConfigurationRunner($this->style, $this->filesystem, $runner);
     }
