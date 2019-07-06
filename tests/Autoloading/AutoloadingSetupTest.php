@@ -92,10 +92,10 @@ final class AutoloadingSetupTest extends TestCase
 
         $autoloadingSetup = new AutoloadingSetup($autoloaderProphecy->reveal(), new Container());
 
-        self::assertFalse(function_exists('\SkeletonDancer\Tests\Autoloading\Fixtures\iMustExist'), 'File is already loaded');
+        self::assertFalse(\function_exists('\SkeletonDancer\Tests\Autoloading\Fixtures\iMustExist'), 'File is already loaded');
 
         $autoloadingSetup->setUpFor($dance);
 
-        self::assertTrue(function_exists('\SkeletonDancer\Tests\Autoloading\Fixtures\iMustExist'), 'File is not loaded');
+        self::assertTrue(\function_exists('\SkeletonDancer\Tests\Autoloading\Fixtures\iMustExist'), 'File is not loaded');
     }
 }

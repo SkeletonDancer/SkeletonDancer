@@ -27,7 +27,7 @@ final class ConfigurationFileInteractor implements QuestionInteractor
     public function interact(Dance $dance, bool $skipOptional = true): QuestionsSet
     {
         $questionCommunicator = function ($question, $name) {
-            if (!array_key_exists($name, $this->answers)) {
+            if (!\array_key_exists($name, $this->answers)) {
                 throw new \InvalidArgumentException(
                     sprintf('Missing answer for "%s", did you provided the correct dance for the answers file?', $name)
                 );

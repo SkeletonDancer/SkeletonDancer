@@ -134,9 +134,9 @@ class Installer
 
     private function setVersion(string $name, string $gitPath, $versionFile, string $version): void
     {
-        if (in_array($version, $this->getTags($name, $gitPath), true)) {
+        if (\in_array($version, $this->getTags($name, $gitPath), true)) {
             $ref = 'tags/'.$version;
-        } elseif (in_array($version, $this->getBranches($name, $gitPath), true)) {
+        } elseif (\in_array($version, $this->getBranches($name, $gitPath), true)) {
             $ref = 'origin/'.$version;
         } else {
             throw new \RuntimeException('No tag or branch exist for this version.');
@@ -158,7 +158,7 @@ class Installer
         $process->setWorkingDirectory($this->dancesDirectory.'/'.$name);
 
         $branches = StringUtil::splitLines($this->process->mustRun($process->getProcess())->getOutput());
-        $branches = array_map(function (string $ref):string {
+        $branches = array_map(function (string $ref): string {
             return mb_substr($ref, 20);
         }, $branches);
 

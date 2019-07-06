@@ -1,45 +1,29 @@
 # :skull: :dancers: SkeletonDancer - PHP Project bootstrapping
 
-SkeletonDancer is a skeleton generator - to help you safe time
-and get started faster.
+SkeletonDancer is a (project) skeleton generator.
 
-> A skeleton is directory structure with providing only the most basic content 
-> to get started. This can include a README with standard instructions, 
-> the src and tests directories, and anything you wish to be generated.
+> A skeleton is a directory structure with only the most basic content 
+> to get started. This can include a README file with standard instructions, 
+> the src and tests directories, or anything you wish to provided.
 
 *SkeletonDancer is still in alpha quality, some things maybe broken.
 Please try it and report any problem you encounter.*
 
-**Note:** For front-end you properly want to use something like Yeoman,
-as SkeletonDancer is mainly focused on PHP.
-
 ## How it works
 
-SkeletonDancer works with predefined dances, each dance describes
-how a skeleton must be generated (*how it should dance*).
+SkeletonDancer works with Questions and Dances, each dance describes how
+the skeleton structure must be generated (*or how it should dance*) based on
+the questions.
 
-A dance contains questions like the projects name, author,
-license, etc; or anything that your generators need. And a 
-list generators.
+In practice both the Questioners and Generators are plain PHP classes,
+and can use some of the provided services for template rendering or
+guessing answers based on the local Git author configuration.
 
-Both the Questioners and Generators are fully-fledged PHP classes
-to provide complete flexility for any use-case.
-
-**Tip:** Some answers can be pre-filled using previous answers 
-or local configuration like Git `author.email` for example.
-
-### Special services
-
-For generators SkeletonDancer comes pre-bundled support for 
-Twig templating, File operations, Git repository generation, 
-and Console operations (using the Symfony Process Component).
-
-Questioners and Generators support autoloading and service autowiring.
-And, ready to use integration for PHPUnit (with fully isolated testing).
+Plus, SkeletonDancer provides integration testing for PHPUnit (with fully isolated testing).
 
 ## Installation
 
-*SkeletonDancer is not something you install as an dependency, 
+*SkeletonDancer is not something you install as a dependency, 
 SkeletonDancer operates outside of your project.*
 
 Assuming you know how to use Git and Composer.
@@ -71,17 +55,16 @@ alias skeleton-dancer="php ~/Sites/SkeletonDancer/src/skel-dancer.php"
 
 ### Install a dance
 
-First you need to install a dance, a dance is kept in a GitHub repository.
-But you can also use local dances if you plan to use SkeletonDancer for eg.
-a monolith development repository.
+First you need to install a dance. Which can be either a GitHub repository
+or Git providing repository. Also, you might use project-local dances.
 
 ```bash
-$ skeleton-dancer install SkeletonDancer/php-pds
+$ skeleton-dancer install https://github.com/SkeletonDancer/php-pds.dance
 ```
 
 This will install (git clone) the https://github.com/SkeletonDancer/php-pds.dance repository.
 
-### Creating a new project
+### Creating a new project skeleton
 
 To create a new project, first create an empty directory
 somewhere on your computer (like your home directory (`~/`)).
@@ -94,9 +77,9 @@ $ skeleton-dancer dance SkeletonDancer/php-pds
 ```
 
 Now SkeletonDancer will ask a number of questions and get the skeleton
-dancing; Once done your skeleton is ready for usage!
+dancing; Once done your project skeleton is ready for usage!
 
-**Note:** SkeletonDancer doesn't overwrite existing files by default, 
+**Note:** SkeletonDancer doesn't overwrite existing files by default,
 use the `--force-overwrite` option if want to discard existing files.
 
 Run `skeleton-dancer help` for a complete overview of all commands and options.

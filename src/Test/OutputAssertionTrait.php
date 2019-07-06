@@ -56,7 +56,7 @@ trait OutputAssertionTrait
         $expectedLines = (array) $expectedLines;
 
         foreach ($expectedLines as $matchLine) {
-            if (is_array($matchLine)) {
+            if (\is_array($matchLine)) {
                 list($line, $lineRegex) = $matchLine;
             } else {
                 $line = $matchLine;
@@ -77,7 +77,7 @@ trait OutputAssertionTrait
         $expectedLines = (array) $expectedLines;
 
         foreach ($expectedLines as $matchLine) {
-            if (is_array($matchLine)) {
+            if (\is_array($matchLine)) {
                 list($line, $lineRegex) = $matchLine;
             } else {
                 $line = $matchLine;

@@ -30,7 +30,7 @@ final class DryRunner implements Runner
     public function run(Dance $dance, QuestionsSet $answers)
     {
         $i = 1;
-        $total = count($dance->generators);
+        $total = \count($dance->generators);
 
         $this->style->text(
             [

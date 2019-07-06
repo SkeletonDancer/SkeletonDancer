@@ -31,7 +31,7 @@ class Container extends \Pimple\Container
     {
         parent::__construct($values);
 
-        $this['.dances'] = function (Container $container) {
+        $this['.dances'] = function (self $container) {
             $args = $container['console.args'];
             if ($args->isOptionDefined('local') && $args->getOption('local')) {
                 return new LocalDances(getcwd(), $container['console.io'], new Loader());
@@ -40,7 +40,7 @@ class Container extends \Pimple\Container
             return new Dances($container['dancers_directory'], $container['console.io'], new Loader());
         };
 
-        $this['.dance_selector'] = function (Container $container) {
+        $this['.dance_selector'] = function (self $container) {
             return new DanceSelector($container['.dances'], $container['style'], $container);
         };
 
@@ -68,7 +68,7 @@ class Container extends \Pimple\Container
             );
         };
 
-        $this['style'] = function (Container $container) {
+        $this['style'] = function (self $container) {
             return new SymfonyStyle($container['sf.console_input'], $container['sf.console_output']);
         };
 
@@ -78,19 +78,19 @@ class Container extends \Pimple\Container
 
         // Services for configurators and generators
 
-        $this['twig'] = function (Container $container) {
+        $this['twig'] = function (self $container) {
             return (new TwigTemplating())->create($container['dance']);
         };
 
-        $this['process'] = function (Container $container) {
+        $this['process'] = function (self $container) {
             return new Service\CliProcess($container['sf.console_output']);
         };
 
-        $this['git'] = function (Container $container) {
+        $this['git'] = function (self $container) {
             return new Service\Git($container['process']);
         };
 
-        $this['filesystem'] = function (Container $container) {
+        $this['filesystem'] = function (self $container) {
             return new Service\Filesystem(
                 new SfFilesystem(),
                 $container['current_dir'],

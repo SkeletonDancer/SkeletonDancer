@@ -99,7 +99,7 @@ final class StringUtil
         $dirs = explode('/', rtrim(str_replace('\\', '/', $path), '/'));
 
         if ($index < 0) {
-            $index = count($dirs) - abs($index);
+            $index = \count($dirs) - abs($index);
         }
 
         return $dirs[$index] ?? $default;

@@ -121,7 +121,7 @@ final class QuestionsSetTest extends TestCase
         );
 
         self::assertEquals('Dancer', $questions->communicate('name', $question1));
-        self::assertEquals(null, $questions->communicate('path', $question2));
+        self::assertNull($questions->communicate('path', $question2));
 
         self::assertSame(['name' => 'Dancer', 'path' => null], $questions->getAnswers());
     }

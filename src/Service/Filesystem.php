@@ -224,7 +224,7 @@ class Filesystem
      * @param string $filename
      * @param bool   $allowMissing
      *
-     * @return null|string
+     * @return string|null
      */
     public function readFile(string $filename, bool $allowMissing = false): ?string
     {

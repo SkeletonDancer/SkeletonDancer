@@ -34,7 +34,7 @@ final class VerboseRunner implements Runner
     public function run(Dance $dance, QuestionsSet $answers)
     {
         $i = 1;
-        $total = count($dance->generators);
+        $total = \count($dance->generators);
         $answers = $answers->getAnswers();
         $startTime = microtime(true);
 
@@ -63,7 +63,7 @@ final class VerboseRunner implements Runner
 
     private function runGenerator(Generator $generator, array $configuration, int $i, int $total)
     {
-        $this->style->write(sprintf(' [%d/%d] Running %s', $i, $total, get_class($generator)));
+        $this->style->write(sprintf(' [%d/%d] Running %s', $i, $total, \get_class($generator)));
         $startTime = microtime(true);
 
         $status = $generator->generate($configuration) ?? 0;
@@ -99,7 +99,7 @@ final class VerboseRunner implements Runner
             if ($ms >= $value) {
                 $time = floor($ms / $value * 100.0) / 100.0;
 
-                return $time.' '.($time === 1 ? $unit : $unit.'s');
+                return $time.' '.(1 === $time ? $unit : $unit.'s');
             }
         }
 

@@ -36,7 +36,7 @@ abstract class QuestionerTestCase extends TestCase
 
     protected function getQuestionerClass(): string
     {
-        $class = mb_substr(str_replace('\\Tests\\', '\\', get_class($this)), 0, -4);
+        $class = mb_substr(str_replace('\\Tests\\', '\\', \get_class($this)), 0, -4);
 
         if (class_exists($class)) {
             return $class;
@@ -45,7 +45,7 @@ abstract class QuestionerTestCase extends TestCase
         throw new \InvalidArgumentException(
             sprintf(
                 'Unable to automatically guess the Questioner className for "%s", overwrite the getQuestionerClass() method.',
-                get_class($this)
+                \get_class($this)
             )
         );
     }
