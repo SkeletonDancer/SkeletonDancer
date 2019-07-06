@@ -17,8 +17,6 @@ use SkeletonDancer\Autoloading\AutoloadingSetup;
 use SkeletonDancer\ClassInitializer;
 use SkeletonDancer\Configuration\DanceSelector;
 use SkeletonDancer\InteractiveQuestionInteractor;
-use SkeletonDancer\Runner;
-use SkeletonDancer\Runner\CacheConfigurationRunner;
 use SkeletonDancer\Runner\VerboseRunner;
 use SkeletonDancer\Service\Filesystem;
 use Symfony\Component\Console\Style\SymfonyStyle;
@@ -61,13 +59,6 @@ final class DanceCommandHandler
         $questioner = new InteractiveQuestionInteractor($this->style, $io, $this->classInitializer);
 
         $this->style->text(sprintf('Using dance: %s (%s)', $dance->name, $dance->directory));
-        $this->createRunner($args)->run($dance, $questioner->interact($dance, !$args->getOption('all')));
-    }
-
-    private function createRunner(Args $args): Runner
-    {
-        $runner = new VerboseRunner($this->style, $this->classInitializer);
-
-        return new CacheConfigurationRunner($this->style, $this->filesystem, $runner);
+        (new VerboseRunner($this->style, $this->classInitializer))->run($dance, $questioner->interact($dance, !$args->getOption('all')));
     }
 }
