@@ -43,7 +43,7 @@ final class VerboseRunner implements Runner
         );
 
         foreach ($dance->generators as $generator) {
-            $this->runGenerator($this->classInitializer->getNewInstance($generator, Generator::class), $answers, $i, $total);
+            $this->runGenerator($this->classInitializer->getNewInstanceFor($dance, $generator, Generator::class), $answers, $i, $total);
             ++$i;
         }
 

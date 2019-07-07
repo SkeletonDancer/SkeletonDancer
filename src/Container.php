@@ -13,8 +13,6 @@ declare(strict_types=1);
 
 namespace SkeletonDancer;
 
-use SkeletonDancer\Autoloading\AutoloadingSetup;
-use SkeletonDancer\Autoloading\Psr4ClassLoader;
 use SkeletonDancer\Cli\Handler\DanceCommandHandler;
 use SkeletonDancer\Cli\Handler\DancesCommandHandler;
 use SkeletonDancer\Cli\Handler\InstallCommandHandler;
@@ -42,17 +40,6 @@ class Container extends \Pimple\Container
 
         $this['.dance_selector'] = function (self $container) {
             return new DanceSelector($container['.dances'], $container['style'], $container);
-        };
-
-        $this['.psr4_class_loader'] = function () {
-            $classLoader = new Psr4ClassLoader();
-            $classLoader->register();
-
-            return $classLoader;
-        };
-
-        $this['.autoloading_setup'] = function ($container) {
-            return new AutoloadingSetup($container['.psr4_class_loader'], $container);
         };
 
         $this['.hosting'] = function () {
@@ -106,8 +93,7 @@ class Container extends \Pimple\Container
                     $this['style'],
                     $this['filesystem'],
                     $this['.dance_selector'],
-                    $this['class_initializer'],
-                    $this['.autoloading_setup']
+                    $this['class_initializer']
                 );
             }
         );

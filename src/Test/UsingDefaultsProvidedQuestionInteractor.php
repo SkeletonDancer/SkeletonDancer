@@ -53,7 +53,7 @@ final class UsingDefaultsProvidedQuestionInteractor implements QuestionInteracto
 
         try {
             /** @var Questioner $questioner */
-            $questioner = $this->classInitializer->getNewInstance(current($dance->questioners), Questioner::class);
+            $questioner = $this->classInitializer->getNewInstanceFor($dance, current($dance->questioners), Questioner::class);
             $questioner->interact($questions);
 
             return $questions;

@@ -13,7 +13,6 @@ declare(strict_types=1);
 
 namespace SkeletonDancer\Cli\Handler;
 
-use SkeletonDancer\Autoloading\AutoloadingSetup;
 use SkeletonDancer\ClassInitializer;
 use SkeletonDancer\Configuration\DanceSelector;
 use SkeletonDancer\InteractiveQuestionInteractor;
@@ -30,23 +29,16 @@ final class DanceCommandHandler
     private $danceSelector;
     private $classInitializer;
 
-    /**
-     * @var AutoloadingSetup
-     */
-    private $autoloadingSetup;
-
     public function __construct(
         SymfonyStyle $style,
         Filesystem $filesystem,
         DanceSelector $danceSelector,
-        ClassInitializer $classInitializer,
-        AutoloadingSetup $autoloadingSetup
+        ClassInitializer $classInitializer
     ) {
         $this->style = $style;
         $this->filesystem = $filesystem;
         $this->danceSelector = $danceSelector;
         $this->classInitializer = $classInitializer;
-        $this->autoloadingSetup = $autoloadingSetup;
     }
 
     public function handle(Args $args, IO $io)
@@ -54,8 +46,6 @@ final class DanceCommandHandler
         $this->style->title('SkeletonDancer');
 
         $dance = $this->danceSelector->resolve($args->getArgument('name'));
-        $this->autoloadingSetup->setUpFor($dance);
-
         $questioner = new InteractiveQuestionInteractor($this->style, $io, $this->classInitializer);
 
         $this->style->text(sprintf('Using dance: %s (%s)', $dance->name, $dance->directory));

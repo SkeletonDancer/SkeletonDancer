@@ -46,7 +46,7 @@ final class InteractiveQuestionInteractor implements QuestionInteractor
         $questions = new QuestionsSet($questionCommunicator, $skipOptional);
 
         foreach ($dance->questioners as $configurator) {
-            $this->classInitializer->getNewInstance($configurator, Questioner::class)->interact($questions);
+            $this->classInitializer->getNewInstanceFor($dance, $configurator, Questioner::class)->interact($questions);
         }
 
         return $questions;

@@ -26,8 +26,6 @@ final class Dance
     public $questioners = [];
     public $generators = [];
 
-    public $autoloading = [];
-
     public function __construct(string $name, string $directory, array $questioners = [], array $generators = [])
     {
         $this->name = $name;
