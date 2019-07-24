@@ -38,7 +38,7 @@ final class QuestionsSet
 
     public function communicate(string $name = null, Question $question)
     {
-        if (null !== $name && array_key_exists($name, $this->answers)) {
+        if (null !== $name && \array_key_exists($name, $this->answers)) {
             throw new \InvalidArgumentException(sprintf('Answer "%s" already exists in the QuestionsSet.', $name));
         }
 
@@ -52,7 +52,7 @@ final class QuestionsSet
 
         if (null !== $name) {
             $answer = $value;
-            $value = $question->getNormalizer() ? call_user_func($question->getNormalizer(), $value) : $value;
+            $value = $question->getNormalizer() ? \call_user_func($question->getNormalizer(), $value) : $value;
 
             $this->answers[$name] = $answer;
         }
@@ -62,7 +62,7 @@ final class QuestionsSet
 
     public function set(string $name, $value)
     {
-        if (array_key_exists($name, $this->answers)) {
+        if (\array_key_exists($name, $this->answers)) {
             throw new \InvalidArgumentException(sprintf('Answer "%s" already exists in the QuestionsSet.', $name));
         }
 
@@ -71,12 +71,12 @@ final class QuestionsSet
 
     public function get(string $name, $default = null)
     {
-        return array_key_exists($name, $this->answers) ? $this->answers[$name] : $default;
+        return \array_key_exists($name, $this->answers) ? $this->answers[$name] : $default;
     }
 
     public function has(string $name): bool
     {
-        return array_key_exists($name, $this->answers);
+        return \array_key_exists($name, $this->answers);
     }
 
     public function getAnswers(): array

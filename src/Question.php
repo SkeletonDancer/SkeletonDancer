@@ -20,7 +20,7 @@ use Symfony\Component\Console\Question\Question as WrappedQuestion;
 final class Question
 {
     /**
-     * @var null|string|\Closure
+     * @var string|\Closure|null
      */
     private $default;
 
@@ -85,9 +85,9 @@ final class Question
      *
      * @return Question
      */
-    public static function ask(string $label, $default = null, $validator = true): Question
+    public static function ask(string $label, $default = null, $validator = true): self
     {
-        if (is_string($validator)) {
+        if (\is_string($validator)) {
             $validator = function ($value) use ($validator) {
                 if (!preg_match($validator, $value)) {
                     throw new \InvalidArgumentException(sprintf('Value does not match regex pattern: %s', $validator));
@@ -95,10 +95,10 @@ final class Question
 
                 return $value;
             };
-        } elseif (is_bool($validator)) {
+        } elseif (\is_bool($validator)) {
             if (true === $validator) {
                 $validator = function ($value) {
-                    if (!is_array($value) && !is_bool($value) && '' === (string) $value) {
+                    if (!\is_array($value) && !\is_bool($value) && '' === (string) $value) {
                         throw new \InvalidArgumentException('A value is required.');
                     }
 
@@ -129,7 +129,7 @@ final class Question
      *
      * @return Question
      */
-    public static function choice(string $label, array $choices, $default = null): Question
+    public static function choice(string $label, array $choices, $default = null): self
     {
         $question = function ($default, $help) use ($label, $choices) {
             if (null !== $default && !isset($choices[$default])) {
@@ -149,7 +149,7 @@ final class Question
      *
      * @return Question
      */
-    public static function multiChoice(string $label, array $choices, array $default = null): Question
+    public static function multiChoice(string $label, array $choices, array $default = null): self
     {
         $question = function ($defaults, $help) use ($label, $choices) {
             if (null !== $defaults) {
@@ -177,7 +177,7 @@ final class Question
      *
      * @return Question
      */
-    public static function confirm(string $label, $default = true, string $trueAnswerRegex = '/^y/i'): Question
+    public static function confirm(string $label, $default = true, string $trueAnswerRegex = '/^y/i'): self
     {
         $question = function ($default, $help) use ($label, $trueAnswerRegex) {
             return new ConfirmationQuestion($label.$help, $default, $trueAnswerRegex);
@@ -210,7 +210,7 @@ final class Question
     }
 
     /**
-     * @return null|string|\Closure
+     * @return string|\Closure|null
      */
     public function getDefault()
     {
@@ -222,7 +222,7 @@ final class Question
      *
      * @return Question
      */
-    public function markOptional($nullValues = null): Question
+    public function markOptional($nullValues = null): self
     {
         if (null === $this->default && null === $nullValues) {
             throw new \InvalidArgumentException(
@@ -237,7 +237,7 @@ final class Question
             $nullValues = (array) $nullValues;
 
             $this->normalizer = function ($value) use ($nullValues) {
-                if (in_array($value, $nullValues, true)) {
+                if (\in_array($value, $nullValues, true)) {
                     return;
                 }
 
@@ -248,7 +248,7 @@ final class Question
         return $this;
     }
 
-    public function setHelp(string $text): Question
+    public function setHelp(string $text): self
     {
         $this->help = $text;
 
@@ -265,14 +265,14 @@ final class Question
         return $this->help;
     }
 
-    public function setAutosuggestionValues(?iterable $autosuggestionValues): Question
+    public function setAutosuggestionValues(?iterable $autosuggestionValues): self
     {
         $this->autosuggestionValues = $autosuggestionValues;
 
         return $this;
     }
 
-    public function setMaxAttempts(int $maxAttempts = null): Question
+    public function setMaxAttempts(int $maxAttempts = null): self
     {
         $this->maxAttempts = $maxAttempts;
 

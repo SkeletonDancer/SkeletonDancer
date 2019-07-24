@@ -13,8 +13,6 @@ declare(strict_types=1);
 
 namespace SkeletonDancer;
 
-use SkeletonDancer\Autoloading\AutoloadingSetup;
-use SkeletonDancer\Autoloading\Psr4ClassLoader;
 use SkeletonDancer\Cli\Handler\DanceCommandHandler;
 use SkeletonDancer\Cli\Handler\DancesCommandHandler;
 use SkeletonDancer\Cli\Handler\InstallCommandHandler;
@@ -31,7 +29,7 @@ class Container extends \Pimple\Container
     {
         parent::__construct($values);
 
-        $this['.dances'] = function (Container $container) {
+        $this['.dances'] = function (self $container) {
             $args = $container['console.args'];
             if ($args->isOptionDefined('local') && $args->getOption('local')) {
                 return new LocalDances(getcwd(), $container['console.io'], new Loader());
@@ -40,19 +38,8 @@ class Container extends \Pimple\Container
             return new Dances($container['dancers_directory'], $container['console.io'], new Loader());
         };
 
-        $this['.dance_selector'] = function (Container $container) {
+        $this['.dance_selector'] = function (self $container) {
             return new DanceSelector($container['.dances'], $container['style'], $container);
-        };
-
-        $this['.psr4_class_loader'] = function () {
-            $classLoader = new Psr4ClassLoader();
-            $classLoader->register();
-
-            return $classLoader;
-        };
-
-        $this['.autoloading_setup'] = function ($container) {
-            return new AutoloadingSetup($container['.psr4_class_loader'], $container);
         };
 
         $this['.hosting'] = function () {
@@ -68,7 +55,7 @@ class Container extends \Pimple\Container
             );
         };
 
-        $this['style'] = function (Container $container) {
+        $this['style'] = function (self $container) {
             return new SymfonyStyle($container['sf.console_input'], $container['sf.console_output']);
         };
 
@@ -78,19 +65,19 @@ class Container extends \Pimple\Container
 
         // Services for configurators and generators
 
-        $this['twig'] = function (Container $container) {
+        $this['twig'] = function (self $container) {
             return (new TwigTemplating())->create($container['dance']);
         };
 
-        $this['process'] = function (Container $container) {
+        $this['process'] = function (self $container) {
             return new Service\CliProcess($container['sf.console_output']);
         };
 
-        $this['git'] = function (Container $container) {
+        $this['git'] = function (self $container) {
             return new Service\Git($container['process']);
         };
 
-        $this['filesystem'] = function (Container $container) {
+        $this['filesystem'] = function (self $container) {
             return new Service\Filesystem(
                 new SfFilesystem(),
                 $container['current_dir'],
@@ -106,8 +93,7 @@ class Container extends \Pimple\Container
                     $this['style'],
                     $this['filesystem'],
                     $this['.dance_selector'],
-                    $this['class_initializer'],
-                    $this['.autoloading_setup']
+                    $this['class_initializer']
                 );
             }
         );

@@ -17,7 +17,6 @@ use SkeletonDancer\Hosting;
 use SkeletonDancer\Installer;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Webmozart\Console\Api\Args\Args;
-use Webmozart\Console\Api\IO\IO;
 
 final class InstallCommandHandler
 {

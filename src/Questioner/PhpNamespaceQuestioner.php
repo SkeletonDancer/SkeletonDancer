@@ -40,7 +40,7 @@ class PhpNamespaceQuestioner implements Questioner
                     $reserved = self::getReservedWords();
 
                     foreach (explode('\\', $namespace) as $word) {
-                        if (in_array(mb_strtolower($word), $reserved, true)) {
+                        if (\in_array(mb_strtolower($word), $reserved, true)) {
                             throw new \InvalidArgumentException(
                                 sprintf('The namespace cannot contain PHP reserved words ("%s").', $word)
                             );

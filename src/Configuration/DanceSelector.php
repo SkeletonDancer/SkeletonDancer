@@ -42,7 +42,7 @@ final class DanceSelector
 
         $dances = $this->dances->all();
 
-        if (!count($dances)) {
+        if (!\count($dances)) {
             throw new \InvalidArgumentException('Oh no there are no dances! Please install a dance before you continue');
         }
 

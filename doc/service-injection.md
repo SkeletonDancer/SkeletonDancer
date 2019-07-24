@@ -63,36 +63,9 @@ final class ReadMeGenerator implements Generator
 ```
 
 That's it, you now know how to use service-injection!
+
 But you are not limited to these two services, SkeletonDancer comes pre-bundled with many
 useful services.
-
-### Registering services
-
-You can register your own using the file-based [autoloading](autoloading.md) system.
-
-**.dance.json**:
-
-```json
-{
-    "autoloading": {
-        "files": "services.php"
-    }
-}
-```
-
-**services.php:**
-
-```php
-<?php
-
-// A service-name must be usable as a PHP variable name,
-// underscores are are converted to camelCase in the constructor.
-//
-// Existing services cannot be overwritten.
-$this->container['service_name'] = function ($container) {};
-```
-
-See also: http://pimple.sensiolabs.org/
 
 ## Provided Services
 

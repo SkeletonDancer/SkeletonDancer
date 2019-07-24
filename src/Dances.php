@@ -57,21 +57,6 @@ class Dances
         return $this->dancesDirectory;
     }
 
-    private function buildConfiguration(string $routineDirectory, IO $io, string $name): ?Dance
-    {
-        $danceDirectory = $routineDirectory.'/'.$name;
-
-        if (!is_dir($routineDirectory.'/'.$name.'/.git')) {
-            $io->errorLine(
-                sprintf('Dance "%s" is damaged: Missing .git directory in "%s".', $name, $routineDirectory.'/'.$name)
-            );
-
-            return null;
-        }
-
-        return $this->buildDance($danceDirectory, $io, $name);
-    }
-
     protected function buildDance(string $danceDirectory, IO $io, string $name): ?Dance
     {
         try {
@@ -109,5 +94,20 @@ class Dances
             }
         }
         $this->dancesDirectory = $dancesDirectory;
+    }
+
+    private function buildConfiguration(string $routineDirectory, IO $io, string $name): ?Dance
+    {
+        $danceDirectory = $routineDirectory.'/'.$name;
+
+        if (!is_dir($routineDirectory.'/'.$name.'/.git')) {
+            $io->errorLine(
+                sprintf('Dance "%s" is damaged: Missing .git directory in "%s".', $name, $routineDirectory.'/'.$name)
+            );
+
+            return null;
+        }
+
+        return $this->buildDance($danceDirectory, $io, $name);
     }
 }

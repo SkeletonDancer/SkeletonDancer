@@ -36,7 +36,7 @@ final class UsingDefaultsProvidedQuestionInteractor implements QuestionInteracto
     {
         $questionCommunicator = function (Question $question, $name) {
             $this->currentQuestion = $name;
-            $value = array_key_exists($name, $this->answers) ? $this->answers[$name] : $question->getDefault();
+            $value = \array_key_exists($name, $this->answers) ? $this->answers[$name] : $question->getDefault();
 
             if ($validator = $question->getValidator()) {
                 $value = $validator($value);
@@ -53,7 +53,7 @@ final class UsingDefaultsProvidedQuestionInteractor implements QuestionInteracto
 
         try {
             /** @var Questioner $questioner */
-            $questioner = $this->classInitializer->getNewInstance(current($dance->questioners), Questioner::class);
+            $questioner = $this->classInitializer->getNewInstanceFor($dance, current($dance->questioners), Questioner::class);
             $questioner->interact($questions);
 
             return $questions;

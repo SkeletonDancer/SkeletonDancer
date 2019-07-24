@@ -77,7 +77,6 @@ class Loader
         $dance = new Dance($name, $directory, $config['questioners'] ?? [], $config['generators'] ?? []);
         $dance->title = $config['title'];
         $dance->description = $config['title'];
-        $dance->autoloading = $config['autoloading'] ?? [];
 
         return $dance;
     }

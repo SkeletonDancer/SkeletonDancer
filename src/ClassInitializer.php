@@ -27,7 +27,14 @@ final class ClassInitializer
         $this->container = $container;
     }
 
-    public function getNewInstance(string $className, string $expectedClass = null)
+    public function getNewInstanceFor(Dance $dance, string $className, string $expectedInterfaceType = null): object
+    {
+        $this->loadClass($className, $dance->directory);
+
+        return $this->getNewInstance($className, $expectedInterfaceType);
+    }
+
+    public function getNewInstance(string $className, string $expectedInterfaceType = null)
     {
         $r = new \ReflectionClass($className);
 
@@ -44,11 +51,36 @@ final class ClassInitializer
             $instance = new $className();
         }
 
-        if (null !== $expectedClass && !$instance instanceof $expectedClass) {
-            throw new \InvalidArgumentException(sprintf('Class "%s" is expected to implement "%s".', $className, $expectedClass));
+        if (null !== $expectedInterfaceType && !$instance instanceof $expectedInterfaceType) {
+            throw new \InvalidArgumentException(sprintf('Class "%s" is expected to implement "%s".', $className, $expectedInterfaceType));
         }
 
         return $instance;
+    }
+
+    private function loadClass(string $className, string $directory): void
+    {
+        if (class_exists($className)) {
+            return;
+        }
+
+        $classParts = explode('\\', $className);
+
+        if ('Dance' !== array_shift($classParts)) {
+            throw new \InvalidArgumentException(sprintf('Dance provided classes are expected to begin with `Dance` for class "%s".', $className));
+        }
+
+        $expectedFilename = implode('/', $classParts).'.php';
+
+        if (!file_exists($directory.'/'.$expectedFilename)) {
+            throw new \InvalidArgumentException(sprintf('Unable to locate file %s in directory %s.', $expectedFilename, $directory));
+        }
+
+        require $directory.'/'.$expectedFilename;
+
+        if (!class_exists($className, false)) {
+            throw new \InvalidArgumentException(sprintf('Class %s was expected to be defined in %s', $className, $directory.'/'.$expectedFilename));
+        }
     }
 
     private function resolveArgument(\ReflectionParameter $parameter)

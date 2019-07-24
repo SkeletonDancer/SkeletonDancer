@@ -15,7 +15,6 @@ namespace SkeletonDancer;
 
 use SkeletonDancer\Configuration\Loader;
 use Symfony\Component\Filesystem\Exception\IOException;
-use Webmozart\Console\Api\Args\Args;
 use Webmozart\Console\Api\IO\IO;
 
 class LocalDances extends Dances
@@ -35,7 +34,7 @@ class LocalDances extends Dances
             $dancesDirectory .= '../';
         }
 
-        if ('.dances' !== substr($dancesDirectory, -7)) {
+        if ('.dances' !== mb_substr($dancesDirectory, -7)) {
             throw new IOException('No local ".dances" directory could be found.');
         }
 
@@ -45,11 +44,11 @@ class LocalDances extends Dances
     private function loadLocalDances(string $dancesDirectory, IO $io): void
     {
         foreach (new \DirectoryIterator($dancesDirectory) as $danceDir) {
-            if ($danceDir->isDot() || !$danceDir->isDir() || '.dance' !== substr($name = $danceDir->getFilename(), -6)) {
+            if ($danceDir->isDot() || !$danceDir->isDir() || '.dance' !== mb_substr($name = $danceDir->getFilename(), -6)) {
                 continue;
             }
 
-            $title = substr($name, 0, -6);
+            $title = mb_substr($name, 0, -6);
 
             if (null !== $dance = $this->buildDance($dancesDirectory.'/'.$name, $io, $title)) {
                 $this->dances[$title] = $dance;

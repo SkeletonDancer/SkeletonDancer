@@ -44,7 +44,7 @@ final class DancerApplicationConfig extends DefaultApplicationConfig
     {
         if (null === $container) {
             $parameters = [];
-            $parameters['current_dir'] = getcwd().DIRECTORY_SEPARATOR;
+            $parameters['current_dir'] = getcwd().\DIRECTORY_SEPARATOR;
             $parameters['dancers_directory'] = getenv('SKELETONDANCER_HOME') ?: getenv('HOME').'/.skeleton_dancer';
 
             if (!is_dir($parameters['dancers_directory'])) {
