@@ -10,7 +10,7 @@
         }
     ],
     "require": {
-        "php": "^7.1",
+        "php": "^7.2",
         "twig/twig": "^2.3.2",
         "symfony/process": "^3.0",
         "symfony/console": "^3.2@dev",
