@@ -13,24 +13,19 @@ declare(strict_types=1);
 
 namespace SkeletonDancer;
 
-use SkeletonDancer\Configuration\Loader;
-use Symfony\Component\Filesystem\Exception\IOException;
-use Webmozart\Console\Api\IO\IO;
-
-class Dances
+final class Dances implements \Countable, \IteratorAggregate
 {
-    protected $dancesDirectory;
-    protected $dances = [];
-    protected $loader;
+    /** @var Dance[] */
+    private $dances = [];
 
-    public function __construct(string $dancesDirectory, IO $io, Loader $loader)
+    /**
+     * @param Dance[] $dances
+     */
+    public function __construct(array $dances = [])
     {
-        if (!is_dir($dancesDirectory)) {
-            throw new IOException(sprintf('Directory "%s" does not exist.', $dancesDirectory));
+        foreach ($dances as $dance) {
+            $this->dances[$dance->name] = $dance;
         }
-
-        $this->loader = $loader;
-        $this->loadDances($dancesDirectory, $io);
     }
 
     public function has(string $name): bool
@@ -44,70 +39,32 @@ class Dances
             return $this->dances[$name];
         }
 
-        throw new \InvalidArgumentException(sprintf('Dance "%s" is not installed.', $name));
+        throw new \InvalidArgumentException(sprintf('Dance "%s" was not found or installed.', $name));
     }
 
+    /**
+     * @return Dances[]
+     */
     public function all(): array
     {
         return $this->dances;
     }
 
-    public function getDancesDirectory(): string
+    /**
+     * @return string[]
+     */
+    public function names(): array
     {
-        return $this->dancesDirectory;
+        return array_keys($this->dances);
     }
 
-    protected function buildDance(string $danceDirectory, IO $io, string $name): ?Dance
+    public function count()
     {
-        try {
-            return $this->loader->load($danceDirectory, $name);
-        } catch (\Exception $e) {
-            $io->errorLine('Dance "'.$name.'" is damaged: '.ltrim(StringUtil::indentLines($e->getMessage())));
-
-            if ($io->isVeryVerbose()) {
-                $io->errorLine(StringUtil::indentLines($e->getTraceAsString(), 1, '  '));
-            }
-
-            return null;
-        }
+        return \count($this->dances);
     }
 
-    private function loadDances(string $dancesDirectory, IO $io): void
+    public function getIterator()
     {
-        foreach (new \DirectoryIterator($dancesDirectory) as $node) {
-            if (!$node->isDir() || $node->isDot()) {
-                continue;
-            }
-
-            $vendorName = $node->getFilename();
-
-            foreach (new \DirectoryIterator($dancesDirectory.'/'.$vendorName) as $danceRepo) {
-                if (!$danceRepo->isDir() || $danceRepo->isDot()) {
-                    continue;
-                }
-
-                $name = $vendorName.'/'.$danceRepo->getFilename();
-
-                if (null !== $dance = $this->buildConfiguration($dancesDirectory, $io, $name)) {
-                    $this->dances[$name] = $dance;
-                }
-            }
-        }
-        $this->dancesDirectory = $dancesDirectory;
-    }
-
-    private function buildConfiguration(string $routineDirectory, IO $io, string $name): ?Dance
-    {
-        $danceDirectory = $routineDirectory.'/'.$name;
-
-        if (!is_dir($routineDirectory.'/'.$name.'/.git')) {
-            $io->errorLine(
-                sprintf('Dance "%s" is damaged: Missing .git directory in "%s".', $name, $routineDirectory.'/'.$name)
-            );
-
-            return null;
-        }
-
-        return $this->buildDance($danceDirectory, $io, $name);
+        return new \ArrayIterator($this->dances);
     }
 }

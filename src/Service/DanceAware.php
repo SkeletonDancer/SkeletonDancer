@@ -11,4 +11,11 @@ declare(strict_types=1);
  * with this source code in the file LICENSE.
  */
 
-require __DIR__.'/../vendor/autoload.php';
+namespace SkeletonDancer\Service;
+
+use SkeletonDancer\Dance;
+
+interface DanceAware
+{
+    public function setDance(Dance $dance): void;
+}

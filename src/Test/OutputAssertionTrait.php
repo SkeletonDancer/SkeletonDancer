@@ -55,7 +55,7 @@ trait OutputAssertionTrait
         $output = preg_replace('/\s!\s/', ' ', trim($display));
         $expectedLines = (array) $expectedLines;
 
-        foreach ($expectedLines as $matchLine) {
+        foreach ($expectedLines as $matchIdx => $matchLine) {
             if (\is_array($matchLine)) {
                 list($line, $lineRegex) = $matchLine;
             } else {
@@ -67,7 +67,7 @@ trait OutputAssertionTrait
                 $line = preg_replace('#\s+#', '\\s+', preg_quote($line, '#'));
             }
 
-            self::assertRegExp('#'.$line.'#m', $output);
+            self::assertRegExp('#'.$line.'#m', $output, 'At index '.$matchIdx);
         }
     }
 

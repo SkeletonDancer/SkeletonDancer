@@ -11,7 +11,7 @@ declare(strict_types=1);
  * with this source code in the file LICENSE.
  */
 
-namespace SkeletonDancer\Generator;
+namespace Dance\Generator;
 
 use SkeletonDancer\Generator;
 use SkeletonDancer\Service\Git;

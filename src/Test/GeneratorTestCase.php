@@ -14,6 +14,7 @@ declare(strict_types=1);
 namespace SkeletonDancer\Test;
 
 use PHPUnit\Framework\TestCase;
+use SkeletonDancer\Dance;
 use SkeletonDancer\Generator;
 
 /**
@@ -22,6 +23,13 @@ use SkeletonDancer\Generator;
 abstract class GeneratorTestCase extends TestCase
 {
     use ContainerCreator;
+
+    private static $location;
+
+    public static function setUpBeforeClass(): void
+    {
+        self::$location = \dirname((new \ReflectionClass(static::class))->getFileName(), 2);
+    }
 
     protected function setUp()
     {
@@ -57,7 +65,7 @@ abstract class GeneratorTestCase extends TestCase
     protected function runGenerator(array $answers = []): int
     {
         /** @var Generator $generator */
-        $generator = $this->container['class_initializer']->getNewInstance($this->getGeneratorClass());
+        $generator = $this->container['class_initializer']->getNewInstanceFor(new Dance('SkeletonDancer/Test', self::$location), $this->getGeneratorClass());
 
         return $generator->generate($answers) ?? 0;
     }

@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace SkeletonDancer;
 
+use SkeletonDancer\Configuration\DancesProvider;
 use SkeletonDancer\Configuration\Loader;
 use SkeletonDancer\Service\CliProcess;
 use SkeletonDancer\Service\Filesystem;
@@ -26,7 +27,7 @@ class Installer
 {
     private $hosting;
     private $process;
-    private $dances;
+    private $dancesProvider;
     private $loader;
     private $dancesDirectory;
     private $executableFinder;
@@ -35,15 +36,16 @@ class Installer
     public function __construct(
         Hosting $hosting,
         CliProcess $process,
-        Dances $dances,
+        DancesProvider $dancesProvider,
+        string $dancesDirectory,
         Loader $loader = null,
         ExecutableFinder $executableFinder = null,
         Filesystem $filesystem = null
     ) {
         $this->hosting = $hosting;
         $this->process = $process;
-        $this->dances = $dances;
-        $this->dancesDirectory = $this->dances->getDancesDirectory();
+        $this->dancesProvider = $dancesProvider;
+        $this->dancesDirectory = $dancesDirectory;
         $this->executableFinder = $executableFinder ?? new ExecutableFinder();
         $this->loader = $loader ?? new Loader();
         $this->filesystem = $filesystem ?? new Filesystem(new SfFilesystem(), '/tmp', true);
@@ -60,7 +62,9 @@ class Installer
             ));
         }
 
-        if (!$this->dances->has($name) && !$this->hosting->supports($name, $version, $message)) {
+        $dances = $this->dancesProvider->global();
+
+        if (!$dances->has($name) && !$this->hosting->supports($name, $version, $message)) {
             throw new \InvalidArgumentException(
                 sprintf(
                     'Unable to find dance "%s" with version "%s" in the hosting, message: %s',
@@ -71,7 +75,7 @@ class Installer
             );
         }
 
-        if ($this->dances->has($name)) {
+        if ($dances->has($name)) {
             $this->updateRepo($name, $gitPath, $version);
         } else {
             $this->cloneRepo($name, $gitPath, $version);

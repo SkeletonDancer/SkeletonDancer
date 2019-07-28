@@ -15,10 +15,11 @@ namespace SkeletonDancer\Tests\Configuration;
 
 use PHPUnit\Framework\TestCase;
 use SkeletonDancer\Configuration\DanceSelector;
-use SkeletonDancer\Container;
+use SkeletonDancer\Configuration\DancesProvider;
 use SkeletonDancer\Dance;
 use SkeletonDancer\Dances;
 use SkeletonDancer\Test\OutputAssertionTrait;
+use SkeletonDancer\Test\SymfonyStyleTestHelper;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\StreamOutput;
 use Symfony\Component\Console\Style\SymfonyStyle;
@@ -33,11 +34,6 @@ final class DanceSelectorTest extends TestCase
     use OutputAssertionTrait;
 
     /**
-     * @var Container
-     */
-    private $container;
-
-    /**
      * @var IO
      */
     private $io;
@@ -50,73 +46,33 @@ final class DanceSelectorTest extends TestCase
     /** @test */
     public function it_accepts_the_given_choice()
     {
-        $resolver = $this->createProfileResolver(['0']);
+        $resolver = $this->createProfileResolver(['0', '0']);
 
-        self::assertArrayNotHasKey('dance', $this->container);
-
-        $choice = $resolver->resolve();
-
-        self::assertEquals('SkeletonDancer/php-std', $choice->name);
-        self::assertSame($choice, $this->container['dance']);
-    }
-
-    /** @test */
-    public function it_informs_when_passed_dance_is_not_installed()
-    {
-        $resolver = $this->createProfileResolver(['0']);
-
-        self::assertArrayNotHasKey('dance', $this->container);
-
-        $choice = $resolver->resolve('foo');
-
-        self::assertEquals('SkeletonDancer/php-std', $choice->name);
-        self::assertArrayHasKey('dance', $this->container);
-        self::assertSame($choice, $this->container['dance']);
-
-        $this->assertOutputMatches('Dance "foo" is not installed.');
+        self::assertEquals('SkeletonDancer/php-std', $resolver->resolve(false)->name);
+        self::assertEquals('SkeletonDancer/php-std', $resolver->resolve(true)->name);
     }
 
     /** @test */
     public function it_asks_when_no_dance_was_provided()
     {
-        $resolver = $this->createProfileResolver(['0']);
-
-        self::assertArrayNotHasKey('dance', $this->container);
-
-        $choice = $resolver->resolve();
-
-        self::assertEquals('SkeletonDancer/php-std', $choice->name);
-        self::assertArrayHasKey('dance', $this->container);
-        self::assertSame($choice, $this->container['dance']);
+        self::assertEquals('SkeletonDancer/php-std', $this->createProfileResolver(['0'])->resolve(false)->name);
 
         $this->assertOutputMatches(['[0] SkeletonDancer/php-std']);
-        $this->assertOutputNotMatches('is not installed.');
+        $this->assertOutputMatches(['[1] SkeletonDancer/empty']);
+        $this->assertOutputMatches(['[2] _local/empty']);
+        $this->assertOutputMatches(['[3] _local/bundle']);
     }
 
     /** @test */
-    public function it_informs_when_passed_dance_is_not_installed_none_interactive()
+    public function it_asks_when_no_dance_was_provided_with_local_ignored()
     {
-        $resolver = $this->createProfileResolver([], false);
+        self::assertEquals('SkeletonDancer/php-std', $this->createProfileResolver(['0'])->resolve(true)->name);
+        self::assertEquals('SkeletonDancer/empty', $this->createProfileResolver(['1'])->resolve(true)->name);
 
-        self::assertArrayNotHasKey('dance', $this->container);
-
-        $this->expectException('InvalidArgumentException');
-        $this->expectExceptionMessage('Dance "foo" is not installed. Installed: SkeletonDancer/php-std, SkeletonDancer/empty');
-
-        $resolver->resolve('foo');
-    }
-
-    /** @test */
-    public function it_informs_when_no_dance_selected_none_interactive()
-    {
-        $resolver = $this->createProfileResolver([], false);
-
-        self::assertArrayNotHasKey('dance', $this->container);
-
-        $this->expectException('InvalidArgumentException');
-        $this->expectExceptionMessage('No Dance selected. Installed: SkeletonDancer/php-std, SkeletonDancer/empty');
-
-        $resolver->resolve(null);
+        $this->assertOutputMatches(['[0] SkeletonDancer/php-std']);
+        $this->assertOutputMatches(['[1] SkeletonDancer/empty']);
+        $this->assertOutputNotMatches(['_local/empty']);
+        $this->assertOutputNotMatches(['_local/bundle']);
     }
 
     private function createProfileResolver(array $input, bool $interactive = true): DanceSelector
@@ -129,35 +85,34 @@ final class DanceSelectorTest extends TestCase
 
         $this->io->setInteractive($interactive);
 
-        $dances = $this->prophesize(Dances::class);
-        $dances->has('SkeletonDancer/php-std')->willReturn(true);
-        $dances->get('SkeletonDancer/php-std')->willReturn($d1 = new Dance('SkeletonDancer/php-std', ''));
+        $d1 = new Dance('SkeletonDancer/php-std', '');
+        $d2 = new Dance('SkeletonDancer/empty', '');
 
-        $dances->has('SkeletonDancer/empty')->willReturn(true);
-        $dances->get('SkeletonDancer/empty')->willReturn($d2 = new Dance('SkeletonDancer/empty', ''));
+        $d3 = new Dance('_local/empty', '');
+        $d4 = new Dance('_local/bundle', '');
 
-        $dances->has('foo')->willReturn(false);
+        $dancesProvider = $this->prophesize(DancesProvider::class);
+        $dancesProvider->global()->willReturn(new Dances([
+            $d1->name => $d1,
+            $d2->name => $d2,
+        ]));
 
-        $dances->all()->willReturn(
-            [
-                'SkeletonDancer/php-std' => $d1,
-                'SkeletonDancer/empty' => $d2,
-            ]
-        );
+        $dancesProvider->local()->willReturn(new Dances([
+            $d3->name => $d3,
+            $d4->name => $d4,
+        ]));
 
-        $this->container = new Container();
-        $selector = new DanceSelector($dances->reveal(), $this->createStyle($input, $interactive), $this->container);
-        $this->container['sf.console_input'] = $this->input;
+        $dancesProvider->all()->willReturn(new Dances([
+            $d1->name => $d1,
+            $d2->name => $d2,
+            $d3->name => $d3,
+            $d4->name => $d4,
+        ]));
 
-        return $selector;
+        return new DanceSelector($dancesProvider->reveal(), $this->createStyle($input, $interactive));
     }
 
-    /**
-     * @param array $input
-     *
-     * @return SymfonyStyle
-     */
-    private function createStyle(array $input = [], bool $interactive = true)
+    private function createStyle(array $input = [], bool $interactive = true): SymfonyStyle
     {
         $this->input = new ArrayInput([]);
         $this->input->setStream($this->getInputStream($input));
@@ -166,7 +121,7 @@ final class DanceSelectorTest extends TestCase
         $this->output = new StreamOutput(fopen('php://memory', 'w', false));
         $this->output->setDecorated(false);
 
-        return new SymfonyStyle($this->input, $this->output);
+        return new SymfonyStyleTestHelper($this->input, $this->output);
     }
 
     private function getInputStream(array $input)
