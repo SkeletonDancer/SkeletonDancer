@@ -14,7 +14,7 @@ declare(strict_types=1);
 namespace SkeletonDancer\Cli\Handler;
 
 use SkeletonDancer\Configuration\DanceSelector;
-use SkeletonDancer\Dances;
+use SkeletonDancer\Configuration\DancesProvider;
 use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Output\BufferedOutput;
 use Symfony\Component\Console\Style\SymfonyStyle;
@@ -23,25 +23,23 @@ use Webmozart\Console\Api\Args\Args;
 final class DancesCommandHandler
 {
     private $style;
-    private $dances;
+    private $dancesProvider;
     private $bufferedOut;
-    private $danceSelector;
 
-    public function __construct(SymfonyStyle $style, DanceSelector $danceSelector, Dances $dances)
+    public function __construct(SymfonyStyle $style, DancesProvider $dancesProvider)
     {
         $this->style = $style;
-        $this->dances = $dances;
-        $this->danceSelector = $danceSelector;
 
         $this->bufferedOut = new BufferedOutput(null, $this->style->isDecorated(), $this->style->getFormatter());
+        $this->dancesProvider = $dancesProvider;
     }
 
     public function handleList()
     {
         $this->style->title('List dances');
 
-        $dances = $this->dances->all();
-        $this->style->listing(array_keys($dances));
+        $dances = $this->dancesProvider->all();
+        $this->style->listing($dances->names());
 
         return 0;
     }
@@ -50,7 +48,11 @@ final class DancesCommandHandler
     {
         $this->style->title('Show dance information');
 
-        $dance = $this->danceSelector->resolve($args->getArgument('dance'));
+        $dance = (new DanceSelector($this->dancesProvider, $this->style))->resolve(
+            $args->getOption('no-local'),
+            $args->getArgument('dance')
+        );
+
         $this->style->section($dance->name);
 
         $row = [

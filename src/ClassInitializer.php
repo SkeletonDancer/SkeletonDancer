@@ -14,6 +14,8 @@ declare(strict_types=1);
 namespace SkeletonDancer;
 
 use Pimple\Container as ServiceLocator;
+use SkeletonDancer\Service\DanceAware;
+use SkeletonDancer\Service\LazyService;
 
 final class ClassInitializer
 {
@@ -31,11 +33,6 @@ final class ClassInitializer
     {
         $this->loadClass($className, $dance->directory);
 
-        return $this->getNewInstance($className, $expectedInterfaceType);
-    }
-
-    public function getNewInstance(string $className, string $expectedInterfaceType = null)
-    {
         $r = new \ReflectionClass($className);
 
         if ($r->hasMethod('__construct')) {
@@ -43,7 +40,7 @@ final class ClassInitializer
             $instanceArguments = [];
 
             foreach ($methodReflection as $parameter) {
-                $instanceArguments[] = $this->resolveArgument($parameter);
+                $instanceArguments[] = $this->resolveArgument($parameter, $dance);
             }
 
             $instance = new $className(...$instanceArguments);
@@ -60,14 +57,14 @@ final class ClassInitializer
 
     private function loadClass(string $className, string $directory): void
     {
-        if (class_exists($className)) {
-            return;
-        }
-
         $classParts = explode('\\', $className);
 
         if ('Dance' !== array_shift($classParts)) {
             throw new \InvalidArgumentException(sprintf('Dance provided classes are expected to begin with `Dance` for class "%s".', $className));
+        }
+
+        if (class_exists($className)) {
+            return;
         }
 
         $expectedFilename = implode('/', $classParts).'.php';
@@ -83,7 +80,7 @@ final class ClassInitializer
         }
     }
 
-    private function resolveArgument(\ReflectionParameter $parameter)
+    private function resolveArgument(\ReflectionParameter $parameter, Dance $dance)
     {
         $name = StringUtil::underscore($parameter->name);
 
@@ -92,7 +89,17 @@ final class ClassInitializer
         }
 
         if (isset($this->container[$name])) {
-            return $this->container[$name];
+            $service = $this->container[$name];
+
+            if ($service instanceof DanceAware) {
+                $service->setDance($dance);
+            }
+
+            if ($service instanceof LazyService) {
+                return $service->getInstance();
+            }
+
+            return $service;
         }
 
         if ($parameter->isOptional()) {

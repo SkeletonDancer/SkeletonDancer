@@ -13,13 +13,16 @@ declare(strict_types=1);
 
 namespace SkeletonDancer\Tests\Runner;
 
+use Dance\Generator\FailingGenerator;
+use Dance\Generator\FooGenerator;
+use Dance\Generator\SkippingGenerator;
+use Dance\Generator\SpiderGenerator;
 use PHPUnit\Framework\TestCase;
 use SkeletonDancer\Dance;
 use SkeletonDancer\QuestionsSet;
 use SkeletonDancer\Runner\VerboseRunner;
 use SkeletonDancer\Test\ContainerCreator;
 use SkeletonDancer\Test\OutputAssertionTrait;
-use SkeletonDancer\Tests\Fixtures\Generator\{FailingGenerator, FooGenerator, SkippingGenerator, SpiderGenerator};
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\StreamOutput;
 use Symfony\Component\Console\Style\SymfonyStyle;

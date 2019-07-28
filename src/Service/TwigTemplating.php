@@ -17,12 +17,36 @@ use SkeletonDancer\Dance;
 use SkeletonDancer\StringUtil;
 use Symfony\Component\Yaml\Yaml;
 
-class TwigTemplating
+class TwigTemplating implements DanceAware, LazyService
 {
-    public function create(Dance $dance): \Twig_Environment
+    /** @var Dance|null */
+    private $dance;
+
+    /** @var \Twig_Environment|null */
+    private $instance;
+
+    public function setDance(Dance $dance): void
     {
+        $this->dance = $dance;
+    }
+
+    public function getInstance(): object
+    {
+        if (null === $this->instance) {
+            $this->instance = $this->create();
+        }
+
+        return $this->instance;
+    }
+
+    private function create(): \Twig_Environment
+    {
+        if (null === $this->dance) {
+            throw new \RuntimeException('setDance() must be called first.');
+        }
+
         $loader = new \Twig_Loader_Filesystem(__DIR__.'/../../templates');
-        $loader->prependPath($dance->directory.'/templates');
+        $loader->prependPath($this->dance->directory.'/templates');
 
         $twig = new \Twig_Environment(
             $loader,

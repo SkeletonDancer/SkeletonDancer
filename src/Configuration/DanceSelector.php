@@ -13,51 +13,31 @@ declare(strict_types=1);
 
 namespace SkeletonDancer\Configuration;
 
-use SkeletonDancer\Container;
 use SkeletonDancer\Dance;
-use SkeletonDancer\Dances;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
+/**
+ * @internal
+ */
 final class DanceSelector
 {
-    private $dances;
+    private $dancesProvider;
     private $style;
-    private $container;
 
-    public function __construct(Dances $dances, SymfonyStyle $style, Container $container)
+    public function __construct(DancesProvider $dancesProvider, SymfonyStyle $style)
     {
-        $this->dances = $dances;
         $this->style = $style;
-        $this->container = $container;
+        $this->dancesProvider = $dancesProvider;
     }
 
-    public function resolve(string $dance = null): Dance
+    public function resolve(bool $ignoreLocal, ?string $selected = null): Dance
     {
-        $selectedDance = $dance; // Preserve the original input for the exception.
+        $dances = $ignoreLocal ? $this->dancesProvider->global() : $this->dancesProvider->all();
 
-        if (null !== $dance && !$this->dances->has($dance)) {
-            $this->style->error(sprintf('Dance "%s" is not installed.', $dance));
-            $selectedDance = null;
+        if (null !== $selected) {
+            return $dances->get($selected);
         }
 
-        $dances = $this->dances->all();
-
-        if (!\count($dances)) {
-            throw new \InvalidArgumentException('Oh no there are no dances! Please install a dance before you continue');
-        }
-
-        if (!$selectedDance && $this->container['sf.console_input']->isInteractive()) {
-            $selectedDance = $this->style->choice('Dance', $dances = array_keys($dances));
-        }
-
-        if (!$selectedDance) {
-            throw new \InvalidArgumentException(
-                (null === $dance ? 'No Dance selected. ' : 'Dance "'.$dance.'" is not installed. ').
-                'Installed: '.
-                implode(', ', array_keys($dances))
-            );
-        }
-
-        return $this->container['dance'] = $this->dances->get($selectedDance);
+        return $dances->get($this->style->choice('Dance', $dances->names()));
     }
 }

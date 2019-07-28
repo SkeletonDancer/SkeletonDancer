@@ -2,6 +2,6 @@
     "title": "Empty SkeletonDancer Dance project",
     "description": "Creates an empty SkeletonDancer Dance project",
     "generators": [
-        "SkeletonDancer\\Generator\\GitInitGenerator"
+        "GitInitGenerator"
     ]
 }

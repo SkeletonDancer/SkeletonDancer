@@ -15,6 +15,7 @@ namespace SkeletonDancer\Cli\Handler;
 
 use SkeletonDancer\ClassInitializer;
 use SkeletonDancer\Configuration\DanceSelector;
+use SkeletonDancer\Configuration\DancesProvider;
 use SkeletonDancer\InteractiveQuestionInteractor;
 use SkeletonDancer\Runner\VerboseRunner;
 use SkeletonDancer\Service\Filesystem;
@@ -26,18 +27,18 @@ final class DanceCommandHandler
 {
     private $style;
     private $filesystem;
-    private $danceSelector;
+    private $dancesProvider;
     private $classInitializer;
 
     public function __construct(
         SymfonyStyle $style,
         Filesystem $filesystem,
-        DanceSelector $danceSelector,
+        DancesProvider $dancesProvider,
         ClassInitializer $classInitializer
     ) {
         $this->style = $style;
         $this->filesystem = $filesystem;
-        $this->danceSelector = $danceSelector;
+        $this->dancesProvider = $dancesProvider;
         $this->classInitializer = $classInitializer;
     }
 
@@ -45,10 +46,17 @@ final class DanceCommandHandler
     {
         $this->style->title('SkeletonDancer');
 
-        $dance = $this->danceSelector->resolve($args->getArgument('name'));
+        $dance = (new DanceSelector($this->dancesProvider, $this->style))->resolve(
+            $args->getOption('no-local'),
+            $args->getArgument('dance')
+        );
+
         $questioner = new InteractiveQuestionInteractor($this->style, $io, $this->classInitializer);
 
         $this->style->text(sprintf('Using dance: %s (%s)', $dance->name, $dance->directory));
-        (new VerboseRunner($this->style, $this->classInitializer))->run($dance, $questioner->interact($dance, !$args->getOption('all')));
+        (new VerboseRunner($this->style, $this->classInitializer))->run(
+            $dance,
+            $questioner->interact($dance, !$args->getOption('all'))
+        );
     }
 }

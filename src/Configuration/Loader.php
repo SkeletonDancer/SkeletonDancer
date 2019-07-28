@@ -74,10 +74,44 @@ class Loader
 
     private function buildConfig(string $name, string $directory, array $config): Dance
     {
-        $dance = new Dance($name, $directory, $config['questioners'] ?? [], $config['generators'] ?? []);
+        $dance = new Dance(
+            $name,
+            $directory,
+            array_map([$this, 'resolveQuestionerClass'], $config['questioners'] ?? []),
+            array_map([$this, 'resolveGeneratorClass'], $config['generators'] ?? [])
+        );
         $dance->title = $config['title'];
         $dance->description = $config['title'];
 
         return $dance;
+    }
+
+    private function resolveQuestionerClass(string $className): string
+    {
+        return self::resolveFullName($className, 'Questioner');
+    }
+
+    private function resolveGeneratorClass(string $className): string
+    {
+        return self::resolveFullName($className, 'Generator');
+    }
+
+    private static function resolveFullName(string $className, string $prefix): string
+    {
+        $classParts = explode('\\', $className);
+
+        if (!isset($classParts[1])) {
+            return 'Dance\\'.$prefix.'\\'.$className;
+        }
+
+        if ('Dance' !== array_shift($classParts)) {
+            throw new \InvalidArgumentException(sprintf('Dance provided classes are expected to begin with `Dance` for class "%s".', $className));
+        }
+
+        if ($prefix !== array_shift($classParts)) {
+            throw new \InvalidArgumentException(sprintf('Dance provided class "%s" namespace was expected to begin with "Dance\\%s".', $className, $prefix));
+        }
+
+        return $className;
     }
 }

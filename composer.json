@@ -10,7 +10,7 @@
         }
     ],
     "require": {
-        "php": "^7.1",
+        "php": "^7.2",
         "twig/twig": "^2.3.2",
         "symfony/process": "^3.0",
         "symfony/console": "^3.2@dev",
@@ -31,12 +31,16 @@
     },
     "autoload": {
         "psr-4": {
+            "Dance\\Generator\\": "src/Generator",
+            "Dance\\Questioner\\": "src/Questioner",
             "SkeletonDancer\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "SkeletonDancer\\Tests\\": "tests/"
+            "SkeletonDancer\\Tests\\": "tests/",
+            "Dance\\Generator\\": ["tests/Generator", "tests/Fixtures/Generator"],
+            "Dance\\Questioner\\": ["tests/Questioner", "tests/Fixtures/Questioner"]
         }
     },
     "minimum-stability": "dev",

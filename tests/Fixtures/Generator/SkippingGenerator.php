@@ -11,7 +11,7 @@ declare(strict_types=1);
  * with this source code in the file LICENSE.
  */
 
-namespace SkeletonDancer\Tests\Fixtures\Generator;
+namespace Dance\Generator;
 
 use PHPUnit\Framework\Assert;
 use SkeletonDancer\Generator;

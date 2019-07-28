@@ -13,13 +13,13 @@ declare(strict_types=1);
 
 namespace SkeletonDancer\Tests;
 
+use Dance\Questioner\NameQuestioner;
+use Dance\Questioner\NamespaceQuestioner;
+use Dance\Questioner\OptionalPathQuestioner;
 use PHPUnit\Framework\TestCase;
 use SkeletonDancer\Dance;
 use SkeletonDancer\InteractiveQuestionInteractor;
 use SkeletonDancer\Test\ContainerCreator;
-use SkeletonDancer\Tests\Fixtures\Questioner\NameQuestioner;
-use SkeletonDancer\Tests\Fixtures\Questioner\NamespaceQuestioner;
-use SkeletonDancer\Tests\Fixtures\Questioner\OptionalPathQuestioner;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\StreamOutput;
 use Symfony\Component\Console\Style\SymfonyStyle;

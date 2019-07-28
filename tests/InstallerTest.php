@@ -15,6 +15,7 @@ namespace SkeletonDancer\Tests;
 
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
+use SkeletonDancer\Configuration\DancesProvider;
 use SkeletonDancer\Configuration\Loader;
 use SkeletonDancer\Dance;
 use SkeletonDancer\Dances;
@@ -37,6 +38,7 @@ final class InstallerTest extends TestCase
             $this->createHosting(),
             $this->createProcessInstall(),
             $this->createDances(),
+            '/var/tmp/.dances',
             $this->createLoader($dance),
             $this->createExecutableFinder(),
             $this->createFilesystem('/var/tmp/.dances/dummy/dummy/.git/.dancer_version', null, 'origin/master')
@@ -54,6 +56,7 @@ final class InstallerTest extends TestCase
             $this->createHosting(),
             $this->createProcessUpdate(true, 'origin/master'),
             $this->createDances(),
+            '/var/tmp/.dances',
             $this->createLoader($dance),
             $this->createExecutableFinder(),
             $this->createFilesystem('/var/tmp/.dances/dummy/dummy2/.git/.dancer_version', 'origin/master', 'origin/master')
@@ -71,6 +74,7 @@ final class InstallerTest extends TestCase
             $this->createHosting(),
             $this->createProcessUpdate(),
             $this->createDances(),
+            '/var/tmp/.dances',
             $this->createLoader($dance),
             $this->createExecutableFinder(),
             $this->createFilesystem('/var/tmp/.dances/dummy/dummy2/.git/.dancer_version', 'origin/master', 'origin/latest')
@@ -88,6 +92,7 @@ final class InstallerTest extends TestCase
             $this->createHosting(),
             $this->createProcessUpdate(true, 'tags/v0.1.0'),
             $this->createDances(),
+            '/var/tmp/.dances',
             $this->createLoader($dance),
             $this->createExecutableFinder(),
             $this->createFilesystem('/var/tmp/.dances/dummy/dummy2/.git/.dancer_version', 'origin/master', 'tags/v0.1.0')
@@ -105,6 +110,7 @@ final class InstallerTest extends TestCase
             $this->createHosting(),
             $this->createProcessUpdate(false),
             $this->createDances(),
+            '/var/tmp/.dances',
             $this->createLoader($dance),
             $this->createExecutableFinder(),
             $this->createFilesystem('/var/tmp/.dances/dummy/dummy2/.git/.dancer_version', 'tags/v0.1.0')
@@ -120,6 +126,7 @@ final class InstallerTest extends TestCase
             $this->createHosting(),
             $this->createProcessUpdate(),
             $this->createDances(),
+            '/var/tmp/.dances',
             $this->createLoader(),
             $this->createExecutableFinder(),
             $this->createFilesystem()
@@ -138,6 +145,7 @@ final class InstallerTest extends TestCase
             $this->createHosting(),
             $this->createProcessUpdate(),
             $this->createDances(),
+            '/var/tmp/.dances',
             $this->createLoader(),
             $this->createExecutableFinder(),
             $this->createFilesystem()
@@ -156,6 +164,7 @@ final class InstallerTest extends TestCase
             $this->createHosting(),
             $this->createProcessUpdate(),
             $this->createDances(),
+            '/var/tmp/.dances',
             $this->createLoader(),
             $this->createExecutableFinder(null),
             $this->createFilesystem()
@@ -282,18 +291,12 @@ final class InstallerTest extends TestCase
         return $processProphecy->reveal();
     }
 
-    private function createDances(): Dances
+    private function createDances(): DancesProvider
     {
-        $dancesProphecy = $this->prophesize(Dances::class);
-        $dancesProphecy->getDancesDirectory()->willReturn('/var/tmp/.dances');
-
-        $dancesProphecy->has('dummy/dummy')->willReturn(false);
-        $dancesProphecy->get('dummy/dummy')->willReturn(new Dance('dummy/dummy', '/var/tmp/.dances/dummy/dummy'));
-
-        $dancesProphecy->has('dummy/dummy2')->willReturn(true);
-        $dancesProphecy->get('dummy/dummy2')->willReturn(new Dance('dummy/dummy2', '/var/tmp/.dances/dummy/dummy2'));
-
-        $dancesProphecy->has('noop/dummy')->willReturn(false);
+        $dancesProphecy = $this->prophesize(DancesProvider::class);
+        $dancesProphecy->global()->willReturn(new Dances([
+            'dummy/dummy2' => new Dance('dummy/dummy2', '/var/tmp/.dances/dummy/dummy2'),
+        ]));
 
         return $dancesProphecy->reveal();
     }

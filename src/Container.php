@@ -16,10 +16,11 @@ namespace SkeletonDancer;
 use SkeletonDancer\Cli\Handler\DanceCommandHandler;
 use SkeletonDancer\Cli\Handler\DancesCommandHandler;
 use SkeletonDancer\Cli\Handler\InstallCommandHandler;
-use SkeletonDancer\Configuration\DanceSelector;
+use SkeletonDancer\Configuration\DancesProvider;
 use SkeletonDancer\Configuration\Loader;
 use SkeletonDancer\Hosting\GitHubHosting;
 use SkeletonDancer\Service\TwigTemplating;
+use Symfony\Component\Console\Logger\ConsoleLogger;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\Filesystem\Filesystem as SfFilesystem;
 
@@ -29,28 +30,20 @@ class Container extends \Pimple\Container
     {
         parent::__construct($values);
 
-        $this['.dances'] = function (self $container) {
-            $args = $container['console.args'];
-            if ($args->isOptionDefined('local') && $args->getOption('local')) {
-                return new LocalDances(getcwd(), $container['console.io'], new Loader());
-            }
-
-            return new Dances($container['dancers_directory'], $container['console.io'], new Loader());
-        };
-
-        $this['.dance_selector'] = function (self $container) {
-            return new DanceSelector($container['.dances'], $container['style'], $container);
+        $this['.dances_provider'] = function (self $container) {
+            return new DancesProvider(getcwd(), $container['dancers_directory'], new Loader(), $container['logger']);
         };
 
         $this['.hosting'] = function () {
             return new GitHubHosting();
         };
 
-        $this['.installer'] = function ($container) {
+        $this['.installer'] = function (self $container) {
             return new Installer(
                 $container['.hosting'],
                 $container['process'],
-                $container['.dances'],
+                $container['.dances_provider'],
+                $container['dancers_directory'],
                 new Loader()
             );
         };
@@ -66,7 +59,7 @@ class Container extends \Pimple\Container
         // Services for configurators and generators
 
         $this['twig'] = function (self $container) {
-            return (new TwigTemplating())->create($container['dance']);
+            return new TwigTemplating();
         };
 
         $this['process'] = function (self $container) {
@@ -85,6 +78,10 @@ class Container extends \Pimple\Container
             );
         };
 
+        $this['logger'] = function (self $container) {
+            return new ConsoleLogger($container['sf.console_output']);
+        };
+
         // CommandHandlers; use closure for lazy loading.
 
         $this['command.dance'] = $this->protect(
@@ -92,7 +89,7 @@ class Container extends \Pimple\Container
                 return new DanceCommandHandler(
                     $this['style'],
                     $this['filesystem'],
-                    $this['.dance_selector'],
+                    $this['.dances_provider'],
                     $this['class_initializer']
                 );
             }
@@ -100,7 +97,7 @@ class Container extends \Pimple\Container
 
         $this['command.dances'] = $this->protect(
             function () {
-                return new DancesCommandHandler($this['style'], $this['.dance_selector'], $this['.dances']);
+                return new DancesCommandHandler($this['style'], $this['.dances_provider']);
             }
         );
 
