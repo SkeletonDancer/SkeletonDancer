@@ -8,9 +8,9 @@ branches:
 
 matrix:
     include:
-        - php: '7.1'
+        - php: '7.2'
           #env: coverage=1
-        - php: '7.1'
+        - php: '7.2'
           env: deps='dev'
 
 cache:
@@ -41,9 +41,9 @@ script:
     - export SKELETONDANCER_HOME=/tmp/.dances
     - export DANCE_BIN="php `pwd`/bin/skel-dancer.php"
     - $DANCE_BIN install SkeletonDancer/test.dance -vvv
-    - $DANCE_BIN install SkeletonDancer/test.dance:v1.0.0 -vvv
+    - $DANCE_BIN install SkeletonDancer/test.dance:v2.0.0 -vvv
     - $DANCE_BIN install SkeletonDancer/test.dance:master -vvv
-    - $DANCE_BIN install SkeletonDancer/test.dance:v1.0.0 -vvv
+    - $DANCE_BIN install SkeletonDancer/test.dance:v2.0.0 -vvv
     - $DANCE_BIN dance SkeletonDancer/test
 
 after_success:
