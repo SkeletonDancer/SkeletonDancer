@@ -18,6 +18,8 @@ final class Dances implements \Countable, \IteratorAggregate
     /** @var Dance[] */
     private $dances = [];
 
+    private $names;
+
     /**
      * @param Dance[] $dances
      */
@@ -26,6 +28,11 @@ final class Dances implements \Countable, \IteratorAggregate
         foreach ($dances as $dance) {
             $this->dances[$dance->name] = $dance;
         }
+
+        $this->names = array_keys($this->dances);
+
+        ksort($this->dances, SORT_STRING);
+        sort($this->names, SORT_STRING);
     }
 
     public function has(string $name): bool
@@ -55,7 +62,7 @@ final class Dances implements \Countable, \IteratorAggregate
      */
     public function names(): array
     {
-        return array_keys($this->dances);
+        return $this->names;
     }
 
     public function count()

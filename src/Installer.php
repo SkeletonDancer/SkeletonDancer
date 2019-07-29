@@ -51,7 +51,7 @@ class Installer
         $this->filesystem = $filesystem ?? new Filesystem(new SfFilesystem(), '/tmp', true);
     }
 
-    public function install(string $name, ?string $version = null): ?Dance
+    public function install(string $name, ?string $version = null): Dance
     {
         $gitPath = $this->executableFinder->find('git');
         $message = '';
@@ -62,7 +62,7 @@ class Installer
             ));
         }
 
-        $dances = $this->dancesProvider->global();
+        $dances = $this->dancesProvider->installed();
 
         if (!$dances->has($name) && !$this->hosting->supports($name, $version, $message)) {
             throw new \InvalidArgumentException(

@@ -64,6 +64,35 @@ class DancesProvider
         return new Dances($dances);
     }
 
+    /**
+     * Returns the installed dances (including corrupted once).
+     *
+     * Note: Unlike global() the dance information is unresolved and
+     * only contains the name and directory.
+     */
+    public function installed(): Dances
+    {
+        $dances = [];
+
+        foreach (new \DirectoryIterator($this->dancesDirectory) as $node) {
+            if (!$node->isDir() || $node->isDot()) {
+                continue;
+            }
+
+            $vendorName = $node->getFilename();
+
+            foreach (new \DirectoryIterator($this->dancesDirectory.'/'.$vendorName) as $danceDir) {
+                if ($danceDir->isDot() || !$danceDir->isDir() || !file_exists($danceDir->getPathname().'/.dance.json')) {
+                    continue;
+                }
+
+                $dances[] = new Dance($vendorName.'/'.$danceDir->getFilename(), $danceDir->getPathname());
+            }
+        }
+
+        return new Dances($dances);
+    }
+
     public function local(): Dances
     {
         $dancesDirectory = $this->getLocalDancesFolder();

@@ -46,7 +46,7 @@ final class DanceSelectorTest extends TestCase
     /** @test */
     public function it_accepts_the_given_choice()
     {
-        $resolver = $this->createProfileResolver(['0', '0']);
+        $resolver = $this->createProfileResolver(['1', '1']);
 
         self::assertEquals('SkeletonDancer/php-std', $resolver->resolve(false)->name);
         self::assertEquals('SkeletonDancer/php-std', $resolver->resolve(true)->name);
@@ -55,22 +55,22 @@ final class DanceSelectorTest extends TestCase
     /** @test */
     public function it_asks_when_no_dance_was_provided()
     {
-        self::assertEquals('SkeletonDancer/php-std', $this->createProfileResolver(['0'])->resolve(false)->name);
+        self::assertEquals('SkeletonDancer/php-std', $this->createProfileResolver(['1'])->resolve(false)->name);
 
-        $this->assertOutputMatches(['[0] SkeletonDancer/php-std']);
-        $this->assertOutputMatches(['[1] SkeletonDancer/empty']);
-        $this->assertOutputMatches(['[2] _local/empty']);
-        $this->assertOutputMatches(['[3] _local/bundle']);
+        $this->assertOutputMatches(['[0] SkeletonDancer/empty']);
+        $this->assertOutputMatches(['[1] SkeletonDancer/php-std']);
+        $this->assertOutputMatches(['[2] _local/bundle']);
+        $this->assertOutputMatches(['[3] _local/empty']);
     }
 
     /** @test */
     public function it_asks_when_no_dance_was_provided_with_local_ignored()
     {
-        self::assertEquals('SkeletonDancer/php-std', $this->createProfileResolver(['0'])->resolve(true)->name);
-        self::assertEquals('SkeletonDancer/empty', $this->createProfileResolver(['1'])->resolve(true)->name);
+        self::assertEquals('SkeletonDancer/php-std', $this->createProfileResolver(['1'])->resolve(true)->name);
+        self::assertEquals('SkeletonDancer/empty', $this->createProfileResolver(['0'])->resolve(true)->name);
 
-        $this->assertOutputMatches(['[0] SkeletonDancer/php-std']);
-        $this->assertOutputMatches(['[1] SkeletonDancer/empty']);
+        $this->assertOutputMatches(['[0] SkeletonDancer/empty']);
+        $this->assertOutputMatches(['[1] SkeletonDancer/php-std']);
         $this->assertOutputNotMatches(['_local/empty']);
         $this->assertOutputNotMatches(['_local/bundle']);
     }

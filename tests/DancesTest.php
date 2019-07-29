@@ -84,11 +84,14 @@ final class DancesTest extends TestCase
         $d3 = new Dance('_local/empty', '');
         $d4 = new Dance('_local/bundle', '');
 
-        return [
+        $dances = [
             $d1->name => $d1,
             $d2->name => $d2,
             $d3->name => $d3,
             $d4->name => $d4,
         ];
+        ksort($dances, SORT_STRING);
+
+        return $dances;
     }
 }

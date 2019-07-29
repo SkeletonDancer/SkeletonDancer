@@ -58,11 +58,24 @@ final class DancesProviderTest extends TestCase
     }
 
     /** @test */
-    public function it_returns_all_installed_dances()
+    public function it_returns_all_avaible_dances()
     {
-        self::assertEquals(['skeletondancer/empty', '_local/empty'], $this->provider->all()->names());
+        self::assertEquals(['_local/empty', 'skeletondancer/empty'], $this->provider->all()->names());
         self::assertEquals(['skeletondancer/empty'], $this->provider->global()->names());
         self::assertEquals(['_local/empty'], $this->provider->local()->names());
+    }
+
+    /** @test */
+    public function it_returns_all_installed_dances()
+    {
+        self::assertEquals(
+            [
+                'skeletondancer/corrupted3',
+                'skeletondancer/corrupted4',
+                'skeletondancer/empty',
+            ],
+            $this->provider->installed()->names()
+        );
     }
 
     /** @test */
@@ -85,7 +98,7 @@ final class DancesProviderTest extends TestCase
     /** @test */
     public function it_logs_errors_of_damages_dances()
     {
-        self::assertEquals(['skeletondancer/empty', '_local/empty'], $this->provider->all()->names());
+        self::assertEquals(['_local/empty', 'skeletondancer/empty'], $this->provider->all()->names());
 
         $localDancesDir = __DIR__.'/Fixtures/LocalDances/.dances';
         $dancesDirectory = __DIR__.'/Fixtures/Dances';
