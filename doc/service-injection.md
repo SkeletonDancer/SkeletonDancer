@@ -27,7 +27,7 @@ service-container and pass them to the class-constructor.
 ```php
 <?php
 
-namespace Acme\Generator;
+namespace Dance\Generator;
 
 use SkeletonDancer\Generator;
 use SkeletonDancer\Service\Filesystem;
