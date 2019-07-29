@@ -294,7 +294,7 @@ final class InstallerTest extends TestCase
     private function createDances(): DancesProvider
     {
         $dancesProphecy = $this->prophesize(DancesProvider::class);
-        $dancesProphecy->global()->willReturn(new Dances([
+        $dancesProphecy->installed()->willReturn(new Dances([
             'dummy/dummy2' => new Dance('dummy/dummy2', '/var/tmp/.dances/dummy/dummy2'),
         ]));
 
